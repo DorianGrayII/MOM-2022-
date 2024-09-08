@@ -1,15 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Audio), HutongGames.PlayMaker.Tooltip("Sets looping on the AudioSource component on a Game Object.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Audio)]
+    [Tooltip("Sets looping on the AudioSource component on a Game Object.")]
     public class SetAudioLoop : ComponentAction<AudioSource>
     {
-        [RequiredField, CheckForComponent(typeof(AudioSource))]
+        [RequiredField]
+        [CheckForComponent(typeof(AudioSource))]
         public FsmOwnerDefault gameObject;
+
         public FsmBool loop;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.loop = false;
+        }
 
         public override void OnEnter()
         {
@@ -20,12 +27,5 @@
             }
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.loop = false;
-        }
     }
 }
-

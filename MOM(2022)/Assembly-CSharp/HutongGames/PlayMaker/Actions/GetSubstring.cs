@@ -1,27 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.String), Tooltip("Gets a sub-string from a String Variable.")]
+    [ActionCategory(ActionCategory.String)]
+    [Tooltip("Gets a sub-string from a String Variable.")]
     public class GetSubstring : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString stringVariable;
+
         [RequiredField]
         public FsmInt startIndex;
+
         [RequiredField]
         public FsmInt length;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString storeResult;
+
         public bool everyFrame;
 
-        private void DoGetSubstring()
+        public override void Reset()
         {
-            if ((this.stringVariable != null) && (this.storeResult != null))
-            {
-                this.storeResult.Value = this.stringVariable.Value.Substring(this.startIndex.Value, this.length.Value);
-            }
+            this.stringVariable = null;
+            this.startIndex = 0;
+            this.length = 1;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,14 +43,12 @@
             this.DoGetSubstring();
         }
 
-        public override void Reset()
+        private void DoGetSubstring()
         {
-            this.stringVariable = null;
-            this.startIndex = 0;
-            this.length = 1;
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (this.stringVariable != null && this.storeResult != null)
+            {
+                this.storeResult.Value = this.stringVariable.Value.Substring(this.startIndex.Value, this.length.Value);
+            }
         }
     }
 }
-

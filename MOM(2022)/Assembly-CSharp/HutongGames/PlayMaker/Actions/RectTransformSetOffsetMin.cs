@@ -1,43 +1,40 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("The offset of the lower left corner of the rectangle relative to the lower left anchor.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("The offset of the lower left corner of the rectangle relative to the lower left anchor.")]
     public class RectTransformSetOffsetMin : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The Vector2 offsetMin. Set to none for no effect, and/or set individual axis below.")]
+
+        [Tooltip("The Vector2 offsetMin. Set to none for no effect, and/or set individual axis below.")]
         public FsmVector2 offsetMin;
-        [HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides offsetMin x value if set. Set to none for no effect")]
+
+        [Tooltip("Setting only the x value. Overrides offsetMin x value if set. Set to none for no effect")]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides offsetMin y value if set. Set to none for no effect")]
+
+        [Tooltip("Setting only the x value. Overrides offsetMin y value if set. Set to none for no effect")]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoSetOffsetMin()
+        public override void Reset()
         {
-            Vector2 offsetMin = this._rt.offsetMin;
-            if (!this.offsetMin.IsNone)
+            base.Reset();
+            this.gameObject = null;
+            this.offsetMin = null;
+            this.x = new FsmFloat
             {
-                offsetMin = this.offsetMin.get_Value();
-            }
-            if (!this.x.IsNone)
+                UseVariable = true
+            };
+            this.y = new FsmFloat
             {
-                offsetMin.x = this.x.Value;
-            }
-            if (!this.y.IsNone)
-            {
-                offsetMin.y = this.y.Value;
-            }
-            this._rt.offsetMin = offsetMin;
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoSetOffsetMin();
+                UseVariable = true
+            };
         }
 
         public override void OnEnter()
@@ -54,18 +51,27 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.offsetMin = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
+            this.DoSetOffsetMin();
+        }
+
+        private void DoSetOffsetMin()
+        {
+            Vector2 value = this._rt.offsetMin;
+            if (!this.offsetMin.IsNone)
+            {
+                value = this.offsetMin.Value;
+            }
+            if (!this.x.IsNone)
+            {
+                value.x = this.x.Value;
+            }
+            if (!this.y.IsNone)
+            {
+                value.y = this.y.Value;
+            }
+            this._rt.offsetMin = value;
         }
     }
 }
-

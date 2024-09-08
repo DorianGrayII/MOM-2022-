@@ -1,21 +1,33 @@
-﻿namespace WorldCode
-{
-    using MHUtils;
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
+using System.Collections.Generic;
+using MHUtils;
+using UnityEngine;
 
+namespace WorldCode
+{
     public class PerlinMap
     {
-        private Dictionary<Layer, Vector3> perlinSettings = new Dictionary<Layer, Vector3>();
-
-        public Vector3 GetLayerData(Layer layer)
+        public enum Layer
         {
-            return this.perlinSettings[layer];
+            Height1 = 0,
+            Height2 = 1,
+            Height3 = 2,
+            Height4 = 3,
+            Humidity1 = 4,
+            Humidity2 = 5,
+            Humidity3 = 6,
+            RivDiff = 7,
+            HillAr1 = 8,
+            HillAr2 = 9,
+            HillMini = 10,
+            Forest1 = 11,
+            Forest2 = 12,
+            FactionRegions = 13,
+            MAX = 14
         }
 
-        public void Initialize(MHRandom random, float scale)
+        private Dictionary<Layer, Vector3> perlinSettings = new Dictionary<Layer, Vector3>();
+
+        public void Initialize(MHRandom random, float scale = 1f)
         {
             if (scale <= 0f)
             {
@@ -38,33 +50,18 @@
 
         public void InitializeFactionNoise()
         {
-            this.perlinSettings[Layer.FactionRegions] = new Vector3(UnityEngine.Random.Range((float) 0f, (float) 1f), UnityEngine.Random.Range((float) 0f, (float) 1f), UnityEngine.Random.Range((float) 0.03f, (float) 0.04f));
+            this.perlinSettings[Layer.FactionRegions] = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0.03f, 0.04f));
+        }
+
+        public Vector3 GetLayerData(Layer layer)
+        {
+            return this.perlinSettings[layer];
         }
 
         public float ProduceValueAtLayer(Layer layer, Vector2 pos)
         {
             Vector3 layerData = this.GetLayerData(layer);
-            return Mathf.PerlinNoise(layerData.x + (pos.x * layerData.z), layerData.y + (pos.y * layerData.z));
-        }
-
-        public enum Layer
-        {
-            Height1,
-            Height2,
-            Height3,
-            Height4,
-            Humidity1,
-            Humidity2,
-            Humidity3,
-            RivDiff,
-            HillAr1,
-            HillAr2,
-            HillMini,
-            Forest1,
-            Forest2,
-            FactionRegions,
-            MAX
+            return Mathf.PerlinNoise(layerData.x + pos.x * layerData.z, layerData.y + pos.y * layerData.z);
         }
     }
 }
-

@@ -1,10 +1,9 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using HutongGames.PlayMaker.Actions;
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using HutongGames.PlayMaker.Actions;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
+namespace HutongGames.PlayMaker
+{
     [AddComponentMenu("PlayMaker/UI/UI Drop Event")]
     public class PlayMakerUiDropEvent : PlayMakerUiEventBase, IDropHandler, IEventSystemHandler
     {
@@ -15,4 +14,3 @@
         }
     }
 }
-

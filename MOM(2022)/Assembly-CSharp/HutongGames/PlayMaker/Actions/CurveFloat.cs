@@ -1,32 +1,59 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.AnimateVariables), Tooltip("Animates the value of a Float Variable FROM-TO with assistance of Deformation Curve.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.AnimateVariables)]
+    [Tooltip("Animates the value of a Float Variable FROM-TO with assistance of Deformation Curve.")]
     public class CurveFloat : CurveFsmAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmFloat floatVariable;
+
         [RequiredField]
         public FsmFloat fromValue;
+
         [RequiredField]
         public FsmFloat toValue;
+
         [RequiredField]
         public FsmAnimationCurve animCurve;
+
         [Tooltip("Calculation lets you set a type of curve deformation that will be applied to otherwise linear move between fromValue and toValue.")]
-        public CurveFsmAction.Calculation calculation;
+        public Calculation calculation;
+
         private bool finishInNextStep;
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.floatVariable = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.toValue = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.fromValue = new FsmFloat
+            {
+                UseVariable = true
+            };
+        }
 
         public override void OnEnter()
         {
             base.OnEnter();
             this.finishInNextStep = false;
             base.resultFloats = new float[1];
-            base.fromFloats = new float[] { this.fromValue.IsNone ? 0f : this.fromValue.Value };
-            base.toFloats = new float[] { this.toValue.IsNone ? 0f : this.toValue.Value };
-            base.calculations = new CurveFsmAction.Calculation[] { this.calculation };
-            base.curves = new AnimationCurve[] { this.animCurve.curve };
+            base.fromFloats = new float[1];
+            base.fromFloats[0] = (this.fromValue.IsNone ? 0f : this.fromValue.Value);
+            base.toFloats = new float[1];
+            base.toFloats[0] = (this.toValue.IsNone ? 0f : this.toValue.Value);
+            base.calculations = new Calculation[1];
+            base.calculations[0] = this.calculation;
+            base.curves = new AnimationCurve[1];
+            base.curves[0] = this.animCurve.curve;
             base.Init();
         }
 
@@ -58,20 +85,5 @@
                 this.finishInNextStep = true;
             }
         }
-
-        public override void Reset()
-        {
-            base.Reset();
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.floatVariable = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.toValue = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.fromValue = num3;
-        }
     }
 }
-

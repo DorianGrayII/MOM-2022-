@@ -1,118 +1,123 @@
-﻿namespace MOM
-{
-    using System;
-    using System.Text;
-    using TMPro;
-    using UnityEngine;
+using System;
+using System.Text;
+using TMPro;
+using UnityEngine;
 
+namespace MOM
+{
     public class CombatLogAttackItem : ListItem
     {
         public TextMeshProUGUI labelInitiative;
+
         public TextMeshProUGUI labelAttackerAction;
+
         public TextMeshProUGUI labelDefenderAction;
+
         public GameObject arrowLeft;
+
         public GameObject arrowRight;
-        public UnityEngine.Color sourceColour;
+
+        public Color sourceColour;
 
         public override void Set(object o, object data, int index)
         {
-            BattleHUD.CombatLogDetail detail = o as BattleHUD.CombatLogDetail;
-            this.labelInitiative.text = (detail.initiative > 0) ? ToRomanNumeral(detail.initiative) : "";
-            this.labelAttackerAction.text = detail.left;
-            this.labelDefenderAction.text = detail.right;
-            this.labelAttackerAction.color = (detail.arrow == BattleHUD.CombatLogDetail.Arrow.Right) ? this.sourceColour : UnityEngine.Color.black;
-            this.labelDefenderAction.color = (detail.arrow == BattleHUD.CombatLogDetail.Arrow.Left) ? this.sourceColour : UnityEngine.Color.black;
-            this.arrowLeft.SetActive(detail.arrow == BattleHUD.CombatLogDetail.Arrow.Left);
-            this.arrowRight.SetActive(detail.arrow == BattleHUD.CombatLogDetail.Arrow.Right);
+            BattleHUD.CombatLogDetail combatLogDetail = o as BattleHUD.CombatLogDetail;
+            this.labelInitiative.text = ((combatLogDetail.initiative > 0) ? CombatLogAttackItem.ToRomanNumeral(combatLogDetail.initiative) : "");
+            this.labelAttackerAction.text = combatLogDetail.left;
+            this.labelDefenderAction.text = combatLogDetail.right;
+            this.labelAttackerAction.color = ((combatLogDetail.arrow == BattleHUD.CombatLogDetail.Arrow.Right) ? this.sourceColour : Color.black);
+            this.labelDefenderAction.color = ((combatLogDetail.arrow == BattleHUD.CombatLogDetail.Arrow.Left) ? this.sourceColour : Color.black);
+            this.arrowLeft.SetActive(combatLogDetail.arrow == BattleHUD.CombatLogDetail.Arrow.Left);
+            this.arrowRight.SetActive(combatLogDetail.arrow == BattleHUD.CombatLogDetail.Arrow.Right);
         }
 
         public static string ToRomanNumeral(int value)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
             int num = value;
             while (num > 0)
             {
-                if (num >= 0x3e8)
+                if (num >= 1000)
                 {
-                    builder.Append("M");
-                    num -= 0x3e8;
+                    stringBuilder.Append("M");
+                    num -= 1000;
                     continue;
                 }
                 if (num >= 900)
                 {
-                    builder.Append("CM");
+                    stringBuilder.Append("CM");
                     num -= 900;
                     continue;
                 }
                 if (num >= 500)
                 {
-                    builder.Append("D");
+                    stringBuilder.Append("D");
                     num -= 500;
                     continue;
                 }
                 if (num >= 400)
                 {
-                    builder.Append("CD");
+                    stringBuilder.Append("CD");
                     num -= 400;
                     continue;
                 }
                 if (num >= 100)
                 {
-                    builder.Append("C");
+                    stringBuilder.Append("C");
                     num -= 100;
                     continue;
                 }
                 if (num >= 90)
                 {
-                    builder.Append("XC");
+                    stringBuilder.Append("XC");
                     num -= 90;
                     continue;
                 }
                 if (num >= 50)
                 {
-                    builder.Append("L");
+                    stringBuilder.Append("L");
                     num -= 50;
                     continue;
                 }
                 if (num >= 40)
                 {
-                    builder.Append("XL");
+                    stringBuilder.Append("XL");
                     num -= 40;
                     continue;
                 }
                 if (num >= 10)
                 {
-                    builder.Append("X");
+                    stringBuilder.Append("X");
                     num -= 10;
                     continue;
                 }
                 if (num >= 9)
                 {
-                    builder.Append("IX");
+                    stringBuilder.Append("IX");
                     num -= 9;
                     continue;
                 }
                 if (num >= 5)
                 {
-                    builder.Append("V");
+                    stringBuilder.Append("V");
                     num -= 5;
                     continue;
                 }
                 if (num >= 4)
                 {
-                    builder.Append("IV");
+                    stringBuilder.Append("IV");
                     num -= 4;
                     continue;
                 }
-                if (num < 1)
+                if (num >= 1)
                 {
-                    throw new Exception("Unexpected error.");
+                    stringBuilder.Append("I");
+                    num--;
+                    continue;
                 }
-                builder.Append("I");
-                num--;
+                throw new Exception("Unexpected error.");
             }
-            return builder.ToString();
+            return stringBuilder.ToString();
         }
     }
 }
-

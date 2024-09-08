@@ -1,19 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Math), Tooltip("Sets the value of an integer variable using a float value.")]
+    [ActionCategory(ActionCategory.Math)]
+    [Tooltip("Sets the value of an integer variable using a float value.")]
     public class SetIntFromFloat : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmInt intVariable;
+
         public FsmFloat floatValue;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.intVariable = null;
+            this.floatValue = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
-            this.intVariable.Value = (int) this.floatValue.Value;
+            this.intVariable.Value = (int)this.floatValue.Value;
             if (!this.everyFrame)
             {
                 base.Finish();
@@ -22,15 +30,7 @@
 
         public override void OnUpdate()
         {
-            this.intVariable.Value = (int) this.floatValue.Value;
-        }
-
-        public override void Reset()
-        {
-            this.intVariable = null;
-            this.floatValue = null;
-            this.everyFrame = false;
+            this.intVariable.Value = (int)this.floatValue.Value;
         }
     }
 }
-

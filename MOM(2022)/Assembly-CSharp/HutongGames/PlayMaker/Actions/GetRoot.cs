@@ -1,24 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Gets the top most parent of the Game Object.\nIf the game object has no parent, returns itself.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Gets the top most parent of the Game Object.\nIf the game object has no parent, returns itself.")]
     public class GetRoot : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject storeRoot;
 
-        private void DoGetRoot()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                this.storeRoot.set_Value(ownerDefaultTarget.transform.root.gameObject);
-            }
+            this.gameObject = null;
+            this.storeRoot = null;
         }
 
         public override void OnEnter()
@@ -27,11 +25,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetRoot()
         {
-            this.gameObject = null;
-            this.storeRoot = null;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                this.storeRoot.Value = ownerDefaultTarget.transform.root.gameObject;
+            }
         }
     }
 }
-

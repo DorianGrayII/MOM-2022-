@@ -1,18 +1,21 @@
-﻿namespace WorldCode
-{
-    using MHUtils;
-    using System;
-    using System.Runtime.InteropServices;
+using MHUtils;
 
-    [StructLayout(LayoutKind.Sequential)]
+namespace WorldCode
+{
     public struct PlaneSettings
     {
         public float waterLevel;
+
         public float hillsAboveLevel;
+
         public float mountainAboveLevel;
+
         public float mapBorders;
+
         public Hex sourceHex;
+
         public float overrideTemperature;
+
         public void NormalWorld(Vector2i size)
         {
             this.mapBorders = size.x / 8;
@@ -39,4 +42,3 @@
         }
     }
 }
-

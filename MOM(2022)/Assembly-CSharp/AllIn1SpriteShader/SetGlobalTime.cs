@@ -1,8 +1,7 @@
-﻿namespace AllIn1SpriteShader
-{
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
+namespace AllIn1SpriteShader
+{
     [ExecuteInEditMode]
     public class SetGlobalTime : MonoBehaviour
     {
@@ -19,4 +18,3 @@
         }
     }
 }
-

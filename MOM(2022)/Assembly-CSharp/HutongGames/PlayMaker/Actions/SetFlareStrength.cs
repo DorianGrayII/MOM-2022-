@@ -1,19 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.RenderSettings), HutongGames.PlayMaker.Tooltip("Sets the intensity of all Flares in the scene.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.RenderSettings)]
+    [Tooltip("Sets the intensity of all Flares in the scene.")]
     public class SetFlareStrength : FsmStateAction
     {
         [RequiredField]
         public FsmFloat flareStrength;
+
         public bool everyFrame;
 
-        private void DoSetFlareStrength()
+        public override void Reset()
         {
-            RenderSettings.flareStrength = this.flareStrength.Value;
+            this.flareStrength = 0.2f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -30,11 +31,9 @@
             this.DoSetFlareStrength();
         }
 
-        public override void Reset()
+        private void DoSetFlareStrength()
         {
-            this.flareStrength = 0.2f;
-            this.everyFrame = false;
+            RenderSettings.flareStrength = this.flareStrength.Value;
         }
     }
 }
-

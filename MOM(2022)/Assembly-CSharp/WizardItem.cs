@@ -1,5 +1,4 @@
-﻿using MOM;
-using System;
+using MOM;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,55 +6,61 @@ using UnityEngine.UI;
 public class WizardItem : MonoBehaviour
 {
     public GameObject none;
+
     public GameObject blue;
+
     public GameObject red;
+
     public GameObject green;
+
     public GameObject yellow;
+
     public GameObject purple;
+
     public TextMeshProUGUI labelName;
+
     public RawImage image;
 
     public void Set(PlayerWizard w)
     {
-        PlayerWizard.Color none = PlayerWizard.Color.None;
+        PlayerWizard.Color color = PlayerWizard.Color.None;
         if (w != null)
         {
-            none = w.color;
+            color = w.color;
         }
-        if (this.none)
+        if ((bool)this.none)
         {
-            this.none.SetActive(none == PlayerWizard.Color.None);
+            this.none.SetActive(color == PlayerWizard.Color.None);
         }
-        if (this.blue)
+        if ((bool)this.blue)
         {
-            this.blue.SetActive(none == PlayerWizard.Color.Blue);
+            this.blue.SetActive(color == PlayerWizard.Color.Blue);
         }
-        if (this.red)
+        if ((bool)this.red)
         {
-            this.red.SetActive(none == PlayerWizard.Color.Red);
+            this.red.SetActive(color == PlayerWizard.Color.Red);
         }
-        if (this.green)
+        if ((bool)this.green)
         {
-            this.green.SetActive(none == PlayerWizard.Color.Green);
+            this.green.SetActive(color == PlayerWizard.Color.Green);
         }
-        if (this.yellow)
+        if ((bool)this.yellow)
         {
-            this.yellow.SetActive(none == PlayerWizard.Color.Yellow);
+            this.yellow.SetActive(color == PlayerWizard.Color.Yellow);
         }
-        if (this.purple)
+        if ((bool)this.purple)
         {
-            this.purple.SetActive(none == PlayerWizard.Color.Purple);
+            this.purple.SetActive(color == PlayerWizard.Color.Purple);
         }
-        if (this.labelName)
+        if ((bool)this.labelName)
         {
             this.labelName.gameObject.SetActive(w != null);
-            this.labelName.text = (w != null) ? w.name : null;
+            this.labelName.text = w?.name;
         }
-        if (this.image)
+        if ((bool)this.image)
         {
             this.image.gameObject.SetActive(w != null);
             this.image.texture = w?.Graphic;
         }
     }
 }
-

@@ -1,11 +1,10 @@
-﻿namespace MOM
-{
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class SimpleListItem : MonoBehaviour
     {
         public RawImage icon;
     }
 }
-

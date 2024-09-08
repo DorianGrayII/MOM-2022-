@@ -1,9 +1,8 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MHUtils.MHVector3
-using MHUtils;
 using ProtoBuf;
 using UnityEngine;
 
+namespace MHUtils
+{
 [ProtoContract]
 public struct MHVector3
 {
@@ -133,5 +132,6 @@ public struct MHVector3
     public Vector3 Normalized()
     {
         return ((Vector3)this).normalized;
+    }
     }
 }

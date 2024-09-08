@@ -1,24 +1,30 @@
-﻿namespace MOM.Adventures
-{
-    using MHUtils.UI;
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Xml.Serialization;
+using MHUtils.UI;
 
+namespace MOM.Adventures
+{
     public class NodeStart : BaseNode
     {
         [XmlAttribute]
         public Adventure.AdventureTriggerType adventureStartType;
+
         [XmlAttribute]
         public Adventure.AdventurePositiveType adventurePositiveType;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string graphic;
+
         [XmlAttribute]
         public int cooldown;
+
         [XmlAttribute]
         public int initialDelay;
-        [XmlAttribute, DefaultValue(false)]
+
+        [XmlAttribute]
+        [DefaultValue(false)]
         public bool genericEvent;
 
         public override HashSet<BaseNode> GetInputs()
@@ -29,20 +35,19 @@
         public override void InitializeOutputs()
         {
             base.outputs = new List<AdvOutput>();
-            base.AddOutput(null);
+            base.AddOutput();
         }
 
         public override void UpdateVisuals(EditorNode editorNode)
         {
-            UIComponentFill.LinkDropdownEnum<Adventure.AdventureTriggerType>(editorNode.gameObject, this, "DropdownEventType", "adventureStartType", null);
-            UIComponentFill.LinkDropdownEnum<Adventure.AdventurePositiveType>(editorNode.gameObject, this, "DropdownEventAlignment", "adventurePositiveType", null);
-            UIComponentFill.LinkToggle(editorNode.gameObject, editorNode.GetBaseNode(), "ToggleTriggerOnce", "allowOnce", null);
-            UIComponentFill.LinkToggle(editorNode.gameObject, editorNode.GetBaseNode(), "ToggleGenericEvent", "genericEvent", null);
-            UIComponentFill.LinkInputField<int>(editorNode.gameObject, editorNode.GetBaseNode(), "InputDelay", "initialDelay", null, null);
-            UIComponentFill.LinkInputField<int>(editorNode.gameObject, editorNode.GetBaseNode(), "InputCooldown", "cooldown", null, null);
+            UIComponentFill.LinkDropdownEnum<Adventure.AdventureTriggerType>(editorNode.gameObject, this, "DropdownEventType", "adventureStartType");
+            UIComponentFill.LinkDropdownEnum<Adventure.AdventurePositiveType>(editorNode.gameObject, this, "DropdownEventAlignment", "adventurePositiveType");
+            UIComponentFill.LinkToggle(editorNode.gameObject, editorNode.GetBaseNode(), "ToggleTriggerOnce", "allowOnce");
+            UIComponentFill.LinkToggle(editorNode.gameObject, editorNode.GetBaseNode(), "ToggleGenericEvent", "genericEvent");
+            UIComponentFill.LinkInputField<int>(editorNode.gameObject, editorNode.GetBaseNode(), "InputDelay", "initialDelay");
+            UIComponentFill.LinkInputField<int>(editorNode.gameObject, editorNode.GetBaseNode(), "InputCooldown", "cooldown");
             editorNode.UpdateGraphic();
             editorNode.UpdateOutputs();
         }
     }
 }
-

@@ -1,29 +1,30 @@
-﻿namespace MHUtils
-{
-    using System;
-    using System.Runtime.CompilerServices;
-    using UnityEngine;
+using UnityEngine;
 
-    [Extension]
+namespace MHUtils
+{
     public static class ConvertUtils
     {
-        [Extension]
-        public static string ColorSInt(int source)
+        public static string SInt(this int source)
         {
-            return ((source >= 0) ? ("+" + source.ToString()) : ("<#FF8000>" + source.ToString() + "</color>"));
+            if (source < 0)
+            {
+                return source.ToString();
+            }
+            return "+" + source;
         }
 
-        [Extension]
-        public static string Percent(float source)
+        public static string ColorSInt(this int source)
         {
-            return (Mathf.RoundToInt(source * 100f).ToString() + "%");
+            if (source < 0)
+            {
+                return "<#FF8000>" + source + "</color>";
+            }
+            return "+" + source;
         }
 
-        [Extension]
-        public static string SInt(int source)
+        public static string Percent(this float source)
         {
-            return ((source >= 0) ? ("+" + source.ToString()) : source.ToString());
+            return Mathf.RoundToInt(source * 100f) + "%";
         }
     }
 }
-

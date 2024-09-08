@@ -1,26 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Rebuild a UI Graphic component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Rebuild a UI Graphic component.")]
     public class UiRebuild : ComponentAction<Graphic>
     {
-        [RequiredField, CheckForComponent(typeof(Graphic)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Graphic component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Graphic))]
+        [Tooltip("The GameObject with the UI Graphic component.")]
         public FsmOwnerDefault gameObject;
+
         public CanvasUpdate canvasUpdate;
-        [HutongGames.PlayMaker.Tooltip("Only Rebuild when state exits.")]
+
+        [Tooltip("Only Rebuild when state exits.")]
         public bool rebuildOnExit;
+
         private Graphic graphic;
 
-        private void DoAction()
+        public override void Reset()
         {
-            if (this.graphic != null)
-            {
-                this.graphic.Rebuild(this.canvasUpdate);
-            }
+            this.gameObject = null;
+            this.canvasUpdate = CanvasUpdate.LatePreRender;
+            this.rebuildOnExit = false;
         }
 
         public override void OnEnter()
@@ -37,6 +40,14 @@
             base.Finish();
         }
 
+        private void DoAction()
+        {
+            if (this.graphic != null)
+            {
+                this.graphic.Rebuild(this.canvasUpdate);
+            }
+        }
+
         public override void OnExit()
         {
             if (this.rebuildOnExit)
@@ -44,13 +55,5 @@
                 this.DoAction();
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.canvasUpdate = CanvasUpdate.LatePreRender;
-            this.rebuildOnExit = false;
-        }
     }
 }
-

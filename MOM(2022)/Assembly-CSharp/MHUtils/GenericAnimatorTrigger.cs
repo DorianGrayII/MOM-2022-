@@ -1,8 +1,7 @@
-﻿namespace MHUtils
-{
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
+namespace MHUtils
+{
     public class GenericAnimatorTrigger : MonoBehaviour
     {
         public string eventName;
@@ -13,4 +12,3 @@
         }
     }
 }
-

@@ -1,21 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Convert), Tooltip("Converts an String value to an Int value.")]
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts an String value to an Int value.")]
     public class ConvertStringToInt : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The String variable to convert to an integer.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The String variable to convert to an integer.")]
         public FsmString stringVariable;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("Store the result in an Int variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in an Int variable.")]
         public FsmInt intVariable;
+
         [Tooltip("Repeat every frame. Useful if the String variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertStringToInt()
+        public override void Reset()
         {
-            this.intVariable.Value = int.Parse(this.stringVariable.Value);
+            this.intVariable = null;
+            this.stringVariable = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -32,12 +38,9 @@
             this.DoConvertStringToInt();
         }
 
-        public override void Reset()
+        private void DoConvertStringToInt()
         {
-            this.intVariable = null;
-            this.stringVariable = null;
-            this.everyFrame = false;
+            this.intVariable.Value = int.Parse(this.stringVariable.Value);
         }
     }
 }
-

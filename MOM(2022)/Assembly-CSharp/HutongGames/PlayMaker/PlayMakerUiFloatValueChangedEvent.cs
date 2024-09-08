@@ -1,14 +1,13 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.Events;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace HutongGames.PlayMaker
+{
     [AddComponentMenu("PlayMaker/UI/UI Float Value Changed Event")]
     public class PlayMakerUiFloatValueChangedEvent : PlayMakerUiEventBase
     {
         public Slider slider;
+
         public Scrollbar scrollbar;
 
         protected override void Initialize()
@@ -22,7 +21,7 @@
                 }
                 if (this.slider != null)
                 {
-                    this.slider.onValueChanged.AddListener(new UnityAction<float>(this.OnValueChanged));
+                    this.slider.onValueChanged.AddListener(OnValueChanged);
                 }
                 if (this.scrollbar == null)
                 {
@@ -30,7 +29,7 @@
                 }
                 if (this.scrollbar != null)
                 {
-                    this.scrollbar.onValueChanged.AddListener(new UnityAction<float>(this.OnValueChanged));
+                    this.scrollbar.onValueChanged.AddListener(OnValueChanged);
                 }
             }
         }
@@ -40,11 +39,11 @@
             base.initialized = false;
             if (this.slider != null)
             {
-                this.slider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnValueChanged));
+                this.slider.onValueChanged.RemoveListener(OnValueChanged);
             }
             if (this.scrollbar != null)
             {
-                this.scrollbar.onValueChanged.RemoveListener(new UnityAction<float>(this.OnValueChanged));
+                this.scrollbar.onValueChanged.RemoveListener(OnValueChanged);
             }
         }
 
@@ -55,4 +54,3 @@
         }
     }
 }
-

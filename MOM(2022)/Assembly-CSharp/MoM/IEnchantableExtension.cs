@@ -1,349 +1,268 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using MHUtils;
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
+using System;
+using System.Collections.Generic;
+using DBDef;
+using MHUtils;
+using UnityEngine;
 
-    [Extension]
+namespace MOM
+{
     public static class IEnchantableExtension
     {
-        [Extension]
-        public static EnchantmentInstance AddEnchantment(IEnchantable obj, EnchantmentInstance ei)
+        public static EnchantmentInstance AddEnchantment(this IEnchantable obj, Enchantment e, object owner, int countdown = -1, string parameters = null, int dispelCost = 0)
+        {
+            if (owner != null && !(owner is Entity))
+            {
+                Debug.LogError("Non-null owner have to be Entity and is: " + owner);
+            }
+            bool inBattle = false;
+            if (obj is Battle || obj is BattleUnit || obj is BattlePlayer)
+            {
+                inBattle = true;
+            }
+            EnchantmentInstance enchantmentInstance = null;
+            enchantmentInstance = ((!IEnchantableExtension.IsEnchantmentAlreadyOnTarget(obj, e, owner, countdown, parameters, dispelCost)) ? obj.GetEnchantmentManager().Add(e, owner as Entity, countdown, parameters, inBattle, dispelCost) : obj.GetEnchantments().Find((EnchantmentInstance o) => o.source == e && o.owner == owner));
+            if (e.applicationScript != null)
+            {
+                ScriptLibrary.Call(e.applicationScript.script, obj, e, enchantmentInstance);
+            }
+            if (obj is IAttributable)
+            {
+                (obj as IAttributable).GetAttributes().SetDirty();
+            }
+            if (obj is Location location && location.GetUnits() != null)
+            {
+                foreach (Reference<Unit> unit in location.GetUnits())
+                {
+                    unit.Get().attributes.SetDirty();
+                }
+            }
+            MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), enchantmentInstance);
+            return enchantmentInstance;
+        }
+
+        public static EnchantmentInstance AddEnchantment(this IEnchantable obj, EnchantmentInstance ei)
         {
             bool inBattle = false;
-            if ((obj is Battle) || (obj is BattleUnit))
+            if (obj is Battle || obj is BattleUnit)
             {
                 inBattle = true;
             }
             obj.GetEnchantmentManager().Add2(ei, inBattle);
             if (ei.source.Get().applicationScript != null)
             {
-                object[] parameters = new object[] { obj, ei.source.Get(), ei };
-                ScriptLibrary.Call(ei.source.Get().applicationScript.script, parameters);
+                ScriptLibrary.Call(ei.source.Get().applicationScript.script, obj, ei.source.Get(), ei);
             }
             if (obj is IAttributable)
             {
                 (obj as IAttributable).GetAttributes().SetDirty();
             }
-            MOM.Location location = obj as MOM.Location;
-            if ((location != null) && (location.GetUnits() != null))
+            if (obj is Location location && location.GetUnits() != null)
             {
-                using (List<Reference<MOM.Unit>>.Enumerator enumerator = location.GetUnits().GetEnumerator())
+                foreach (Reference<Unit> unit in location.GetUnits())
                 {
-                    while (enumerator.MoveNext())
-                    {
-                        enumerator.Current.Get().attributes.SetDirty();
-                    }
+                    unit.Get().attributes.SetDirty();
                 }
             }
             MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), ei);
             return ei;
         }
 
-        [Extension]
-        public static EnchantmentInstance AddEnchantment(IEnchantable obj, Enchantment e, object owner, int countdown, string parameters, int dispelCost)
+        public static void RemoveEnchantment(this IEnchantable obj, Enchantment e)
         {
-            if ((owner != null) && !(owner is Entity))
+            EnchantmentInstance enchantmentInstance = obj.GetEnchantmentManager().Remove(e);
+            if (e.removalScript != null)
             {
-                string text1;
-                if (owner != null)
-                {
-                    text1 = owner.ToString();
-                }
-                else
-                {
-                    object local1 = owner;
-                    text1 = null;
-                }
-                Debug.LogError("Non-null owner have to be Entity and is: " + text1);
-            }
-            bool inBattle = false;
-            if ((obj is Battle) || ((obj is BattleUnit) || (obj is BattlePlayer)))
-            {
-                inBattle = true;
-            }
-            EnchantmentInstance args = null;
-            args = !IsEnchantmentAlreadyOnTarget(obj, e, owner, countdown, parameters, dispelCost) ? obj.GetEnchantmentManager().Add(e, owner as Entity, countdown, parameters, inBattle, dispelCost) : GetEnchantments(obj).Find(o => (o.source == e) && (o.owner == owner));
-            if (e.applicationScript != null)
-            {
-                object[] objArray1 = new object[] { obj, e, args };
-                ScriptLibrary.Call(e.applicationScript.script, objArray1);
+                ScriptLibrary.Call(e.removalScript.script, obj, e, enchantmentInstance);
             }
             if (obj is IAttributable)
             {
                 (obj as IAttributable).GetAttributes().SetDirty();
             }
-            MOM.Location location = obj as MOM.Location;
-            if ((location != null) && (location.GetUnits() != null))
+            if (obj is Location location && location.GetUnits() != null)
             {
-                using (List<Reference<MOM.Unit>>.Enumerator enumerator = location.GetUnits().GetEnumerator())
+                foreach (Reference<Unit> unit in location.GetUnits())
                 {
-                    while (enumerator.MoveNext())
-                    {
-                        enumerator.Current.Get().attributes.SetDirty();
-                    }
+                    unit.Get().attributes.SetDirty();
                 }
             }
-            MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), args);
-            return args;
+            MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), enchantmentInstance);
         }
 
-        [Extension]
-        public static void BattleCountdownUpdate(IEnchantable obj, bool isAttackerTurn)
+        public static void RemoveEnchantment(this IEnchantable obj, EnchantmentInstance e)
         {
-            obj.GetEnchantmentManager().BattleCountdownUpdate(obj, isAttackerTurn);
-        }
-
-        public static string CombineStringParameters(string param, string param2)
-        {
-            string str5;
-            try
+            EnchantmentInstance enchantmentInstance = obj.GetEnchantmentManager().Remove(e);
+            if (e.source.Get().removalScript != null)
             {
-                string[] strArray = param.Split(';', StringSplitOptions.None);
-                float num = 100f;
-                string str = null;
-                string str2 = null;
-                int index = 0;
-                while (true)
+                ScriptLibrary.Call(e.source.Get().removalScript.script, obj, e.source.Get(), enchantmentInstance);
+            }
+            if (obj is IAttributable)
+            {
+                (obj as IAttributable).GetAttributes().SetDirty();
+            }
+            if (obj is Location location && location.GetUnits() != null)
+            {
+                foreach (Reference<Unit> unit in location.GetUnits())
                 {
-                    if (index >= strArray.Length)
-                    {
-                        string[] strArray2 = param2.Split(';', StringSplitOptions.None);
-                        float num2 = 100f;
-                        string str3 = null;
-                        string str4 = null;
-                        int num10 = 0;
-                        while (true)
-                        {
-                            if (num10 >= strArray2.Length)
-                            {
-                                float num3 = (str != null) ? Convert.ToSingle(str, Globals.GetCultureInfo()) : 0f;
-                                float num4 = (str2 != null) ? Convert.ToSingle(str2, Globals.GetCultureInfo()) : num3;
-                                float num5 = (str3 != null) ? Convert.ToSingle(str3, Globals.GetCultureInfo()) : 0f;
-                                float num6 = (str4 != null) ? Convert.ToSingle(str4, Globals.GetCultureInfo()) : num5;
-                                float num7 = 1f;
-                                if ((num != 100f) || (num2 != 100f))
-                                {
-                                    num7 = Math.Max(num, num2);
-                                }
-                                string[] textArray1 = new string[] { num7.ToString(), "%;", (num3 + num5).ToString(), ";", (num4 + num6).ToString() };
-                                str5 = string.Concat(textArray1);
-                                break;
-                            }
-                            int num11 = strArray2[num10].IndexOf("%");
-                            if (num11 > -1)
-                            {
-                                strArray2[num10].Substring(0, num11).Replace(" ", "");
-                            }
-                            else if (str3 == null)
-                            {
-                                str3 = strArray2[num10].Replace(" ", "");
-                            }
-                            else
-                            {
-                                str4 = strArray2[num10].Replace(" ", "");
-                            }
-                            num10++;
-                        }
-                        break;
-                    }
-                    int length = strArray[index].IndexOf("%");
-                    if (length > -1)
-                    {
-                        strArray[index].Substring(0, length).Replace(" ", "");
-                    }
-                    else if (str == null)
-                    {
-                        str = strArray[index].Replace(" ", "");
-                    }
-                    else
-                    {
-                        str2 = strArray[index].Replace(" ", "");
-                    }
-                    index++;
+                    unit.Get().attributes.SetDirty();
                 }
             }
-            catch
-            {
-                Debug.LogError("UTIL_StringParameterProcessor error");
-                str5 = null;
-            }
-            return str5;
-        }
-
-        [Extension]
-        public static EnchantmentManager CopyEnchantmentManager(IEnchantable obj, IEnchantable newOwner)
-        {
-            return obj.GetEnchantmentManager().CopyEnchantmentManager(newOwner);
-        }
-
-        [Extension]
-        public static void CopyEnchantmentManagerFrom(IEnchantable obj, IEnchantable source, bool useRequirementScripts)
-        {
-            obj.GetEnchantmentManager().CopyEnchantmentManagerFrom(source, useRequirementScripts);
-        }
-
-        [Extension]
-        public static void CountdownUpdate(IEnchantable obj)
-        {
-            obj.GetEnchantmentManager().CountedownUpdate(obj);
-        }
-
-        [Extension]
-        public static void EnsureEnchantments(IEnchantable obj)
-        {
-            obj.GetEnchantmentManager().EnsureEnchantments();
-        }
-
-        [Extension]
-        public static List<EnchantmentInstance> GetEnchantments(IEnchantable obj)
-        {
-            return obj.GetEnchantmentManager().GetEnchantments();
-        }
-
-        [Extension]
-        public static HashSet<EnchantmentInstance> GetRemoteEnchantments(IEnchantable obj, IEnchantable target)
-        {
-            return obj.GetEnchantmentManager().GetRemoteEnchantments(target);
+            MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), enchantmentInstance);
         }
 
         public static bool IsEnchantmentAlreadyOnTarget(IEnchantable obj, Enchantment e, object owner, int countdown, string parameters, int dispelCost)
         {
-            bool flag;
-            using (List<EnchantmentInstance>.Enumerator enumerator = GetEnchantments(obj).GetEnumerator())
+            foreach (EnchantmentInstance enchantment in obj.GetEnchantments())
             {
-                while (true)
+                if (enchantment.source == e && enchantment.owner == owner)
                 {
-                    if (enumerator.MoveNext())
+                    if (enchantment.countDown > -1 && countdown > -1)
                     {
-                        EnchantmentInstance current = enumerator.Current;
-                        if ((current.source != e) || (current.owner != owner))
-                        {
-                            continue;
-                        }
-                        if ((current.countDown > -1) && (countdown > -1))
-                        {
-                            current.countDown += countdown;
-                        }
-                        if ((current.dispelCost > 0) || (dispelCost > 0))
-                        {
-                            current.dispelCost = Math.Max(current.dispelCost, dispelCost);
-                        }
-                        if (!string.IsNullOrEmpty(current.parameters) || !string.IsNullOrEmpty(parameters))
-                        {
-                            current.parameters = CombineStringParameters(current.parameters, parameters);
-                        }
-                        flag = true;
+                        enchantment.countDown += countdown;
                     }
-                    else
+                    if (enchantment.dispelCost > 0 || dispelCost > 0)
                     {
-                        return false;
+                        enchantment.dispelCost = Math.Max(enchantment.dispelCost, dispelCost);
                     }
-                    break;
+                    if (!string.IsNullOrEmpty(enchantment.parameters) || !string.IsNullOrEmpty(parameters))
+                    {
+                        enchantment.parameters = IEnchantableExtension.CombineStringParameters(enchantment.parameters, parameters);
+                    }
+                    return true;
                 }
             }
-            return flag;
+            return false;
         }
 
-        [Extension]
-        public static bool IsIteratingEnchantments(IEnchantable obj)
+        public static void TriggerScripts(this IEnchantable obj, EEnchantmentType eType, object data = null, IEnchantable customTarget = null)
         {
-            return (obj.GetEnchantmentManager().localActiveIterators > 0);
+            obj.GetEnchantmentManager().TriggerScripts(eType, data, customTarget);
         }
 
-        [Extension]
-        public static void ProcessFIntScripts(IEnchantable obj, EEnchantmentType eType, ref FInt value)
+        public static List<EnchantmentInstance> GetEnchantments(this IEnchantable obj)
         {
-            obj.GetEnchantmentManager().ProcessFIntScripts(eType, ref value);
+            return obj.GetEnchantmentManager().GetEnchantments();
         }
 
-        [Extension]
-        public static void ProcessFloatScripts(IEnchantable obj, EEnchantmentType eType, ref float value)
+        public static HashSet<EnchantmentInstance> GetRemoteEnchantments(this IEnchantable obj, IEnchantable target)
         {
-            obj.GetEnchantmentManager().ProcessFloatScripts(eType, ref value);
+            return obj.GetEnchantmentManager().GetRemoteEnchantments(target);
         }
 
-        [Extension]
-        public static void ProcessIntigerScripts(IEnchantable obj, EEnchantmentType eType, ref int value)
+        public static void ProcessIntigerScripts(this IEnchantable obj, EEnchantmentType eType, ref int value)
         {
             obj.GetEnchantmentManager().ProcessIntigerScripts(eType, ref value);
         }
 
-        [Extension]
-        public static void ProcessIntigerScripts(IEnchantable obj, EEnchantmentType eType, ref int income, ref int upkeep)
+        public static void ProcessIntigerScripts(this IEnchantable obj, EEnchantmentType eType, ref int income, ref int upkeep)
         {
             obj.GetEnchantmentManager().ProcessIntigerScripts(eType, ref income, ref upkeep);
         }
 
-        [Extension]
-        public static void ProcessIntigerScripts(IEnchantable obj, EEnchantmentType eType, ref int income, StatDetails details)
+        public static void ProcessIntigerScripts(this IEnchantable obj, EEnchantmentType eType, ref int income, StatDetails details)
         {
             obj.GetEnchantmentManager().ProcessIntigerScripts(eType, ref income, details);
         }
 
-        [Extension]
-        public static void RemoveEnchantment(IEnchantable obj, Enchantment e)
+        public static void ProcessFloatScripts(this IEnchantable obj, EEnchantmentType eType, ref float value)
         {
-            EnchantmentInstance args = obj.GetEnchantmentManager().Remove(e);
-            if (e.removalScript != null)
-            {
-                object[] parameters = new object[] { obj, e, args };
-                ScriptLibrary.Call(e.removalScript.script, parameters);
-            }
-            if (obj is IAttributable)
-            {
-                (obj as IAttributable).GetAttributes().SetDirty();
-            }
-            MOM.Location location = obj as MOM.Location;
-            if ((location != null) && (location.GetUnits() != null))
-            {
-                using (List<Reference<MOM.Unit>>.Enumerator enumerator = location.GetUnits().GetEnumerator())
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        enumerator.Current.Get().attributes.SetDirty();
-                    }
-                }
-            }
-            MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), args);
+            obj.GetEnchantmentManager().ProcessFloatScripts(eType, ref value);
         }
 
-        [Extension]
-        public static void RemoveEnchantment(IEnchantable obj, EnchantmentInstance e)
+        public static void ProcessFIntScripts(this IEnchantable obj, EEnchantmentType eType, ref FInt value)
         {
-            EnchantmentInstance args = obj.GetEnchantmentManager().Remove(e);
-            if (e.source.Get().removalScript != null)
-            {
-                object[] parameters = new object[] { obj, e.source.Get(), args };
-                ScriptLibrary.Call(e.source.Get().removalScript.script, parameters);
-            }
-            if (obj is IAttributable)
-            {
-                (obj as IAttributable).GetAttributes().SetDirty();
-            }
-            MOM.Location location = obj as MOM.Location;
-            if ((location != null) && (location.GetUnits() != null))
-            {
-                using (List<Reference<MOM.Unit>>.Enumerator enumerator = location.GetUnits().GetEnumerator())
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        enumerator.Current.Get().attributes.SetDirty();
-                    }
-                }
-            }
-            MHEventSystem.TriggerEvent<EnchantmentManager>(obj.GetEnchantmentManager(), args);
+            obj.GetEnchantmentManager().ProcessFIntScripts(eType, ref value);
         }
 
-        [Extension]
-        public static void TriggerScripts(IEnchantable obj, EEnchantmentType eType, object data, IEnchantable customTarget)
+        public static void CountdownUpdate(this IEnchantable obj)
         {
-            obj.GetEnchantmentManager().TriggerScripts(eType, data, customTarget);
+            obj.GetEnchantmentManager().CountedownUpdate(obj);
+        }
+
+        public static void BattleCountdownUpdate(this IEnchantable obj, bool isAttackerTurn)
+        {
+            obj.GetEnchantmentManager().BattleCountdownUpdate(obj, isAttackerTurn);
+        }
+
+        public static EnchantmentManager CopyEnchantmentManager(this IEnchantable obj, IEnchantable newOwner)
+        {
+            return obj.GetEnchantmentManager().CopyEnchantmentManager(newOwner);
+        }
+
+        public static void CopyEnchantmentManagerFrom(this IEnchantable obj, IEnchantable source, bool useRequirementScripts = false)
+        {
+            obj.GetEnchantmentManager().CopyEnchantmentManagerFrom(source, useRequirementScripts);
+        }
+
+        public static bool IsIteratingEnchantments(this IEnchantable obj)
+        {
+            return obj.GetEnchantmentManager().localActiveIterators > 0;
+        }
+
+        public static void EnsureEnchantments(this IEnchantable obj)
+        {
+            obj.GetEnchantmentManager().EnsureEnchantments();
+        }
+
+        public static string CombineStringParameters(string param, string param2)
+        {
+            try
+            {
+                string[] array = param.Split(';'); //, StringSplitOptions.None);
+                float num = 100f;
+                string text = null;
+                string text2 = null;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    int num2 = array[i].IndexOf("%");
+                    if (num2 > -1)
+                    {
+                        array[i].Substring(0, num2).Replace(" ", "");
+                    }
+                    else if (text == null)
+                    {
+                        text = array[i].Replace(" ", "");
+                    }
+                    else
+                    {
+                        text2 = array[i].Replace(" ", "");
+                    }
+                }
+                string[] array2 = param2.Split(';'); //, StringSplitOptions.None);
+                float num3 = 100f;
+                string text3 = null;
+                string text4 = null;
+                for (int j = 0; j < array2.Length; j++)
+                {
+                    int num4 = array2[j].IndexOf("%");
+                    if (num4 > -1)
+                    {
+                        array2[j].Substring(0, num4).Replace(" ", "");
+                    }
+                    else if (text3 == null)
+                    {
+                        text3 = array2[j].Replace(" ", "");
+                    }
+                    else
+                    {
+                        text4 = array2[j].Replace(" ", "");
+                    }
+                }
+                float num5 = ((text != null) ? Convert.ToSingle(text, Globals.GetCultureInfo()) : 0f);
+                float num6 = ((text2 != null) ? Convert.ToSingle(text2, Globals.GetCultureInfo()) : num5);
+                float num7 = ((text3 != null) ? Convert.ToSingle(text3, Globals.GetCultureInfo()) : 0f);
+                float num8 = ((text4 != null) ? Convert.ToSingle(text4, Globals.GetCultureInfo()) : num7);
+                float num9 = 1f;
+                if (num != 100f || num3 != 100f)
+                {
+                    num9 = Math.Max(num, num3);
+                }
+                return num9 + "%;" + (num5 + num7) + ";" + (num6 + num8);
+            }
+            catch
+            {
+                Debug.LogError("UTIL_StringParameterProcessor error");
+                return null;
+            }
         }
     }
 }
-

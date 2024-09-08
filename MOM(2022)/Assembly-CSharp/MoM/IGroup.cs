@@ -1,21 +1,21 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.IGroup
 using System.Collections.Generic;
-using MOM;
 
-public interface IGroup
+namespace MOM
 {
-    int GetOwnerID();
+    public interface IGroup
+    {
+        int GetOwnerID();
 
-    void SetOwnerID(int id, int attackerID = -1, bool additionalLosses = false);
+        void SetOwnerID(int id, int attackerID = -1, bool additionalLosses = false);
 
-    List<Reference<Unit>> GetUnits();
+        List<Reference<Unit>> GetUnits();
 
-    AdventureTrigger GetAdventureTrigger();
+        AdventureTrigger GetAdventureTrigger();
 
-    void AddUnit(Unit u, bool updateMovementFlags = true);
+        void AddUnit(Unit u, bool updateMovementFlags = true);
 
-    void RemoveUnit(Unit u, bool allowGroupDestruction = true, bool updateGroup = true);
+        void RemoveUnit(Unit u, bool allowGroupDestruction = true, bool updateGroup = true);
 
-    Group GetGroup();
+        Group GetGroup();
+    }
 }

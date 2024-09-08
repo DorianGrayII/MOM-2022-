@@ -1,38 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("Begins a ScrollView. Use GUILayoutEndScrollView at the end of the block.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("Begins a ScrollView. Use GUILayoutEndScrollView at the end of the block.")]
     public class GUILayoutBeginScrollView : GUILayoutAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Assign a Vector2 variable to store the scroll position of this view.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Assign a Vector2 variable to store the scroll position of this view.")]
         public FsmVector2 scrollPosition;
-        [HutongGames.PlayMaker.Tooltip("Always show the horizontal scrollbars.")]
-        public FsmBool horizontalScrollbar;
-        [HutongGames.PlayMaker.Tooltip("Always show the vertical scrollbars.")]
-        public FsmBool verticalScrollbar;
-        [HutongGames.PlayMaker.Tooltip("Define custom styles below. NOTE: You have to define all the styles if you check this option.")]
-        public FsmBool useCustomStyle;
-        [HutongGames.PlayMaker.Tooltip("Named style in the active GUISkin for the horizontal scrollbars.")]
-        public FsmString horizontalStyle;
-        [HutongGames.PlayMaker.Tooltip("Named style in the active GUISkin for the vertical scrollbars.")]
-        public FsmString verticalStyle;
-        [HutongGames.PlayMaker.Tooltip("Named style in the active GUISkin for the background.")]
-        public FsmString backgroundStyle;
 
-        public override void OnGUI()
-        {
-            if (this.useCustomStyle.Value)
-            {
-                this.scrollPosition.set_Value(GUILayout.BeginScrollView(this.scrollPosition.get_Value(), this.horizontalScrollbar.Value, this.verticalScrollbar.Value, this.horizontalStyle.Value, this.verticalStyle.Value, this.backgroundStyle.Value, base.LayoutOptions));
-            }
-            else
-            {
-                this.scrollPosition.set_Value(GUILayout.BeginScrollView(this.scrollPosition.get_Value(), this.horizontalScrollbar.Value, this.verticalScrollbar.Value, base.LayoutOptions));
-            }
-        }
+        [Tooltip("Always show the horizontal scrollbars.")]
+        public FsmBool horizontalScrollbar;
+
+        [Tooltip("Always show the vertical scrollbars.")]
+        public FsmBool verticalScrollbar;
+
+        [Tooltip("Define custom styles below. NOTE: You have to define all the styles if you check this option.")]
+        public FsmBool useCustomStyle;
+
+        [Tooltip("Named style in the active GUISkin for the horizontal scrollbars.")]
+        public FsmString horizontalStyle;
+
+        [Tooltip("Named style in the active GUISkin for the vertical scrollbars.")]
+        public FsmString verticalStyle;
+
+        [Tooltip("Named style in the active GUISkin for the background.")]
+        public FsmString backgroundStyle;
 
         public override void Reset()
         {
@@ -45,6 +40,17 @@
             this.verticalStyle = null;
             this.backgroundStyle = null;
         }
+
+        public override void OnGUI()
+        {
+            if (this.useCustomStyle.Value)
+            {
+                this.scrollPosition.Value = GUILayout.BeginScrollView(this.scrollPosition.Value, this.horizontalScrollbar.Value, this.verticalScrollbar.Value, this.horizontalStyle.Value, this.verticalStyle.Value, this.backgroundStyle.Value, base.LayoutOptions);
+            }
+            else
+            {
+                this.scrollPosition.Value = GUILayout.BeginScrollView(this.scrollPosition.Value, this.horizontalScrollbar.Value, this.verticalScrollbar.Value, base.LayoutOptions);
+            }
+        }
     }
 }
-

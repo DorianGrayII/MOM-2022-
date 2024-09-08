@@ -1,27 +1,30 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Camera), HutongGames.PlayMaker.Tooltip("Sets the Culling Mask used by the Camera.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Camera)]
+    [Tooltip("Sets the Culling Mask used by the Camera.")]
     public class SetCameraCullingMask : ComponentAction<Camera>
     {
-        [RequiredField, CheckForComponent(typeof(Camera))]
+        [RequiredField]
+        [CheckForComponent(typeof(Camera))]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Cull these layers."), UIHint(UIHint.Layer)]
+
+        [Tooltip("Cull these layers.")]
+        [UIHint(UIHint.Layer)]
         public FsmInt[] cullingMask;
-        [HutongGames.PlayMaker.Tooltip("Invert the mask, so you cull all layers except those defined above.")]
+
+        [Tooltip("Invert the mask, so you cull all layers except those defined above.")]
         public FsmBool invertMask;
+
         public bool everyFrame;
 
-        private void DoSetCameraCullingMask()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.camera.cullingMask = ActionHelpers.LayerArrayToLayerMask(this.cullingMask, this.invertMask.Value);
-            }
+            this.gameObject = null;
+            this.cullingMask = new FsmInt[0];
+            this.invertMask = false;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,13 +41,13 @@
             this.DoSetCameraCullingMask();
         }
 
-        public override void Reset()
+        private void DoSetCameraCullingMask()
         {
-            this.gameObject = null;
-            this.cullingMask = new FsmInt[0];
-            this.invertMask = false;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.camera.cullingMask = ActionHelpers.LayerArrayToLayerMask(this.cullingMask, this.invertMask.Value);
+            }
         }
     }
 }
-

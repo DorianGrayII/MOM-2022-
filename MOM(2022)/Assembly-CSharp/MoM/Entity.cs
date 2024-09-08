@@ -1,9 +1,13 @@
-﻿namespace MOM
-{
-    using ProtoBuf;
-    using System;
+using ProtoBuf;
 
-    [ProtoInclude(100, typeof(BaseUnit)), ProtoInclude(0x65, typeof(GameManager)), ProtoInclude(0x66, typeof(Group)), ProtoInclude(0x67, typeof(Location)), ProtoInclude(0x68, typeof(PlayerWizard)), ProtoContract]
+namespace MOM
+{
+    [ProtoInclude(100, typeof(BaseUnit))]
+    [ProtoInclude(101, typeof(GameManager))]
+    [ProtoInclude(102, typeof(Group))]
+    [ProtoInclude(103, typeof(Location))]
+    [ProtoInclude(104, typeof(PlayerWizard))]
+    [ProtoContract]
     public class Entity
     {
         public virtual int GetID()
@@ -16,4 +20,3 @@
         }
     }
 }
-

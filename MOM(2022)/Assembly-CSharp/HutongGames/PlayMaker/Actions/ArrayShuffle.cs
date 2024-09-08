@@ -1,54 +1,58 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Array), HutongGames.PlayMaker.Tooltip("Shuffle values in an array. Optionally set a start index and range to shuffle only part of the array.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Array)]
+    [Tooltip("Shuffle values in an array. Optionally set a start index and range to shuffle only part of the array.")]
     public class ArrayShuffle : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Array to shuffle.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Array to shuffle.")]
         public FsmArray array;
-        [HutongGames.PlayMaker.Tooltip("Optional start Index for the shuffling. Leave it to none or 0 for no effect")]
-        public FsmInt startIndex;
-        [HutongGames.PlayMaker.Tooltip("Optional range for the shuffling, starting at the start index if greater than 0. Leave it to none or 0 for no effect, it will shuffle the whole array")]
-        public FsmInt shufflingRange;
 
-        public override void OnEnter()
-        {
-            List<object> list = new List<object>(this.array.Values);
-            int minInclusive = 0;
-            int b = list.Count - 1;
-            if (this.startIndex.Value > 0)
-            {
-                minInclusive = Mathf.Min(this.startIndex.Value, b);
-            }
-            if (this.shufflingRange.Value > 0)
-            {
-                b = Mathf.Min((int) (list.Count - 1), (int) (minInclusive + this.shufflingRange.Value));
-            }
-            for (int i = b; i > minInclusive; i--)
-            {
-                int num4 = UnityEngine.Random.Range(minInclusive, i + 1);
-                object obj2 = list[i];
-                list[i] = list[num4];
-                list[num4] = obj2;
-            }
-            this.array.Values = list.ToArray();
-            base.Finish();
-        }
+        [Tooltip("Optional start Index for the shuffling. Leave it to none or 0 for no effect")]
+        public FsmInt startIndex;
+
+        [Tooltip("Optional range for the shuffling, starting at the start index if greater than 0. Leave it to none or 0 for no effect, it will shuffle the whole array")]
+        public FsmInt shufflingRange;
 
         public override void Reset()
         {
             this.array = null;
-            FsmInt num1 = new FsmInt();
-            num1.UseVariable = true;
-            this.startIndex = num1;
-            FsmInt num2 = new FsmInt();
-            num2.UseVariable = true;
-            this.shufflingRange = num2;
+            this.startIndex = new FsmInt
+            {
+                UseVariable = true
+            };
+            this.shufflingRange = new FsmInt
+            {
+                UseVariable = true
+            };
+        }
+
+        public override void OnEnter()
+        {
+            List<object> list = new List<object>(this.array.Values);
+            int num = 0;
+            int num2 = list.Count - 1;
+            if (this.startIndex.Value > 0)
+            {
+                num = Mathf.Min(this.startIndex.Value, num2);
+            }
+            if (this.shufflingRange.Value > 0)
+            {
+                num2 = Mathf.Min(list.Count - 1, num + this.shufflingRange.Value);
+            }
+            for (int num3 = num2; num3 > num; num3--)
+            {
+                int index = Random.Range(num, num3 + 1);
+                object value = list[num3];
+                list[num3] = list[index];
+                list[index] = value;
+            }
+            this.array.Values = list.ToArray();
+            base.Finish();
         }
     }
 }
-

@@ -1,10 +1,9 @@
-﻿namespace MOM
-{
-    using MHUtils;
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using MHUtils;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
+namespace MOM
+{
     public class RollOverOutEvents : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
     {
         public object data;
@@ -20,4 +19,3 @@
         }
     }
 }
-

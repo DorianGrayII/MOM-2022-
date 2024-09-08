@@ -1,14 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Audio), HutongGames.PlayMaker.Tooltip("Stops playing the Audio Clip played by an Audio Source component on a Game Object.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Audio)]
+    [Tooltip("Stops playing the Audio Clip played by an Audio Source component on a Game Object.")]
     public class AudioStop : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(AudioSource)), HutongGames.PlayMaker.Tooltip("The GameObject with an AudioSource component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(AudioSource))]
+        [Tooltip("The GameObject with an AudioSource component.")]
         public FsmOwnerDefault gameObject;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+        }
 
         public override void OnEnter()
         {
@@ -23,11 +29,5 @@
             }
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-        }
     }
 }
-

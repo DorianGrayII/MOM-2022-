@@ -1,30 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the text value of a UI InputField component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the text value of a UI InputField component.")]
     public class UiInputFieldSetText : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.TextArea), HutongGames.PlayMaker.Tooltip("The text of the UI InputField component.")]
+
+        [UIHint(UIHint.TextArea)]
+        [Tooltip("The text of the UI InputField component.")]
         public FsmString text;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private InputField inputField;
+
         private string originalString;
 
-        private void DoSetTextValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.inputField.text = this.text.Value;
-            }
+            this.gameObject = null;
+            this.text = null;
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,26 +49,25 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.inputField != null) && this.resetOnExit.Value)
-            {
-                this.inputField.text = this.originalString;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetTextValue();
         }
 
-        public override void Reset()
+        private void DoSetTextValue()
         {
-            this.gameObject = null;
-            this.text = null;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (this.inputField != null)
+            {
+                this.inputField.text = this.text.Value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.inputField == null) && this.resetOnExit.Value)
+            {
+                this.inputField.text = this.originalString;
+            }
         }
     }
 }
-

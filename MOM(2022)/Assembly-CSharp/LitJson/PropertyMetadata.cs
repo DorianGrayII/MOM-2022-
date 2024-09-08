@@ -1,15 +1,14 @@
-﻿namespace LitJson
-{
-    using System;
-    using System.Reflection;
-    using System.Runtime.InteropServices;
+using System;
+using System.Reflection;
 
-    [StructLayout(LayoutKind.Sequential)]
+namespace LitJson
+{
     internal struct PropertyMetadata
     {
         public MemberInfo Info;
+
         public bool IsField;
-        public System.Type Type;
+
+        public Type Type;
     }
 }
-

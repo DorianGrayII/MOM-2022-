@@ -1,43 +1,40 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Set the size of this RectTransform relative to the distances between the anchors. this is the 'Width' and 'Height' values in the RectTransform inspector.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Set the size of this RectTransform relative to the distances between the anchors. this is the 'Width' and 'Height' values in the RectTransform inspector.")]
     public class RectTransformSetSizeDelta : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("TheVector2 sizeDelta. Set to none for no effect, and/or set individual axis below.")]
+
+        [Tooltip("TheVector2 sizeDelta. Set to none for no effect, and/or set individual axis below.")]
         public FsmVector2 sizeDelta;
-        [HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides sizeDelta x value if set. Set to none for no effect")]
+
+        [Tooltip("Setting only the x value. Overrides sizeDelta x value if set. Set to none for no effect")]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides sizeDelta y value if set. Set to none for no effect")]
+
+        [Tooltip("Setting only the x value. Overrides sizeDelta y value if set. Set to none for no effect")]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoSetSizeDelta()
+        public override void Reset()
         {
-            Vector2 sizeDelta = this._rt.sizeDelta;
-            if (!this.sizeDelta.IsNone)
+            base.Reset();
+            this.gameObject = null;
+            this.sizeDelta = null;
+            this.x = new FsmFloat
             {
-                sizeDelta = this.sizeDelta.get_Value();
-            }
-            if (!this.x.IsNone)
+                UseVariable = true
+            };
+            this.y = new FsmFloat
             {
-                sizeDelta.x = this.x.Value;
-            }
-            if (!this.y.IsNone)
-            {
-                sizeDelta.y = this.y.Value;
-            }
-            this._rt.sizeDelta = sizeDelta;
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoSetSizeDelta();
+                UseVariable = true
+            };
         }
 
         public override void OnEnter()
@@ -54,18 +51,27 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.sizeDelta = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
+            this.DoSetSizeDelta();
+        }
+
+        private void DoSetSizeDelta()
+        {
+            Vector2 value = this._rt.sizeDelta;
+            if (!this.sizeDelta.IsNone)
+            {
+                value = this.sizeDelta.Value;
+            }
+            if (!this.x.IsNone)
+            {
+                value.x = this.x.Value;
+            }
+            if (!this.y.IsNone)
+            {
+                value.y = this.y.Value;
+            }
+            this._rt.sizeDelta = value;
         }
     }
 }
-

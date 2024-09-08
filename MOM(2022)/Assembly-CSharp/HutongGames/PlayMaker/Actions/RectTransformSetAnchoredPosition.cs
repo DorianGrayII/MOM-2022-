@@ -1,43 +1,40 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("The position of the pivot of this RectTransform relative to the anchor reference point.The anchor reference point is where the anchors are. If the anchor are not together, the four anchor positions are interpolated according to the pivot normalized values.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("The position of the pivot of this RectTransform relative to the anchor reference point.The anchor reference point is where the anchors are. If the anchor are not together, the four anchor positions are interpolated according to the pivot normalized values.")]
     public class RectTransformSetAnchoredPosition : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The Vector2 position. Set to none for no effect, and/or set individual axis below. ")]
+
+        [Tooltip("The Vector2 position. Set to none for no effect, and/or set individual axis below. ")]
         public FsmVector2 position;
-        [HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides position x value if set. Set to none for no effect")]
+
+        [Tooltip("Setting only the x value. Overrides position x value if set. Set to none for no effect")]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("Setting only the y value. Overrides position x value if set. Set to none for no effect")]
+
+        [Tooltip("Setting only the y value. Overrides position x value if set. Set to none for no effect")]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoSetAnchoredPosition()
+        public override void Reset()
         {
-            Vector2 anchoredPosition = this._rt.anchoredPosition;
-            if (!this.position.IsNone)
+            base.Reset();
+            this.gameObject = null;
+            this.position = null;
+            this.x = new FsmFloat
             {
-                anchoredPosition = this.position.get_Value();
-            }
-            if (!this.x.IsNone)
+                UseVariable = true
+            };
+            this.y = new FsmFloat
             {
-                anchoredPosition.x = this.x.Value;
-            }
-            if (!this.y.IsNone)
-            {
-                anchoredPosition.y = this.y.Value;
-            }
-            this._rt.anchoredPosition = anchoredPosition;
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoSetAnchoredPosition();
+                UseVariable = true
+            };
         }
 
         public override void OnEnter()
@@ -54,18 +51,27 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.position = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
+            this.DoSetAnchoredPosition();
+        }
+
+        private void DoSetAnchoredPosition()
+        {
+            Vector2 anchoredPosition = this._rt.anchoredPosition;
+            if (!this.position.IsNone)
+            {
+                anchoredPosition = this.position.Value;
+            }
+            if (!this.x.IsNone)
+            {
+                anchoredPosition.x = this.x.Value;
+            }
+            if (!this.y.IsNone)
+            {
+                anchoredPosition.y = this.y.Value;
+            }
+            this._rt.anchoredPosition = anchoredPosition;
         }
     }
 }
-

@@ -1,18 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Time), HutongGames.PlayMaker.Tooltip("Delays a State from finishing by the specified time. NOTE: Other actions continue, but FINISHED can't happen before Time.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Time)]
+    [Tooltip("Delays a State from finishing by the specified time. NOTE: Other actions continue, but FINISHED can't happen before Time.")]
     public class Wait : FsmStateAction
     {
         [RequiredField]
         public FsmFloat time;
+
         public FsmEvent finishEvent;
+
         public bool realTime;
+
         private float startTime;
+
         private float timer;
+
+        public override void Reset()
+        {
+            this.time = 1f;
+            this.finishEvent = null;
+            this.realTime = false;
+        }
 
         public override void OnEnter()
         {
@@ -30,7 +40,14 @@
 
         public override void OnUpdate()
         {
-            this.timer = !this.realTime ? (this.timer + Time.deltaTime) : (FsmTime.RealtimeSinceStartup - this.startTime);
+            if (this.realTime)
+            {
+                this.timer = FsmTime.RealtimeSinceStartup - this.startTime;
+            }
+            else
+            {
+                this.timer += Time.deltaTime;
+            }
             if (this.timer >= this.time.Value)
             {
                 base.Finish();
@@ -40,13 +57,5 @@
                 }
             }
         }
-
-        public override void Reset()
-        {
-            this.time = 1f;
-            this.finishEvent = null;
-            this.realTime = false;
-        }
     }
 }
-

@@ -1,16 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("GUILayout Label for simple text.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("GUILayout Label for simple text.")]
     public class GUILayoutTextLabel : GUILayoutAction
     {
-        [HutongGames.PlayMaker.Tooltip("Text to display.")]
+        [Tooltip("Text to display.")]
         public FsmString text;
-        [HutongGames.PlayMaker.Tooltip("Optional GUIStyle in the active GUISkin.")]
+
+        [Tooltip("Optional GUIStyle in the active GUISkin.")]
         public FsmString style;
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.text = "";
+            this.style = "";
+        }
 
         public override void OnGUI()
         {
@@ -23,13 +30,5 @@
                 GUILayout.Label(new GUIContent(this.text.Value), this.style.Value, base.LayoutOptions);
             }
         }
-
-        public override void Reset()
-        {
-            base.Reset();
-            this.text = "";
-            this.style = "";
-        }
     }
 }
-

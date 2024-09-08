@@ -1,30 +1,23 @@
-﻿namespace MOM.Adventures
-{
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Xml.Serialization;
 
+namespace MOM.Adventures
+{
     public class LogicOptionalGroup
     {
-        public static List<string> signs;
-        [XmlAttribute, DefaultValue((string) null)]
-        public string sign = signs[0];
-        [XmlAttribute, DefaultValue(0)]
-        public int value;
-        [XmlAttribute, DefaultValue((string) null)]
-        public string typeData;
+        public static List<string> signs = new List<string> { ">=", ">", "=", "<", "<=" };
 
-        static LogicOptionalGroup()
-        {
-            List<string> list1 = new List<string>();
-            list1.Add(">=");
-            list1.Add(">");
-            list1.Add("=");
-            list1.Add("<");
-            list1.Add("<=");
-            signs = list1;
-        }
+        [XmlAttribute]
+        [DefaultValue(null)]
+        public string sign = LogicOptionalGroup.signs[0];
+
+        [XmlAttribute]
+        [DefaultValue(0)]
+        public int value;
+
+        [XmlAttribute]
+        [DefaultValue(null)]
+        public string typeData;
     }
 }
-

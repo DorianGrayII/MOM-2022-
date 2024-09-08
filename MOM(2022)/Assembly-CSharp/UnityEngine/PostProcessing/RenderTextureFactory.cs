@@ -1,41 +1,39 @@
-﻿namespace UnityEngine.PostProcessing
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
+using System;
+using System.Collections.Generic;
 
+namespace UnityEngine.PostProcessing
+{
     public sealed class RenderTextureFactory : IDisposable
     {
-        private HashSet<RenderTexture> m_TemporaryRTs = new HashSet<RenderTexture>();
+        private HashSet<RenderTexture> m_TemporaryRTs;
 
-        public void Dispose()
+        public RenderTextureFactory()
         {
-            this.ReleaseAll();
+            this.m_TemporaryRTs = new HashSet<RenderTexture>();
         }
 
         public RenderTexture Get(RenderTexture baseRenderTexture)
         {
-            return this.Get(baseRenderTexture.width, baseRenderTexture.height, baseRenderTexture.depth, baseRenderTexture.format, baseRenderTexture.sRGB ? RenderTextureReadWrite.sRGB : RenderTextureReadWrite.Linear, baseRenderTexture.filterMode, baseRenderTexture.wrapMode, "FactoryTempTexture");
+            return this.Get(baseRenderTexture.width, baseRenderTexture.height, baseRenderTexture.depth, baseRenderTexture.format, (!baseRenderTexture.sRGB) ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB, baseRenderTexture.filterMode, baseRenderTexture.wrapMode);
         }
 
-        public RenderTexture Get(int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite rw, FilterMode filterMode, TextureWrapMode wrapMode, string name)
+        public RenderTexture Get(int width, int height, int depthBuffer = 0, RenderTextureFormat format = RenderTextureFormat.ARGBHalf, RenderTextureReadWrite rw = RenderTextureReadWrite.Default, FilterMode filterMode = FilterMode.Bilinear, TextureWrapMode wrapMode = TextureWrapMode.Clamp, string name = "FactoryTempTexture")
         {
-            RenderTexture item = RenderTexture.GetTemporary(width, height, depthBuffer, format, rw);
-            item.filterMode = filterMode;
-            item.wrapMode = wrapMode;
-            item.name = name;
-            this.m_TemporaryRTs.Add(item);
-            return item;
+            RenderTexture temporary = RenderTexture.GetTemporary(width, height, depthBuffer, format, rw);
+            temporary.filterMode = filterMode;
+            temporary.wrapMode = wrapMode;
+            temporary.name = name;
+            this.m_TemporaryRTs.Add(temporary);
+            return temporary;
         }
 
         public void Release(RenderTexture rt)
         {
-            if (rt != null)
+            if (!(rt == null))
             {
                 if (!this.m_TemporaryRTs.Contains(rt))
                 {
-                    throw new ArgumentException(string.Format("Attempting to remove a RenderTexture that was not allocated: {0}", rt));
+                    throw new ArgumentException($"Attempting to remove a RenderTexture that was not allocated: {rt}");
                 }
                 this.m_TemporaryRTs.Remove(rt);
                 RenderTexture.ReleaseTemporary(rt);
@@ -51,6 +49,10 @@
             }
             this.m_TemporaryRTs.Clear();
         }
+
+        public void Dispose()
+        {
+            this.ReleaseAll();
+        }
     }
 }
-

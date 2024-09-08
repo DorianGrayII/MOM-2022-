@@ -1,34 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Logic), HutongGames.PlayMaker.Tooltip("Sends an Event based on a Game Object's Tag.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Sends an Event based on a Game Object's Tag.")]
     public class GameObjectTagSwitch : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The GameObject to test.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The GameObject to test.")]
         public FsmGameObject gameObject;
-        [CompoundArray("Tag Switches", "Compare Tag", "Send Event"), UIHint(UIHint.Tag)]
+
+        [CompoundArray("Tag Switches", "Compare Tag", "Send Event")]
+        [UIHint(UIHint.Tag)]
         public FsmString[] compareTo;
+
         public FsmEvent[] sendEvent;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoTagSwitch()
+        public override void Reset()
         {
-            GameObject obj2 = this.gameObject.get_Value();
-            if (obj2 != null)
-            {
-                for (int i = 0; i < this.compareTo.Length; i++)
-                {
-                    if (obj2.tag == this.compareTo[i].Value)
-                    {
-                        base.Fsm.Event(this.sendEvent[i]);
-                        return;
-                    }
-                }
-            }
+            this.gameObject = null;
+            this.compareTo = new FsmString[1];
+            this.sendEvent = new FsmEvent[1];
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -45,13 +42,21 @@
             this.DoTagSwitch();
         }
 
-        public override void Reset()
+        private void DoTagSwitch()
         {
-            this.gameObject = null;
-            this.compareTo = new FsmString[1];
-            this.sendEvent = new FsmEvent[1];
-            this.everyFrame = false;
+            GameObject value = this.gameObject.Value;
+            if (value == null)
+            {
+                return;
+            }
+            for (int i = 0; i < this.compareTo.Length; i++)
+            {
+                if (value.tag == this.compareTo[i].Value)
+                {
+                    base.Fsm.Event(this.sendEvent[i]);
+                    break;
+                }
+            }
         }
     }
 }
-

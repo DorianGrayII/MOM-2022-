@@ -1,27 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the text value of a UI Text component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the text value of a UI Text component.")]
     public class UiTextGetText : ComponentAction<Text>
     {
-        [RequiredField, CheckForComponent(typeof(Text)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Text component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Text))]
+        [Tooltip("The GameObject with the UI Text component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The text value of the UI Text component.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The text value of the UI Text component.")]
         public FsmString text;
-        [HutongGames.PlayMaker.Tooltip("Runs every frame. Useful to animate values over time.")]
+
+        [Tooltip("Runs every frame. Useful to animate values over time.")]
         public bool everyFrame;
+
         private Text uiText;
 
-        private void DoGetTextValue()
+        public override void Reset()
         {
-            if (this.uiText != null)
-            {
-                this.text.Value = this.uiText.text;
-            }
+            this.text = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,11 +47,12 @@
             this.DoGetTextValue();
         }
 
-        public override void Reset()
+        private void DoGetTextValue()
         {
-            this.text = null;
-            this.everyFrame = false;
+            if (this.uiText != null)
+            {
+                this.text.Value = this.uiText.text;
+            }
         }
     }
 }
-

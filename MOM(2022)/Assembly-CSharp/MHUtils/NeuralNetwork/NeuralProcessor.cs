@@ -1,16 +1,51 @@
-﻿namespace MHUtils.NeuralNetwork
-{
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
+namespace MHUtils.NeuralNetwork
+{
     public class NeuralProcessor
     {
         public double[] outbound;
+
         public double[] inbound;
+
         public double error;
 
-        public List<double> GetResult(MHUtils.NeuralNetwork.NeuralNetwork n)
+        public void ProcessViaNetwork(NeuralNetwork n, INeuralData data)
+        {
+            if (!n.IsValid())
+            {
+                Debug.LogError("invalid network!");
+                return;
+            }
+            if (this.outbound == null || this.outbound.Length != n.GetTotalNeuron())
+            {
+                int totalNeuron = n.GetTotalNeuron();
+                this.outbound = new double[totalNeuron];
+                this.inbound = new double[totalNeuron];
+            }
+            double[] data2 = data.GetData();
+            NeuralLayer firsLayer = n.GetFirsLayer();
+            if (firsLayer.neurons.Count != data2.Length)
+            {
+                Debug.LogError("Network get incorrect input size  " + firsLayer.neurons.Count + " vs " + data2.Length);
+                return;
+            }
+            for (int i = 0; i < firsLayer.neurons.Count; i++)
+            {
+                int num = firsLayer.neurons[i];
+                this.inbound[num] = data2[i];
+                n.GetNeuron(num).Squash(this);
+            }
+            n.Process(this);
+        }
+
+        public double GetResultSingle()
+        {
+            return this.outbound[this.outbound.Length - 1];
+        }
+
+        public List<double> GetResult(NeuralNetwork n)
         {
             NeuralLayer finalLayer = n.GetFinalLayer();
             List<double> list = new List<double>(finalLayer.neurons.Count);
@@ -23,7 +58,7 @@
 
         public double GetResultError(List<double> result, List<double> target)
         {
-            if ((result == null) || ((target == null) || (result.Count != target.Count)))
+            if (result == null || target == null || result.Count != target.Count)
             {
                 return 0.0;
             }
@@ -37,46 +72,7 @@
 
         public double GetResultError(double result, double target)
         {
-            return ((0.5 * (target - result)) * (target - result));
-        }
-
-        public double GetResultSingle()
-        {
-            return this.outbound[this.outbound.Length - 1];
-        }
-
-        public void ProcessViaNetwork(MHUtils.NeuralNetwork.NeuralNetwork n, INeuralData data)
-        {
-            if (!n.IsValid())
-            {
-                Debug.LogError("invalid network!");
-            }
-            else
-            {
-                if ((this.outbound == null) || (this.outbound.Length != n.GetTotalNeuron()))
-                {
-                    int totalNeuron = n.GetTotalNeuron();
-                    this.outbound = new double[totalNeuron];
-                    this.inbound = new double[totalNeuron];
-                }
-                double[] numArray = data.GetData();
-                NeuralLayer firsLayer = n.GetFirsLayer();
-                if (firsLayer.neurons.Count != numArray.Length)
-                {
-                    Debug.LogError("Network get incorrect input size  " + firsLayer.neurons.Count.ToString() + " vs " + numArray.Length.ToString());
-                }
-                else
-                {
-                    for (int i = 0; i < firsLayer.neurons.Count; i++)
-                    {
-                        int index = firsLayer.neurons[i];
-                        this.inbound[index] = numArray[i];
-                        n.GetNeuron(index).Squash(this);
-                    }
-                    n.Process(this);
-                }
-            }
+            return 0.5 * (target - result) * (target - result);
         }
     }
 }
-

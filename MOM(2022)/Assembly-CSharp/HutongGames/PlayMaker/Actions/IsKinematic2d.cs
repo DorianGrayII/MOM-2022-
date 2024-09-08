@@ -1,32 +1,36 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics2D), HutongGames.PlayMaker.Tooltip("Tests if a Game Object's Rigid Body 2D is Kinematic.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics2D)]
+    [Tooltip("Tests if a Game Object's Rigid Body 2D is Kinematic.")]
     public class IsKinematic2d : ComponentAction<Rigidbody2D>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody2D)), HutongGames.PlayMaker.Tooltip("the GameObject with a Rigidbody2D attached")]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody2D))]
+        [Tooltip("the GameObject with a Rigidbody2D attached")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Event Sent if Kinematic")]
+
+        [Tooltip("Event Sent if Kinematic")]
         public FsmEvent trueEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if not Kinematic")]
+
+        [Tooltip("Event sent if not Kinematic")]
         public FsmEvent falseEvent;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the Kinematic state")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the Kinematic state")]
         public FsmBool store;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame")]
+
+        [Tooltip("Repeat every frame")]
         public bool everyFrame;
 
-        private void DoIsKinematic()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                bool isKinematic = base.rigidbody2d.isKinematic;
-                this.store.Value = isKinematic;
-                base.Fsm.Event(isKinematic ? this.trueEvent : this.falseEvent);
-            }
+            this.gameObject = null;
+            this.trueEvent = null;
+            this.falseEvent = null;
+            this.store = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,14 +47,15 @@
             this.DoIsKinematic();
         }
 
-        public override void Reset()
+        private void DoIsKinematic()
         {
-            this.gameObject = null;
-            this.trueEvent = null;
-            this.falseEvent = null;
-            this.store = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                bool isKinematic = base.rigidbody2d.isKinematic;
+                this.store.Value = isKinematic;
+                base.Fsm.Event(isKinematic ? this.trueEvent : this.falseEvent);
+            }
         }
     }
 }
-

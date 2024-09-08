@@ -1,25 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Camera), ActionTarget(typeof(Camera), "storeGameObject", false), HutongGames.PlayMaker.Tooltip("Gets the GameObject tagged MainCamera from the scene")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Camera)]
+    [ActionTarget(typeof(Camera), "storeGameObject", false)]
+    [Tooltip("Gets the GameObject tagged MainCamera from the scene")]
     public class GetMainCamera : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject storeGameObject;
-
-        public override void OnEnter()
-        {
-            this.storeGameObject.set_Value(Camera.main?.gameObject);
-            base.Finish();
-        }
 
         public override void Reset()
         {
             this.storeGameObject = null;
         }
+
+        public override void OnEnter()
+        {
+            this.storeGameObject.Value = ((Camera.main != null) ? Camera.main.gameObject : null);
+            base.Finish();
+        }
     }
 }
-

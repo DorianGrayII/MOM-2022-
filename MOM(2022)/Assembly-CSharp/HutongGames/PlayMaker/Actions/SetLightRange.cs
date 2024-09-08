@@ -1,24 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Sets the Range of a Light.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Sets the Range of a Light.")]
     public class SetLightRange : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         public FsmFloat lightRange;
+
         public bool everyFrame;
 
-        private void DoSetLightRange()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.light.range = this.lightRange.Value;
-            }
+            this.gameObject = null;
+            this.lightRange = 20f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -35,12 +35,13 @@
             this.DoSetLightRange();
         }
 
-        public override void Reset()
+        private void DoSetLightRange()
         {
-            this.gameObject = null;
-            this.lightRange = 20f;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.light.range = this.lightRange.Value;
+            }
         }
     }
 }
-

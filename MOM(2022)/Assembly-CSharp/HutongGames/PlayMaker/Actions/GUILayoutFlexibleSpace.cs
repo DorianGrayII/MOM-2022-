@@ -1,20 +1,18 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("Inserts a flexible space element.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("Inserts a flexible space element.")]
     public class GUILayoutFlexibleSpace : FsmStateAction
     {
+        public override void Reset()
+        {
+        }
+
         public override void OnGUI()
         {
             GUILayout.FlexibleSpace();
         }
-
-        public override void Reset()
-        {
-        }
     }
 }
-

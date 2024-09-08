@@ -1,42 +1,40 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Character), HutongGames.PlayMaker.Tooltip("Tests if a Character Controller on a Game Object was touching the ground during the last move.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Character)]
+    [Tooltip("Tests if a Character Controller on a Game Object was touching the ground during the last move.")]
     public class ControllerIsGrounded : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(CharacterController)), HutongGames.PlayMaker.Tooltip("The GameObject to check.")]
+        [RequiredField]
+        [CheckForComponent(typeof(CharacterController))]
+        [Tooltip("The GameObject to check.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Event to send if touching the ground.")]
+
+        [Tooltip("Event to send if touching the ground.")]
         public FsmEvent trueEvent;
-        [HutongGames.PlayMaker.Tooltip("Event to send if not touching the ground.")]
+
+        [Tooltip("Event to send if not touching the ground.")]
         public FsmEvent falseEvent;
-        [HutongGames.PlayMaker.Tooltip("Store the result in a bool variable."), UIHint(UIHint.Variable)]
+
+        [Tooltip("Store the result in a bool variable.")]
+        [UIHint(UIHint.Variable)]
         public FsmBool storeResult;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame while the state is active.")]
+
+        [Tooltip("Repeat every frame while the state is active.")]
         public bool everyFrame;
+
         private GameObject previousGo;
+
         private CharacterController controller;
 
-        private void DoControllerIsGrounded()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                if (ownerDefaultTarget != this.previousGo)
-                {
-                    this.controller = ownerDefaultTarget.GetComponent<CharacterController>();
-                    this.previousGo = ownerDefaultTarget;
-                }
-                if (this.controller != null)
-                {
-                    bool isGrounded = this.controller.isGrounded;
-                    this.storeResult.Value = isGrounded;
-                    base.Fsm.Event(isGrounded ? this.trueEvent : this.falseEvent);
-                }
-            }
+            this.gameObject = null;
+            this.trueEvent = null;
+            this.falseEvent = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -53,14 +51,23 @@
             this.DoControllerIsGrounded();
         }
 
-        public override void Reset()
+        private void DoControllerIsGrounded()
         {
-            this.gameObject = null;
-            this.trueEvent = null;
-            this.falseEvent = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                if (ownerDefaultTarget != this.previousGo)
+                {
+                    this.controller = ownerDefaultTarget.GetComponent<CharacterController>();
+                    this.previousGo = ownerDefaultTarget;
+                }
+                if (!(this.controller == null))
+                {
+                    bool isGrounded = this.controller.isGrounded;
+                    this.storeResult.Value = isGrounded;
+                    base.Fsm.Event(isGrounded ? this.trueEvent : this.falseEvent);
+                }
+            }
         }
     }
 }
-

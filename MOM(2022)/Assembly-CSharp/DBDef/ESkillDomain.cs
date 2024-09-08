@@ -1,16 +1,13 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum ESkillDomain
     {
-        None,
-        Nature,
-        Sorcery,
-        Life,
-        Chaos,
-        Death,
-        Tech
+        None = 0,
+        Nature = 1,
+        Sorcery = 2,
+        Life = 3,
+        Chaos = 4,
+        Death = 5,
+        Tech = 6
     }
 }
-

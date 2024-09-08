@@ -1,30 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the number of distinct scroll positions allowed for a UI Scrollbar component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the number of distinct scroll positions allowed for a UI Scrollbar component.")]
     public class UiScrollbarSetNumberOfSteps : ComponentAction<Scrollbar>
     {
-        [RequiredField, CheckForComponent(typeof(Scrollbar)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Scrollbar component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Scrollbar))]
+        [Tooltip("The GameObject with the UI Scrollbar component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The number of distinct scroll positions allowed for the UI Scrollbar.")]
+
+        [RequiredField]
+        [Tooltip("The number of distinct scroll positions allowed for the UI Scrollbar.")]
         public FsmInt value;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Scrollbar scrollbar;
+
         private int originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.scrollbar != null)
-            {
-                this.scrollbar.numberOfSteps = this.value.Value;
-            }
+            this.gameObject = null;
+            this.value = null;
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,26 +49,25 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.scrollbar != null) && this.resetOnExit.Value)
-            {
-                this.scrollbar.numberOfSteps = this.originalValue;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetValue();
         }
 
-        public override void Reset()
+        private void DoSetValue()
         {
-            this.gameObject = null;
-            this.value = null;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (this.scrollbar != null)
+            {
+                this.scrollbar.numberOfSteps = this.value.Value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.scrollbar == null) && this.resetOnExit.Value)
+            {
+                this.scrollbar.numberOfSteps = this.originalValue;
+            }
         }
     }
 }
-

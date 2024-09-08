@@ -1,30 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the text value of a UI Text component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the text value of a UI Text component.")]
     public class UiTextSetText : ComponentAction<Text>
     {
-        [RequiredField, CheckForComponent(typeof(Text)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Text component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Text))]
+        [Tooltip("The GameObject with the UI Text component.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.TextArea), HutongGames.PlayMaker.Tooltip("The text of the UI Text component.")]
+
+        [UIHint(UIHint.TextArea)]
+        [Tooltip("The text of the UI Text component.")]
         public FsmString text;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Text uiText;
+
         private string originalString;
 
-        private void DoSetTextValue()
+        public override void Reset()
         {
-            if (this.uiText != null)
-            {
-                this.uiText.text = this.text.Value;
-            }
+            this.gameObject = null;
+            this.text = null;
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,26 +49,25 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.uiText != null) && this.resetOnExit.Value)
-            {
-                this.uiText.text = this.originalString;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetTextValue();
         }
 
-        public override void Reset()
+        private void DoSetTextValue()
         {
-            this.gameObject = null;
-            this.text = null;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (!(this.uiText == null))
+            {
+                this.uiText.text = this.text.Value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.uiText == null) && this.resetOnExit.Value)
+            {
+                this.uiText.text = this.originalString;
+            }
         }
     }
 }
-

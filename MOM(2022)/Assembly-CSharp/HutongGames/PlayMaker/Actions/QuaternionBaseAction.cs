@@ -1,41 +1,34 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
     public abstract class QuaternionBaseAction : FsmStateAction
     {
+        public enum everyFrameOptions
+        {
+            Update = 0,
+            FixedUpdate = 1,
+            LateUpdate = 2
+        }
+
         [Tooltip("Repeat every frame. Useful if any of the values are changing.")]
         public bool everyFrame;
+
         [Tooltip("Defines how to perform the action when 'every Frame' is enabled.")]
         public everyFrameOptions everyFrameOption;
-
-        protected QuaternionBaseAction()
-        {
-        }
 
         public override void Awake()
         {
             if (this.everyFrame)
             {
-                everyFrameOptions everyFrameOption = this.everyFrameOption;
-                if (everyFrameOption == everyFrameOptions.FixedUpdate)
+                switch (this.everyFrameOption)
                 {
+                case everyFrameOptions.FixedUpdate:
                     base.Fsm.HandleFixedUpdate = true;
-                }
-                else if (everyFrameOption == everyFrameOptions.LateUpdate)
-                {
+                    break;
+                case everyFrameOptions.LateUpdate:
                     base.Fsm.HandleLateUpdate = true;
+                    break;
                 }
             }
         }
-
-        public enum everyFrameOptions
-        {
-            Update,
-            FixedUpdate,
-            LateUpdate
-        }
     }
 }
-

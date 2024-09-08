@@ -1,10 +1,7 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum BUDGET_SCALING
     {
-        BUDGET
+        BUDGET = 0
     }
 }
-

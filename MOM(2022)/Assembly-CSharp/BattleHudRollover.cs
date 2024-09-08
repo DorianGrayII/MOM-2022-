@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// BattleHudRollover
 using MOM;
 using UnityEngine;
 using UnityEngine.EventSystems;

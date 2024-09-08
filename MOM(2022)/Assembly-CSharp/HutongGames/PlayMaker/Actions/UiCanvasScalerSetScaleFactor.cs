@@ -1,27 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the ScaleFactor of a CanvasScaler.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the ScaleFactor of a CanvasScaler.")]
     public class UiCanvasScalerSetScaleFactor : ComponentAction<CanvasScaler>
     {
-        [RequiredField, CheckForComponent(typeof(CanvasScaler)), HutongGames.PlayMaker.Tooltip("The GameObject with a UI CanvasScaler component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(CanvasScaler))]
+        [Tooltip("The GameObject with a UI CanvasScaler component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The scaleFactor of the UI CanvasScaler.")]
+
+        [RequiredField]
+        [Tooltip("The scaleFactor of the UI CanvasScaler.")]
         public FsmFloat scaleFactor;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame, useful for animation")]
+
+        [Tooltip("Repeats every frame, useful for animation")]
         public bool everyFrame;
+
         private CanvasScaler component;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.component != null)
-            {
-                this.component.scaleFactor = this.scaleFactor.Value;
-            }
+            this.gameObject = null;
+            this.scaleFactor = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,12 +47,12 @@
             this.DoSetValue();
         }
 
-        public override void Reset()
+        private void DoSetValue()
         {
-            this.gameObject = null;
-            this.scaleFactor = null;
-            this.everyFrame = false;
+            if (this.component != null)
+            {
+                this.component.scaleFactor = this.scaleFactor.Value;
+            }
         }
     }
 }
-

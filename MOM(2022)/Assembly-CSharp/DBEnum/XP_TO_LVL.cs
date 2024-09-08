@@ -1,11 +1,8 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum XP_TO_LVL
     {
-        COST_UNIT,
-        COST_HERO
+        COST_UNIT = 0,
+        COST_HERO = 1
     }
 }
-

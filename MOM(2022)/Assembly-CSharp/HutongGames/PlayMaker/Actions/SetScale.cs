@@ -1,43 +1,56 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Transform), HutongGames.PlayMaker.Tooltip("Sets the Scale of a Game Object. To leave any axis unchanged, set variable to 'None'.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Transform)]
+    [Tooltip("Sets the Scale of a Game Object. To leave any axis unchanged, set variable to 'None'.")]
     public class SetScale : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The GameObject to scale.")]
+        [RequiredField]
+        [Tooltip("The GameObject to scale.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Use stored Vector3 value, and/or set each axis below.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Use stored Vector3 value, and/or set each axis below.")]
         public FsmVector3 vector;
+
         public FsmFloat x;
+
         public FsmFloat y;
+
         public FsmFloat z;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
-        [HutongGames.PlayMaker.Tooltip("Perform in LateUpdate. This is useful if you want to override the position of objects that are animated or otherwise positioned in Update.")]
+
+        [Tooltip("Perform in LateUpdate. This is useful if you want to override the position of objects that are animated or otherwise positioned in Update.")]
         public bool lateUpdate;
 
-        private void DoSetScale()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
+            this.gameObject = null;
+            this.vector = null;
+            this.x = new FsmFloat
             {
-                Vector3 vector = this.vector.IsNone ? ownerDefaultTarget.transform.localScale : this.vector.get_Value();
-                if (!this.x.IsNone)
-                {
-                    vector.x = this.x.Value;
-                }
-                if (!this.y.IsNone)
-                {
-                    vector.y = this.y.Value;
-                }
-                if (!this.z.IsNone)
-                {
-                    vector.z = this.z.Value;
-                }
-                ownerDefaultTarget.transform.localScale = vector;
+                UseVariable = true
+            };
+            this.y = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.z = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.everyFrame = false;
+            this.lateUpdate = false;
+        }
+
+        public override void OnPreprocess()
+        {
+            if (this.lateUpdate)
+            {
+                base.Fsm.HandleLateUpdate = true;
             }
         }
 
@@ -47,6 +60,14 @@
             if (!this.everyFrame)
             {
                 base.Finish();
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            if (!this.lateUpdate)
+            {
+                this.DoSetScale();
             }
         }
 
@@ -62,38 +83,26 @@
             }
         }
 
-        public override void OnPreprocess()
+        private void DoSetScale()
         {
-            if (this.lateUpdate)
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
             {
-                base.Fsm.HandleLateUpdate = true;
+                Vector3 localScale = (this.vector.IsNone ? ownerDefaultTarget.transform.localScale : this.vector.Value);
+                if (!this.x.IsNone)
+                {
+                    localScale.x = this.x.Value;
+                }
+                if (!this.y.IsNone)
+                {
+                    localScale.y = this.y.Value;
+                }
+                if (!this.z.IsNone)
+                {
+                    localScale.z = this.z.Value;
+                }
+                ownerDefaultTarget.transform.localScale = localScale;
             }
-        }
-
-        public override void OnUpdate()
-        {
-            if (!this.lateUpdate)
-            {
-                this.DoSetScale();
-            }
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.vector = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.z = num3;
-            this.everyFrame = false;
-            this.lateUpdate = false;
         }
     }
 }
-

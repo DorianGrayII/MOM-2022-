@@ -1,28 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Trigonometry), HutongGames.PlayMaker.Tooltip("Get the Arc Tangent. You can get the result in degrees, simply check on the RadToDeg conversion")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Trigonometry)]
+    [Tooltip("Get the Arc Tangent. You can get the result in degrees, simply check on the RadToDeg conversion")]
     public class GetAtan : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The value of the tan")]
+        [RequiredField]
+        [Tooltip("The value of the tan")]
         public FsmFloat Value;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
         public FsmFloat angle;
-        [HutongGames.PlayMaker.Tooltip("Check on if you want the angle expressed in degrees.")]
+
+        [Tooltip("Check on if you want the angle expressed in degrees.")]
         public FsmBool RadToDeg;
+
         public bool everyFrame;
 
-        private void DoATan()
+        public override void Reset()
         {
-            float num = Mathf.Atan(this.Value.Value);
-            if (this.RadToDeg.Value)
-            {
-                num *= 57.29578f;
-            }
-            this.angle.Value = num;
+            this.Value = null;
+            this.RadToDeg = true;
+            this.everyFrame = false;
+            this.angle = null;
         }
 
         public override void OnEnter()
@@ -39,13 +42,14 @@
             this.DoATan();
         }
 
-        public override void Reset()
+        private void DoATan()
         {
-            this.Value = null;
-            this.RadToDeg = true;
-            this.everyFrame = false;
-            this.angle = null;
+            float num = Mathf.Atan(this.Value.Value);
+            if (this.RadToDeg.Value)
+            {
+                num *= 57.29578f;
+            }
+            this.angle.Value = num;
         }
     }
 }
-

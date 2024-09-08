@@ -1,9 +1,8 @@
-﻿namespace MOM
-{
-    using System;
-    using TMPro;
-    using UnityEngine.EventSystems;
+using TMPro;
+using UnityEngine.EventSystems;
 
+namespace MOM
+{
     public class CombatLogText : RolloverObject
     {
         public TextMeshProUGUI label;
@@ -19,7 +18,7 @@
         public void Set(BattleHUD.CombatSummary summary)
         {
             base.source = summary;
-            if ((summary.details != null) && (summary.details.Count > 0))
+            if (summary.details != null && summary.details.Count > 0)
             {
                 this.label.text = summary.summary;
             }
@@ -30,4 +29,3 @@
         }
     }
 }
-

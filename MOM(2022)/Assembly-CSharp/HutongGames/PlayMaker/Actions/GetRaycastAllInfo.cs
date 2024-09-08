@@ -1,35 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Physics), Tooltip("Gets info on the last RaycastAll and store in array variables.")]
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Gets info on the last RaycastAll and store in array variables.")]
     public class GetRaycastAllInfo : FsmStateAction
     {
-        [Tooltip("Store the GameObjects hit in an array variable."), UIHint(UIHint.Variable), ArrayEditor(VariableType.GameObject, "", 0, 0, 0x10000)]
+        [Tooltip("Store the GameObjects hit in an array variable.")]
+        [UIHint(UIHint.Variable)]
+        [ArrayEditor(VariableType.GameObject, "", 0, 0, 65536)]
         public FsmArray storeHitObjects;
-        [Tooltip("Get the world position of all ray hit point and store them in an array variable."), UIHint(UIHint.Variable), ArrayEditor(VariableType.Vector3, "", 0, 0, 0x10000)]
+
+        [Tooltip("Get the world position of all ray hit point and store them in an array variable.")]
+        [UIHint(UIHint.Variable)]
+        [ArrayEditor(VariableType.Vector3, "", 0, 0, 65536)]
         public FsmArray points;
-        [Tooltip("Get the normal at all hit points and store them in an array variable."), UIHint(UIHint.Variable), ArrayEditor(VariableType.Vector3, "", 0, 0, 0x10000)]
+
+        [Tooltip("Get the normal at all hit points and store them in an array variable.")]
+        [UIHint(UIHint.Variable)]
+        [ArrayEditor(VariableType.Vector3, "", 0, 0, 65536)]
         public FsmArray normals;
-        [Tooltip("Get the distance along the ray to all hit points and store them in an array variable."), UIHint(UIHint.Variable), ArrayEditor(VariableType.Float, "", 0, 0, 0x10000)]
+
+        [Tooltip("Get the distance along the ray to all hit points and store them in an array variable.")]
+        [UIHint(UIHint.Variable)]
+        [ArrayEditor(VariableType.Float, "", 0, 0, 65536)]
         public FsmArray distances;
+
         [Tooltip("Repeat every frame. Warning, this could be affecting performances")]
         public bool everyFrame;
-
-        public override void OnEnter()
-        {
-            this.StoreRaycastAllInfo();
-            if (!this.everyFrame)
-            {
-                base.Finish();
-            }
-        }
-
-        public override void OnUpdate()
-        {
-            this.StoreRaycastAllInfo();
-        }
 
         public override void Reset()
         {
@@ -57,6 +53,19 @@
                 }
             }
         }
+
+        public override void OnEnter()
+        {
+            this.StoreRaycastAllInfo();
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            this.StoreRaycastAllInfo();
+        }
     }
 }
-

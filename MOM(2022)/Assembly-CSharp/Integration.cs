@@ -1,27 +1,18 @@
-﻿using Steamworks;
-using System;
+using Steamworks;
 using UnityEngine;
 
 public class Integration : MonoBehaviour
 {
     private static Integration instance;
+
     private bool postStart;
+
     private bool listOfAchi;
 
-    public static bool GetAchievement(string name)
+    private void Start()
     {
-        bool flag;
-        if (!IsReady())
-        {
-            return false;
-        }
-        SteamUserStats.GetAchievement(name, out flag);
-        return flag;
-    }
-
-    public static string GetName()
-    {
-        return (IsReady() ? SteamFriends.GetPersonaName() : "NotInitialized");
+        Integration.instance = this;
+        this.Initialize();
     }
 
     public void Initialize()
@@ -34,21 +25,41 @@ public class Integration : MonoBehaviour
         return SteamManager.Initialized;
     }
 
-    public static void ResetAchievements()
+    private void Update()
     {
-        for (int i = 0; i < 12; i++)
+        if (!this.postStart && Integration.IsReady())
         {
-            SteamUserStats.ClearAchievement(((AchievementManager.Achievement) i).ToString());
+            this.postStart = true;
+            CSteamID steamID = SteamUser.GetSteamID();
+            Debug.Log("Steam user stats downloaded with: " + SteamUserStats.RequestUserStats(steamID).ToString());
         }
+    }
+
+    public static string GetName()
+    {
+        if (!Integration.IsReady())
+        {
+            return "NotInitialized";
+        }
+        return SteamFriends.GetPersonaName();
+    }
+
+    public static bool GetAchievement(string name)
+    {
+        if (!Integration.IsReady())
+        {
+            return false;
+        }
+        SteamUserStats.GetAchievement(name, out var pbAchieved);
+        return pbAchieved;
     }
 
     public static void SetAchievement(string name)
     {
-        if (IsReady())
+        if (Integration.IsReady())
         {
-            bool flag;
-            SteamUserStats.GetAchievement(name, out flag);
-            if (!flag)
+            SteamUserStats.GetAchievement(name, out var pbAchieved);
+            if (!pbAchieved)
             {
                 SteamUserStats.SetAchievement(name);
             }
@@ -59,28 +70,20 @@ public class Integration : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        instance = this;
-        this.Initialize();
-    }
-
     public static void SubmitAchievements()
     {
-        if (IsReady())
+        if (Integration.IsReady())
         {
             SteamUserStats.StoreStats();
         }
     }
 
-    private void Update()
+    public static void ResetAchievements()
     {
-        if (!this.postStart && IsReady())
+        for (int i = 0; i < 12; i++)
         {
-            this.postStart = true;
-            CSteamID steamID = SteamUser.GetSteamID();
-            Debug.Log("Steam user stats downloaded with: " + SteamUserStats.RequestUserStats(steamID).ToString());
+            AchievementManager.Achievement achievement = (AchievementManager.Achievement)i;
+            SteamUserStats.ClearAchievement(achievement.ToString());
         }
     }
 }
-

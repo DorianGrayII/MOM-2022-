@@ -1,73 +1,148 @@
-﻿namespace MOM.Adventures
-{
-    using DBDef;
-    using DBEnum;
-    using MHUtils;
-    using MOM;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
+using DBDef;
+using DBEnum;
+using MHUtils;
+using UnityEngine;
 
+namespace MOM.Adventures
+{
     public class AdventureLibrary
     {
         public static AdventureLibrary currentLibrary;
+
         public List<Module> modules;
+
         public HashSet<int> modulesModified = new HashSet<int>();
+
         public HashSet<string> modulesDeleted = new HashSet<string>();
+
         private List<Adventure> perPlayerEvents = new List<Adventure>();
+
         private List<Adventure> simultaneusEvents = new List<Adventure>();
+
         private List<Adventure> genericEvents = new List<Adventure>();
+
         private Dictionary<Adventure, Module> advToModuleDictionary = new Dictionary<Adventure, Module>();
+
         private Dictionary<Module, string> modulePaths = new Dictionary<Module, string>();
+
         private Adventure midGameCrisis;
+
         private string curentLanguageSuffix;
 
-        public void AdventureLocalization()
+        public static AdventureLibrary LoadModulesFromDrive(global::MHUtils.Callback onFinish, global::MHUtils.Callback onError)
         {
-            if (this.ReqiresLocalization())
+            List<string> list = new List<string>(Directory.GetFiles(Path.Combine(MHApplication.EXTERNAL_ASSETS, "StoryModules")));
+            list.AddRange(AdventureLibrary.LoadModAdventures());
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Module));
+            AdventureLibrary adventureLibrary = new AdventureLibrary
             {
-                string dbName;
-                bool ready = false;
-                bool failed = false;
-                string directory = Path.Combine(MHApplication.EXTERNAL_ASSETS, "StoryLocalisation");
-                string key = PlayerPrefs.GetString("Language");
-                Language language = DataBase.GetType<Language>().Find(o => o.dbName == key);
-                string languagePostfix = "";
-                if (language != null)
+                modules = new List<Module>()
+            };
+            foreach (string item in list)
+            {
+                using (Stream stream = new FileStream(item, FileMode.Open, FileAccess.Read))
                 {
-                    languagePostfix = string.IsNullOrEmpty(language.nameSuffix) ? "" : language.nameSuffix;
+                    Module module = (Module)xmlSerializer.Deserialize(stream);
+                    adventureLibrary.modules.Add(module);
+                    adventureLibrary.modulePaths[module] = item;
                 }
-                Language eN = (Language) LANGUAGE.EN;
-                if (eN != null)
+            }
+            adventureLibrary.curentLanguageSuffix = null;
+            onFinish?.Invoke(adventureLibrary);
+            return adventureLibrary;
+        }
+
+        private static List<string> LoadModAdventures()
+        {
+            List<ModOrder> activeValidMods = ModManager.Get().GetActiveValidMods();
+            List<string> list = new List<string>();
+            foreach (ModOrder item in activeValidMods)
+            {
+                string path = item.GetPath();
+                if (string.IsNullOrEmpty(path))
                 {
-                    dbName = eN.dbName;
+                    Debug.LogWarning("Path for mod " + item.name + " is missing!");
+                    continue;
                 }
-                else
+                string path2 = Path.Combine(path, "Adventures");
+                if (!Directory.Exists(path2))
                 {
-                    Language local1 = eN;
-                    dbName = null;
+                    continue;
                 }
-                if (key == dbName)
+                string[] files = Directory.GetFiles(path2);
+                foreach (string text in files)
                 {
-                    currentLibrary = LoadModulesFromDrive(null, null);
-                }
-                else
-                {
-                    ModulesImport.ImportBlockOfModules(this.modules, () => ready = true, () => failed = true, directory, languagePostfix);
-                    if (failed)
+                    if (text.EndsWith(".xml"))
                     {
-                        Debug.Log("Adventure localization for " + language.nameSuffix + " failed (using bundle)");
+                        list.Add(text);
                     }
-                    else if (ready)
+                }
+            }
+            return list;
+        }
+
+        public void Save()
+        {
+            if (this.modules == null)
+            {
+                Debug.LogError("Saving when modules does not exists");
+                return;
+            }
+            string path = Path.Combine(MHApplication.EXTERNAL_ASSETS, "StoryModules");
+            if (this.modulesDeleted != null)
+            {
+                foreach (string item in this.modulesDeleted)
+                {
+                    string path2 = Path.Combine(path, item + ".xml");
+                    foreach (KeyValuePair<Module, string> modulePath in this.modulePaths)
                     {
-                        Debug.Log("Adventure localization by bundle finished");
+                        if (Path.GetFileNameWithoutExtension(modulePath.Value) == item)
+                        {
+                            path2 = modulePath.Value;
+                            break;
+                        }
                     }
-                    ModulesImport.ImportSingleForModules(this.modules, directory, languagePostfix);
-                    this.SetLocalizationCorrect();
+                    if (File.Exists(path2))
+                    {
+                        File.Delete(path2);
+                    }
+                }
+            }
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Module));
+            if (this.modulesModified == null)
+            {
+                return;
+            }
+            foreach (int v in this.modulesModified)
+            {
+                Module module = this.modules.Find((Module o) => o.uniqueID == v);
+                if (module == null)
+                {
+                    continue;
+                }
+                module.Test();
+                string path3 = Path.Combine(path, module.name + ".xml");
+                foreach (KeyValuePair<Module, string> modulePath2 in this.modulePaths)
+                {
+                    if (Path.GetFileNameWithoutExtension(modulePath2.Value) == module.name)
+                    {
+                        path3 = modulePath2.Value;
+                        break;
+                    }
+                }
+                using (Stream w = new FileStream(path3, FileMode.Create))
+                {
+                    XmlWriter xmlWriter = new XmlTextWriter(w, Encoding.Unicode)
+                    {
+                        Formatting = Formatting.Indented
+                    };
+                    xmlSerializer.Serialize(xmlWriter, module);
                 }
             }
         }
@@ -78,98 +153,6 @@
             this.simultaneusEvents.Clear();
             this.advToModuleDictionary.Clear();
             this.genericEvents.Clear();
-        }
-
-        public List<Adventure> GetGenericEvents()
-        {
-            if ((this.perPlayerEvents == null) || (this.perPlayerEvents.Count == 0))
-            {
-                this.PrepareCache();
-            }
-            return this.genericEvents;
-        }
-
-        public Adventure GetMidgameCrisis()
-        {
-            return this.midGameCrisis;
-        }
-
-        public List<Module> GetModules()
-        {
-            if ((this.perPlayerEvents == null) || (this.perPlayerEvents.Count == 0))
-            {
-                this.PrepareCache();
-            }
-            return this.modules;
-        }
-
-        public List<Adventure> GetPerPlayerEvents()
-        {
-            if ((this.perPlayerEvents == null) || (this.perPlayerEvents.Count == 0))
-            {
-                this.PrepareCache();
-            }
-            return this.perPlayerEvents;
-        }
-
-        public List<Adventure> GetSimultaneusEvents()
-        {
-            if ((this.perPlayerEvents == null) || (this.perPlayerEvents.Count == 0))
-            {
-                this.PrepareCache();
-            }
-            return this.simultaneusEvents;
-        }
-
-        private static List<string> LoadModAdventures()
-        {
-            List<string> list = new List<string>();
-            foreach (ModOrder order in ModManager.Get().GetActiveValidMods())
-            {
-                string path = order.GetPath();
-                if (string.IsNullOrEmpty(path))
-                {
-                    Debug.LogWarning("Path for mod " + order.name + " is missing!");
-                    continue;
-                }
-                string str2 = Path.Combine(path, "Adventures");
-                if (Directory.Exists(str2))
-                {
-                    foreach (string str3 in Directory.GetFiles(str2))
-                    {
-                        if (str3.EndsWith(".xml"))
-                        {
-                            list.Add(str3);
-                        }
-                    }
-                }
-            }
-            return list;
-        }
-
-        public static AdventureLibrary LoadModulesFromDrive(MHUtils.Callback onFinish, MHUtils.Callback onError)
-        {
-            List<string> list1 = new List<string>(Directory.GetFiles(Path.Combine(MHApplication.EXTERNAL_ASSETS, "StoryModules")));
-            list1.AddRange(LoadModAdventures());
-            XmlSerializer serializer = new XmlSerializer(typeof(Module));
-            AdventureLibrary o = new AdventureLibrary {
-                modules = new List<Module>()
-            };
-            foreach (string str in list1)
-            {
-                using (Stream stream = new FileStream(str, FileMode.Open, FileAccess.Read))
-                {
-                    Module item = (Module) serializer.Deserialize(stream);
-                    o.modules.Add(item);
-                    o.modulePaths[item] = str;
-                }
-            }
-            o.curentLanguageSuffix = null;
-            if (onFinish != null)
-            {
-                onFinish(o);
-            }
-            return o;
         }
 
         public void PrepareCache()
@@ -183,163 +166,156 @@
             Array values = Enum.GetValues(typeof(DLCManager.DLCs));
             foreach (Module module in this.modules)
             {
-                if (module.isAllowed && (module.adventures != null))
+                if (!module.isAllowed || module.adventures == null)
                 {
-                    bool flag = false;
-                    foreach (object obj2 in values)
+                    continue;
+                }
+                bool flag = false;
+                foreach (object item in values)
+                {
+                    if (module.name.ToLowerInvariant().Contains(item.ToString().ToLowerInvariant()))
                     {
-                        if (module.name.ToLowerInvariant().Contains(obj2.ToString().ToLowerInvariant()))
+                        if (!DLCManager.IsDlcActive((int)item))
                         {
-                            if (DLCManager.IsDlcActive((int) obj2))
-                            {
-                                Debug.Log("[" + obj2?.ToString() + "] Using DLC adventure module " + module.name);
-                                continue;
-                            }
-                            Debug.Log("[" + obj2?.ToString() + "] Skipping DLC adventure module " + module.name);
+                            Debug.Log("[" + item?.ToString() + "] Skipping DLC adventure module " + module.name);
                             flag = true;
                         }
-                    }
-                    if (!flag)
-                    {
-                        if (setting != null)
+                        else
                         {
-                            string title = setting.title;
-                            if (title == "UI_DIFF_SPECIAL_EVENTS_NONE")
-                            {
-                                if ((module.uniqueID == -1600151959) || ((module.uniqueID == 0x268b232) || ((module.uniqueID == -1007762225) || ((module.uniqueID == -2010396620) || (module.uniqueID == -409307634)))))
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (title == "UI_DIFF_SPECIAL_EVENTS_ORIGINAL")
-                            {
-                                if ((module.uniqueID == 0x268b232) || ((module.uniqueID == -1007762225) || ((module.uniqueID == -2010396620) || (module.uniqueID == -409307634))))
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (title != "UI_DIFF_SPECIAL_EVENTS_ORIGINAL_MODIFIED")
-                            {
-                                if ((title == "UI_DIFF_SPECIAL_EVENTS_ORIGINAL_AND_NEW") && (module.uniqueID == -1600151959))
-                                {
-                                    continue;
-                                }
-                            }
-                            else if ((module.uniqueID == -1600151959) || ((module.uniqueID == -1007762225) || ((module.uniqueID == -2010396620) || (module.uniqueID == -409307634))))
-                            {
-                                continue;
-                            }
-                        }
-                        foreach (Adventure adventure in module.adventures)
-                        {
-                            if (adventure.isAllowed)
-                            {
-                                adventure.PrepareForGame();
-                                adventure.module = module;
-                                if (adventure.nodes != null)
-                                {
-                                    using (List<BaseNode>.Enumerator enumerator4 = adventure.nodes.GetEnumerator())
-                                    {
-                                        while (enumerator4.MoveNext())
-                                        {
-                                            enumerator4.Current.parentEvent = adventure;
-                                        }
-                                    }
-                                }
-                                NodeStart start = adventure.GetStart();
-                                if ((start.adventureStartType == Adventure.AdventureTriggerType.PerPlayer) && !start.genericEvent)
-                                {
-                                    this.perPlayerEvents.Add(adventure);
-                                }
-                                else if (start.genericEvent)
-                                {
-                                    this.genericEvents.Add(adventure);
-                                }
-                                this.advToModuleDictionary[adventure] = module;
-                                if ((module.name == "9 DLC2 Tech Dungeon") && (adventure.uniqueID == 2))
-                                {
-                                    this.midGameCrisis = adventure;
-                                }
-                            }
+                            Debug.Log("[" + item?.ToString() + "] Using DLC adventure module " + module.name);
                         }
                     }
                 }
+                if (flag)
+                {
+                    continue;
+                }
+                if (setting != null)
+                {
+                    switch (setting.title)
+                    {
+                    case "UI_DIFF_SPECIAL_EVENTS_NONE":
+                        if (module.uniqueID == -1600151959 || module.uniqueID == 40415794 || module.uniqueID == -1007762225 || module.uniqueID == -2010396620 || module.uniqueID == -409307634)
+                        {
+                            continue;
+                        }
+                        break;
+                    case "UI_DIFF_SPECIAL_EVENTS_ORIGINAL":
+                        if (module.uniqueID == 40415794 || module.uniqueID == -1007762225 || module.uniqueID == -2010396620 || module.uniqueID == -409307634)
+                        {
+                            continue;
+                        }
+                        break;
+                    case "UI_DIFF_SPECIAL_EVENTS_ORIGINAL_MODIFIED":
+                        if (module.uniqueID == -1600151959 || module.uniqueID == -1007762225 || module.uniqueID == -2010396620 || module.uniqueID == -409307634)
+                        {
+                            continue;
+                        }
+                        break;
+                    case "UI_DIFF_SPECIAL_EVENTS_ORIGINAL_AND_NEW":
+                        if (module.uniqueID == -1600151959)
+                        {
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                foreach (Adventure adventure in module.adventures)
+                {
+                    if (!adventure.isAllowed)
+                    {
+                        continue;
+                    }
+                    adventure.PrepareForGame();
+                    adventure.module = module;
+                    if (adventure.nodes != null)
+                    {
+                        foreach (BaseNode node in adventure.nodes)
+                        {
+                            node.parentEvent = adventure;
+                        }
+                    }
+                    NodeStart start = adventure.GetStart();
+                    if (start.adventureStartType == Adventure.AdventureTriggerType.PerPlayer && !start.genericEvent)
+                    {
+                        this.perPlayerEvents.Add(adventure);
+                    }
+                    else if (start.genericEvent)
+                    {
+                        this.genericEvents.Add(adventure);
+                    }
+                    this.advToModuleDictionary[adventure] = module;
+                    if (module.name == "9 DLC2 Tech Dungeon" && adventure.uniqueID == 2)
+                    {
+                        this.midGameCrisis = adventure;
+                    }
+                }
             }
+        }
+
+        public List<Adventure> GetPerPlayerEvents()
+        {
+            if (this.perPlayerEvents == null || this.perPlayerEvents.Count == 0)
+            {
+                this.PrepareCache();
+            }
+            return this.perPlayerEvents;
+        }
+
+        public List<Adventure> GetSimultaneusEvents()
+        {
+            if (this.perPlayerEvents == null || this.perPlayerEvents.Count == 0)
+            {
+                this.PrepareCache();
+            }
+            return this.simultaneusEvents;
+        }
+
+        public List<Adventure> GetGenericEvents()
+        {
+            if (this.perPlayerEvents == null || this.perPlayerEvents.Count == 0)
+            {
+                this.PrepareCache();
+            }
+            return this.genericEvents;
+        }
+
+        public List<Module> GetModules()
+        {
+            if (this.perPlayerEvents == null || this.perPlayerEvents.Count == 0)
+            {
+                this.PrepareCache();
+            }
+            return this.modules;
+        }
+
+        public Adventure GetMidgameCrisis()
+        {
+            return this.midGameCrisis;
         }
 
         public bool ReqiresLocalization()
         {
-            if (!PlayerPrefs.HasKey("Language"))
+            if (PlayerPrefs.HasKey("Language"))
             {
-                return false;
-            }
-            string key = PlayerPrefs.GetString("Language");
-            Language language = DataBase.GetType<Language>().Find(o => o.dbName == key);
-            return ((language != null) && ((("_EN" != language.nameSuffix) || (this.curentLanguageSuffix != null)) ? (this.curentLanguageSuffix != language.nameSuffix) : false));
-        }
-
-        public void Save()
-        {
-            if (this.modules == null)
-            {
-                Debug.LogError("Saving when modules does not exists");
-            }
-            else
-            {
-                string str = Path.Combine(MHApplication.EXTERNAL_ASSETS, "StoryModules");
-                if (this.modulesDeleted != null)
+                string key = PlayerPrefs.GetString("Language");
+                Language language = DataBase.GetType<Language>().Find((Language o) => o.dbName == key);
+                if (language != null)
                 {
-                    foreach (string str2 in this.modulesDeleted)
+                    if ("_EN" == language.nameSuffix && this.curentLanguageSuffix == null)
                     {
-                        string path = Path.Combine(str, str2 + ".xml");
-                        foreach (KeyValuePair<Module, string> pair in this.modulePaths)
-                        {
-                            if (Path.GetFileNameWithoutExtension(pair.Value) == str2)
-                            {
-                                path = pair.Value;
-                                break;
-                            }
-                        }
-                        if (File.Exists(path))
-                        {
-                            File.Delete(path);
-                        }
+                        return false;
                     }
-                }
-                XmlSerializer serializer = new XmlSerializer(typeof(Module));
-                if (this.modulesModified != null)
-                {
-                    foreach (int v in this.modulesModified)
-                    {
-                        Module module = this.modules.Find(o => o.uniqueID == v);
-                        if (module != null)
-                        {
-                            module.Test(true);
-                            string path = Path.Combine(str, module.name + ".xml");
-                            foreach (KeyValuePair<Module, string> pair2 in this.modulePaths)
-                            {
-                                if (Path.GetFileNameWithoutExtension(pair2.Value) == module.name)
-                                {
-                                    path = pair2.Value;
-                                    break;
-                                }
-                            }
-                            using (Stream stream = new FileStream(path, FileMode.Create))
-                            {
-                                XmlTextWriter writer1 = new XmlTextWriter(stream, Encoding.Unicode);
-                                writer1.Formatting = Formatting.Indented;
-                                serializer.Serialize((XmlWriter) writer1, module);
-                            }
-                        }
-                    }
+                    return this.curentLanguageSuffix != language.nameSuffix;
                 }
             }
+            return false;
         }
 
         public void SetLocalizationCorrect()
         {
             string key = PlayerPrefs.GetString("Language");
-            Language language = DataBase.GetType<Language>().Find(o => o.dbName == key);
+            Language language = DataBase.GetType<Language>().Find((Language o) => o.dbName == key);
             if (language != null)
             {
                 this.curentLanguageSuffix = language.nameSuffix;
@@ -349,6 +325,45 @@
                 this.curentLanguageSuffix = null;
             }
         }
+
+        public void AdventureLocalization()
+        {
+            if (!this.ReqiresLocalization())
+            {
+                return;
+            }
+            bool ready = false;
+            bool failed = false;
+            string directory = Path.Combine(MHApplication.EXTERNAL_ASSETS, "StoryLocalisation");
+            string key = PlayerPrefs.GetString("Language");
+            Language language = DataBase.GetType<Language>().Find((Language o) => o.dbName == key);
+            string languagePostfix = "";
+            if (language != null)
+            {
+                languagePostfix = (string.IsNullOrEmpty(language.nameSuffix) ? "" : language.nameSuffix);
+            }
+            if (key == ((Language)LANGUAGE.EN)?.dbName)
+            {
+                AdventureLibrary.currentLibrary = AdventureLibrary.LoadModulesFromDrive(null, null);
+                return;
+            }
+            ModulesImport.ImportBlockOfModules(this.modules, delegate
+            {
+                ready = true;
+            }, delegate
+            {
+                failed = true;
+            }, directory, languagePostfix);
+            if (failed)
+            {
+                Debug.Log("Adventure localization for " + language.nameSuffix + " failed (using bundle)");
+            }
+            else if (ready)
+            {
+                Debug.Log("Adventure localization by bundle finished");
+            }
+            ModulesImport.ImportSingleForModules(this.modules, directory, languagePostfix);
+            this.SetLocalizationCorrect();
+        }
     }
 }
-

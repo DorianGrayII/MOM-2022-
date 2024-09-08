@@ -1,20 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Rect), Tooltip("Sets the value of a Rect Variable.")]
+    [ActionCategory(ActionCategory.Rect)]
+    [Tooltip("Sets the value of a Rect Variable.")]
     public class SetRectValue : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmRect rectVariable;
+
         [RequiredField]
         public FsmRect rectValue;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.rectVariable = null;
+            this.rectValue = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
-            this.rectVariable.set_Value(this.rectValue.get_Value());
+            this.rectVariable.Value = this.rectValue.Value;
             if (!this.everyFrame)
             {
                 base.Finish();
@@ -23,15 +31,7 @@
 
         public override void OnUpdate()
         {
-            this.rectVariable.set_Value(this.rectValue.get_Value());
-        }
-
-        public override void Reset()
-        {
-            this.rectVariable = null;
-            this.rectValue = null;
-            this.everyFrame = false;
+            this.rectVariable.Value = this.rectValue.Value;
         }
     }
 }
-

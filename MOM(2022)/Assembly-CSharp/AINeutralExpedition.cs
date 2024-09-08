@@ -1,5 +1,3 @@
-﻿// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// AINeutralExpedition
 using System.Collections;
 using System.Collections.Generic;
 using MHUtils;
@@ -20,7 +18,7 @@ public class AINeutralExpedition
     public Reference<Group> target;
 
     [ProtoMember(6)]
-    public Reference<adfTownLocation> spawnLocation;
+    public Reference<TownLocation> spawnLocation;
 
     [ProtoMember(7)]
     public bool rampage;

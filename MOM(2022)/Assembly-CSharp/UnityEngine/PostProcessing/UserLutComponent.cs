@@ -1,22 +1,12 @@
-﻿namespace UnityEngine.PostProcessing
+namespace UnityEngine.PostProcessing
 {
-    using System;
-    using UnityEngine;
-
     public sealed class UserLutComponent : PostProcessingComponentRenderTexture<UserLutModel>
     {
-        public void OnGUI()
+        private static class Uniforms
         {
-            UserLutModel.Settings settings = base.model.settings;
-            GUI.DrawTexture(new Rect((base.context.viewport.x * Screen.width) + 8f, 8f, (float) settings.lut.width, (float) settings.lut.height), settings.lut);
-        }
+            internal static readonly int _UserLut = Shader.PropertyToID("_UserLut");
 
-        public override void Prepare(Material uberMaterial)
-        {
-            UserLutModel.Settings settings = base.model.settings;
-            uberMaterial.EnableKeyword("USER_LUT");
-            uberMaterial.SetTexture(Uniforms._UserLut, settings.lut);
-            uberMaterial.SetVector(Uniforms._UserLut_Params, new Vector4(1f / ((float) settings.lut.width), 1f / ((float) settings.lut.height), settings.lut.height - 1f, settings.contribution));
+            internal static readonly int _UserLut_Params = Shader.PropertyToID("_UserLut_Params");
         }
 
         public override bool active
@@ -24,15 +14,26 @@
             get
             {
                 UserLutModel.Settings settings = base.model.settings;
-                return (base.model.enabled && ((settings.lut != null) && ((settings.contribution > 0f) && ((settings.lut.height == ((int) Mathf.Sqrt((float) settings.lut.width))) && !base.context.interrupted))));
+                if (base.model.enabled && settings.lut != null && settings.contribution > 0f && settings.lut.height == (int)Mathf.Sqrt(settings.lut.width))
+                {
+                    return !base.context.interrupted;
+                }
+                return false;
             }
         }
 
-        private static class Uniforms
+        public override void Prepare(Material uberMaterial)
         {
-            internal static readonly int _UserLut = Shader.PropertyToID("_UserLut");
-            internal static readonly int _UserLut_Params = Shader.PropertyToID("_UserLut_Params");
+            UserLutModel.Settings settings = base.model.settings;
+            uberMaterial.EnableKeyword("USER_LUT");
+            uberMaterial.SetTexture(Uniforms._UserLut, settings.lut);
+            uberMaterial.SetVector(Uniforms._UserLut_Params, new Vector4(1f / (float)settings.lut.width, 1f / (float)settings.lut.height, (float)settings.lut.height - 1f, settings.contribution));
+        }
+
+        public void OnGUI()
+        {
+            UserLutModel.Settings settings = base.model.settings;
+            GUI.DrawTexture(new Rect(base.context.viewport.x * (float)Screen.width + 8f, 8f, settings.lut.width, settings.lut.height), settings.lut);
         }
     }
 }
-

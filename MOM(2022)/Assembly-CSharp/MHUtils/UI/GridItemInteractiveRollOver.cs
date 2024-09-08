@@ -1,15 +1,16 @@
-﻿namespace MHUtils.UI
-{
-    using MHUtils;
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
+namespace MHUtils.UI
+{
     public class GridItemInteractiveRollOver : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler
     {
         public GridItemManager owner;
+
         public int itemIndex;
+
         public object itemDisplaySource;
+
         public object itemData;
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -18,4 +19,3 @@
         }
     }
 }
-

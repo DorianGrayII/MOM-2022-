@@ -1,46 +1,42 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the explicit navigation properties of a UI Selectable component. ")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the explicit navigation properties of a UI Selectable component. ")]
     public class UiNavigationExplicitGetProperties : ComponentAction<Selectable>
     {
-        [RequiredField, CheckForComponent(typeof(Selectable)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Selectable component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Selectable))]
+        [Tooltip("The GameObject with the UI Selectable component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The down Selectable."), UIHint(UIHint.Variable)]
+
+        [Tooltip("The down Selectable.")]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject selectOnDown;
-        [HutongGames.PlayMaker.Tooltip("The up Selectable."), UIHint(UIHint.Variable)]
+
+        [Tooltip("The up Selectable.")]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject selectOnUp;
-        [HutongGames.PlayMaker.Tooltip("The left Selectable."), UIHint(UIHint.Variable)]
+
+        [Tooltip("The left Selectable.")]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject selectOnLeft;
-        [HutongGames.PlayMaker.Tooltip("The right Selectable."), UIHint(UIHint.Variable)]
+
+        [Tooltip("The right Selectable.")]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject selectOnRight;
+
         private Selectable _selectable;
 
-        private void DoGetValue()
+        public override void Reset()
         {
-            if (this._selectable != null)
-            {
-                if (!this.selectOnUp.IsNone)
-                {
-                    this.selectOnUp.set_Value(this._selectable.navigation.selectOnUp?.gameObject);
-                }
-                if (!this.selectOnDown.IsNone)
-                {
-                    this.selectOnDown.set_Value(this._selectable.navigation.selectOnDown?.gameObject);
-                }
-                if (!this.selectOnLeft.IsNone)
-                {
-                    this.selectOnLeft.set_Value(this._selectable.navigation.selectOnLeft?.gameObject);
-                }
-                if (!this.selectOnRight.IsNone)
-                {
-                    this.selectOnRight.set_Value(this._selectable.navigation.selectOnRight?.gameObject);
-                }
-            }
+            this.gameObject = null;
+            this.selectOnDown = null;
+            this.selectOnUp = null;
+            this.selectOnLeft = null;
+            this.selectOnRight = null;
         }
 
         public override void OnEnter()
@@ -54,14 +50,27 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetValue()
         {
-            this.gameObject = null;
-            this.selectOnDown = null;
-            this.selectOnUp = null;
-            this.selectOnLeft = null;
-            this.selectOnRight = null;
+            if (this._selectable != null)
+            {
+                if (!this.selectOnUp.IsNone)
+                {
+                    this.selectOnUp.Value = ((this._selectable.navigation.selectOnUp == null) ? null : this._selectable.navigation.selectOnUp.gameObject);
+                }
+                if (!this.selectOnDown.IsNone)
+                {
+                    this.selectOnDown.Value = ((this._selectable.navigation.selectOnDown == null) ? null : this._selectable.navigation.selectOnDown.gameObject);
+                }
+                if (!this.selectOnLeft.IsNone)
+                {
+                    this.selectOnLeft.Value = ((this._selectable.navigation.selectOnLeft == null) ? null : this._selectable.navigation.selectOnLeft.gameObject);
+                }
+                if (!this.selectOnRight.IsNone)
+                {
+                    this.selectOnRight.Value = ((this._selectable.navigation.selectOnRight == null) ? null : this._selectable.navigation.selectOnRight.gameObject);
+                }
+            }
         }
     }
 }
-

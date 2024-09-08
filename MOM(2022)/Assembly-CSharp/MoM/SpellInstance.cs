@@ -1,9 +1,6 @@
-﻿namespace MOM
+namespace MOM
 {
-    using System;
-
     public class SpellInstance
     {
     }
 }
-

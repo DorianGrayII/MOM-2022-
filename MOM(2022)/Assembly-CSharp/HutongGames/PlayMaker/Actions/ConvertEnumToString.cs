@@ -1,21 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Convert), Tooltip("Converts an Enum value to a String value.")]
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts an Enum value to a String value.")]
     public class ConvertEnumToString : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Enum variable to convert.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Enum variable to convert.")]
         public FsmEnum enumVariable;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The String variable to store the converted value.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The String variable to store the converted value.")]
         public FsmString stringVariable;
+
         [Tooltip("Repeat every frame. Useful if the Enum variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertEnumToString()
+        public override void Reset()
         {
-            this.stringVariable.Value = (this.enumVariable.Value != 0) ? this.enumVariable.Value.ToString() : "";
+            this.enumVariable = null;
+            this.stringVariable = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -32,12 +38,9 @@
             this.DoConvertEnumToString();
         }
 
-        public override void Reset()
+        private void DoConvertEnumToString()
         {
-            this.enumVariable = null;
-            this.stringVariable = null;
-            this.everyFrame = false;
+            this.stringVariable.Value = ((this.enumVariable.Value != null) ? this.enumVariable.Value.ToString() : "");
         }
     }
 }
-

@@ -1,34 +1,42 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("Begin a GUILayout block of GUI controls in a fixed screen area. NOTE: Block must end with a corresponding GUILayoutEndArea.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("Begin a GUILayout block of GUI controls in a fixed screen area. NOTE: Block must end with a corresponding GUILayoutEndArea.")]
     public class GUILayoutBeginArea : FsmStateAction
     {
         [UIHint(UIHint.Variable)]
         public FsmRect screenRect;
+
         public FsmFloat left;
+
         public FsmFloat top;
+
         public FsmFloat width;
+
         public FsmFloat height;
+
         public FsmBool normalized;
+
         public FsmString style;
+
         private Rect rect;
 
-        public override unsafe void OnGUI()
+        public override void Reset()
         {
-            Rect rect1;
-            if (!this.screenRect.IsNone)
-            {
-                rect1 = this.screenRect.get_Value();
-            }
-            else
-            {
-                rect1 = new Rect();
-            }
-            this.rect = rect1;
+            this.screenRect = null;
+            this.left = 0f;
+            this.top = 0f;
+            this.width = 1f;
+            this.height = 1f;
+            this.normalized = true;
+            this.style = "";
+        }
+
+        public override void OnGUI()
+        {
+            this.rect = ((!this.screenRect.IsNone) ? this.screenRect.Value : default(Rect));
             if (!this.left.IsNone)
             {
                 this.rect.x = this.left.Value;
@@ -47,28 +55,12 @@
             }
             if (this.normalized.Value)
             {
-                Rect* rectPtr1 = &this.rect;
-                rectPtr1.x *= Screen.width;
-                Rect* rectPtr2 = &this.rect;
-                rectPtr2.width *= Screen.width;
-                Rect* rectPtr3 = &this.rect;
-                rectPtr3.y *= Screen.height;
-                Rect* rectPtr4 = &this.rect;
-                rectPtr4.height *= Screen.height;
+                this.rect.x *= Screen.width;
+                this.rect.width *= Screen.width;
+                this.rect.y *= Screen.height;
+                this.rect.height *= Screen.height;
             }
             GUILayout.BeginArea(this.rect, GUIContent.none, this.style.Value);
         }
-
-        public override void Reset()
-        {
-            this.screenRect = null;
-            this.left = 0f;
-            this.top = 0f;
-            this.width = 1f;
-            this.height = 1f;
-            this.normalized = true;
-            this.style = "";
-        }
     }
 }
-

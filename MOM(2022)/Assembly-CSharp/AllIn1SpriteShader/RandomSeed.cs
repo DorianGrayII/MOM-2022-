@@ -1,9 +1,8 @@
-﻿namespace AllIn1SpriteShader
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace AllIn1SpriteShader
+{
     public class RandomSeed : MonoBehaviour
     {
         private void Start()
@@ -13,30 +12,30 @@
             {
                 if (component.material != null)
                 {
-                    component.material.SetFloat("_RandomSeed", UnityEngine.Random.Range((float) 0f, (float) 1000f));
+                    component.material.SetFloat("_RandomSeed", Random.Range(0f, 1000f));
                 }
                 else
                 {
                     Debug.LogError("Missing Renderer or Material: " + base.gameObject.name);
                 }
+                return;
             }
-            else
+            Image component2 = base.GetComponent<Image>();
+            if (component2 != null)
             {
-                Image image = base.GetComponent<Image>();
-                if (image == null)
+                if (component2.material != null)
                 {
-                    Debug.LogError("Missing Renderer or UI Image on: " + base.gameObject.name);
-                }
-                else if (image.material != null)
-                {
-                    image.material.SetFloat("_RandomSeed", UnityEngine.Random.Range((float) 0f, (float) 1000f));
+                    component2.material.SetFloat("_RandomSeed", Random.Range(0f, 1000f));
                 }
                 else
                 {
                     Debug.LogError("Missing Material on UI Image: " + base.gameObject.name);
                 }
             }
+            else
+            {
+                Debug.LogError("Missing Renderer or UI Image on: " + base.gameObject.name);
+            }
         }
     }
 }
-

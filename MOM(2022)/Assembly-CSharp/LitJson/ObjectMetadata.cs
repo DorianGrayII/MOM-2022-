@@ -1,26 +1,32 @@
-﻿namespace LitJson
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
+using System;
+using System.Collections.Generic;
 
-    [StructLayout(LayoutKind.Sequential)]
+namespace LitJson
+{
     internal struct ObjectMetadata
     {
         private Type element_type;
+
         private bool is_dictionary;
+
         private IDictionary<string, PropertyMetadata> properties;
+
         public Type ElementType
         {
             get
             {
-                return ((this.element_type != null) ? this.element_type : typeof(JsonData));
+                if (this.element_type == null)
+                {
+                    return typeof(JsonData);
+                }
+                return this.element_type;
             }
             set
             {
                 this.element_type = value;
             }
         }
+
         public bool IsDictionary
         {
             get
@@ -32,6 +38,7 @@
                 this.is_dictionary = value;
             }
         }
+
         public IDictionary<string, PropertyMetadata> Properties
         {
             get
@@ -45,4 +52,3 @@
         }
     }
 }
-

@@ -1,52 +1,44 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.StateMachine), ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false), HutongGames.PlayMaker.Tooltip("Get the value of a variable in another FSM and store it in a variable of the same name in this FSM.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.StateMachine)]
+    [ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false)]
+    [Tooltip("Get the value of a variable in another FSM and store it in a variable of the same name in this FSM.")]
     public class GetFsmVariable : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The GameObject that owns the FSM")]
+        [RequiredField]
+        [Tooltip("The GameObject that owns the FSM")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.FsmName), HutongGames.PlayMaker.Tooltip("Optional name of FSM on Game Object")]
+
+        [UIHint(UIHint.FsmName)]
+        [Tooltip("Optional name of FSM on Game Object")]
         public FsmString fsmName;
-        [RequiredField, HideTypeFilter, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the value of the FsmVariable")]
+
+        [RequiredField]
+        [HideTypeFilter]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the value of the FsmVariable")]
         public FsmVar storeValue;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
+
         private GameObject cachedGO;
+
         private string cachedFsmName;
+
         private PlayMakerFSM sourceFsm;
+
         private INamedVariable sourceVariable;
+
         private NamedVariable targetVariable;
 
-        private void DoGetFsmVariable()
+        public override void Reset()
         {
-            if (!this.storeValue.IsNone)
-            {
-                this.InitFsmVar();
-                this.storeValue.GetValueFrom(this.sourceVariable);
-                this.storeValue.ApplyValueTo(this.targetVariable);
-            }
-        }
-
-        private void InitFsmVar()
-        {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if ((ownerDefaultTarget != null) && ((ownerDefaultTarget != this.cachedGO) || (this.cachedFsmName != this.fsmName.Value)))
-            {
-                this.sourceFsm = ActionHelpers.GetGameObjectFsm(ownerDefaultTarget, this.fsmName.Value);
-                this.sourceVariable = this.sourceFsm.FsmVariables.GetVariable(this.storeValue.variableName);
-                this.targetVariable = base.Fsm.Variables.GetVariable(this.storeValue.variableName);
-                this.storeValue.Type = this.targetVariable.VariableType;
-                if (!string.IsNullOrEmpty(this.storeValue.variableName) && (this.sourceVariable == null))
-                {
-                    base.LogWarning("Missing Variable: " + this.storeValue.variableName);
-                }
-                this.cachedGO = ownerDefaultTarget;
-                this.cachedFsmName = this.fsmName.Value;
-            }
+            this.gameObject = null;
+            this.fsmName = "";
+            this.storeValue = new FsmVar();
         }
 
         public override void OnEnter()
@@ -64,12 +56,32 @@
             this.DoGetFsmVariable();
         }
 
-        public override void Reset()
+        private void InitFsmVar()
         {
-            this.gameObject = null;
-            this.fsmName = "";
-            this.storeValue = new FsmVar();
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null) && (ownerDefaultTarget != this.cachedGO || this.cachedFsmName != this.fsmName.Value))
+            {
+                this.sourceFsm = ActionHelpers.GetGameObjectFsm(ownerDefaultTarget, this.fsmName.Value);
+                this.sourceVariable = this.sourceFsm.FsmVariables.GetVariable(this.storeValue.variableName);
+                this.targetVariable = base.Fsm.Variables.GetVariable(this.storeValue.variableName);
+                this.storeValue.Type = this.targetVariable.VariableType;
+                if (!string.IsNullOrEmpty(this.storeValue.variableName) && this.sourceVariable == null)
+                {
+                    base.LogWarning("Missing Variable: " + this.storeValue.variableName);
+                }
+                this.cachedGO = ownerDefaultTarget;
+                this.cachedFsmName = this.fsmName.Value;
+            }
+        }
+
+        private void DoGetFsmVariable()
+        {
+            if (!this.storeValue.IsNone)
+            {
+                this.InitFsmVar();
+                this.storeValue.GetValueFrom(this.sourceVariable);
+                this.storeValue.ApplyValueTo(this.targetVariable);
+            }
         }
     }
 }
-

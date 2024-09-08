@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,270 +5,52 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class PSMeshRendererUpdater : MonoBehaviour
 {
+    private class ParticleStartInfo
+    {
+        public ParticleSystem.MinMaxCurve StartSize;
+
+        public ParticleSystem.MinMaxCurve StartSpeed;
+    }
+
     public GameObject MeshObject;
+
     public float StartScaleMultiplier = 1f;
-    public UnityEngine.Color Color = UnityEngine.Color.black;
+
+    public Color Color = Color.black;
+
     private const string materialName = "MeshEffect";
+
     private List<Material[]> rendererMaterials = new List<Material[]>();
+
     private List<Material[]> skinnedMaterials = new List<Material[]>();
+
     public bool IsActive = true;
+
     public float FadeTime = 1.5f;
+
     private bool currentActiveStatus;
+
     private bool needUpdateAlpha;
-    private UnityEngine.Color oldColor = UnityEngine.Color.black;
+
+    private Color oldColor = Color.black;
+
     private float currentAlphaTime;
-    private string[] colorProperties;
+
+    private string[] colorProperties = new string[9] { "_TintColor", "_Color", "_EmissionColor", "_BorderColor", "_ReflectColor", "_RimColor", "_MainColor", "_CoreColor", "_FresnelColor" };
+
     private float alpha;
+
     private float prevAlpha;
+
     private Dictionary<string, float> startAlphaColors;
+
     private bool previousActiveStatus;
+
     private bool needUpdate;
+
     private bool needLastUpdate;
+
     private Dictionary<ParticleSystem, ParticleStartInfo> startParticleParameters;
-
-    public PSMeshRendererUpdater()
-    {
-        string[] textArray1 = new string[9];
-        textArray1[0] = "_TintColor";
-        textArray1[1] = "_Color";
-        textArray1[2] = "_EmissionColor";
-        textArray1[3] = "_BorderColor";
-        textArray1[4] = "_ReflectColor";
-        textArray1[5] = "_RimColor";
-        textArray1[6] = "_MainColor";
-        textArray1[7] = "_CoreColor";
-        textArray1[8] = "_FresnelColor";
-        this.colorProperties = textArray1;
-    }
-
-    private void AddMaterialToMesh(GameObject go)
-    {
-        ME_MeshMaterialEffect componentInChildren = base.GetComponentInChildren<ME_MeshMaterialEffect>();
-        if (componentInChildren != null)
-        {
-            MeshRenderer renderer = go.GetComponentInChildren<MeshRenderer>();
-            SkinnedMeshRenderer renderer2 = go.GetComponentInChildren<SkinnedMeshRenderer>();
-            if (renderer != null)
-            {
-                this.rendererMaterials.Add(renderer.sharedMaterials);
-                renderer.sharedMaterials = this.AddToSharedMaterial(renderer.sharedMaterials, componentInChildren);
-            }
-            if (renderer2 != null)
-            {
-                this.skinnedMaterials.Add(renderer2.sharedMaterials);
-                renderer2.sharedMaterials = this.AddToSharedMaterial(renderer2.sharedMaterials, componentInChildren);
-            }
-        }
-    }
-
-    private Material[] AddToSharedMaterial(Material[] sharedMaterials, ME_MeshMaterialEffect meshMatEffect)
-    {
-        if (meshMatEffect.IsFirstMaterial)
-        {
-            return new Material[] { meshMatEffect.Material };
-        }
-        List<Material> list = Enumerable.ToList<Material>(sharedMaterials);
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (list[i].name.Contains("MeshEffect"))
-            {
-                list.RemoveAt(i);
-            }
-        }
-        list.Add(meshMatEffect.Material);
-        return list.ToArray();
-    }
-
-    private void CheckScaleIncludedParticles()
-    {
-    }
-
-    private void GetStartAlphaByProperties(string rendName, int materialNumber, Material mat)
-    {
-        foreach (string str in this.colorProperties)
-        {
-            if (mat.HasProperty(str))
-            {
-                string key = rendName + materialNumber.ToString() + str.ToString();
-                if (!this.startAlphaColors.ContainsKey(key))
-                {
-                    this.startAlphaColors.Add(rendName + materialNumber.ToString() + str.ToString(), mat.GetColor(str).a);
-                }
-            }
-        }
-    }
-
-    private void InitStartAlphaColors()
-    {
-        this.startAlphaColors = new Dictionary<string, float>();
-        Renderer[] componentsInChildren = base.GetComponentsInChildren<Renderer>(true);
-        int index = 0;
-        while (index < componentsInChildren.Length)
-        {
-            Renderer renderer = componentsInChildren[index];
-            Material[] materials = renderer.materials;
-            int num2 = 0;
-            while (true)
-            {
-                if (num2 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num2].name.Contains("MeshEffect"))
-                {
-                    this.GetStartAlphaByProperties(renderer.GetHashCode().ToString(), num2, materials[num2]);
-                }
-                num2++;
-            }
-        }
-        SkinnedMeshRenderer[] rendererArray2 = base.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-        index = 0;
-        while (index < rendererArray2.Length)
-        {
-            SkinnedMeshRenderer renderer2 = rendererArray2[index];
-            Material[] materials = renderer2.materials;
-            int num4 = 0;
-            while (true)
-            {
-                if (num4 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num4].name.Contains("MeshEffect"))
-                {
-                    this.GetStartAlphaByProperties(renderer2.GetHashCode().ToString(), num4, materials[num4]);
-                }
-                num4++;
-            }
-        }
-        Light[] lightArray = base.GetComponentsInChildren<Light>(true);
-        for (int i = 0; i < lightArray.Length; i++)
-        {
-            ME_LightCurves component = lightArray[i].GetComponent<ME_LightCurves>();
-            float graphIntensityMultiplier = 1f;
-            if (component != null)
-            {
-                graphIntensityMultiplier = component.GraphIntensityMultiplier;
-            }
-            this.startAlphaColors.Add(lightArray[i].GetHashCode().ToString() + i.ToString(), graphIntensityMultiplier);
-        }
-        componentsInChildren = this.MeshObject.GetComponentsInChildren<Renderer>(true);
-        index = 0;
-        while (index < componentsInChildren.Length)
-        {
-            Renderer renderer3 = componentsInChildren[index];
-            Material[] materials = renderer3.materials;
-            int num7 = 0;
-            while (true)
-            {
-                if (num7 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num7].name.Contains("MeshEffect"))
-                {
-                    this.GetStartAlphaByProperties(renderer3.GetHashCode().ToString(), num7, materials[num7]);
-                }
-                num7++;
-            }
-        }
-        rendererArray2 = this.MeshObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-        index = 0;
-        while (index < rendererArray2.Length)
-        {
-            SkinnedMeshRenderer renderer4 = rendererArray2[index];
-            Material[] materials = renderer4.materials;
-            int num8 = 0;
-            while (true)
-            {
-                if (num8 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num8].name.Contains("MeshEffect"))
-                {
-                    this.GetStartAlphaByProperties(renderer4.GetHashCode().ToString(), num8, materials[num8]);
-                }
-                num8++;
-            }
-        }
-    }
-
-    private void InitStartParticleParameters()
-    {
-        this.startParticleParameters = new Dictionary<ParticleSystem, ParticleStartInfo>();
-        foreach (ParticleSystem system in this.MeshObject.GetComponentsInChildren<ParticleSystem>(true))
-        {
-            ParticleStartInfo info1 = new ParticleStartInfo();
-            info1.StartSize = system.main.startSize;
-            ParticleSystem.MainModule main = system.main;
-            info1.StartSpeed = main.startSpeed;
-            this.startParticleParameters.Add(system, info1);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (this.MeshObject != null)
-        {
-            MeshRenderer[] componentsInChildren = this.MeshObject.GetComponentsInChildren<MeshRenderer>();
-            SkinnedMeshRenderer[] rendererArray2 = this.MeshObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-            int index = 0;
-            while (index < componentsInChildren.Length)
-            {
-                if (this.rendererMaterials.Count == componentsInChildren.Length)
-                {
-                    componentsInChildren[index].sharedMaterials = this.rendererMaterials[index];
-                }
-                List<Material> list = Enumerable.ToList<Material>(componentsInChildren[index].sharedMaterials);
-                int num2 = 0;
-                while (true)
-                {
-                    if (num2 >= list.Count)
-                    {
-                        componentsInChildren[index].sharedMaterials = list.ToArray();
-                        index++;
-                        break;
-                    }
-                    if (list[num2].name.Contains("MeshEffect"))
-                    {
-                        list.RemoveAt(num2);
-                    }
-                    num2++;
-                }
-            }
-            int num3 = 0;
-            while (num3 < rendererArray2.Length)
-            {
-                if (this.skinnedMaterials.Count == rendererArray2.Length)
-                {
-                    rendererArray2[num3].sharedMaterials = this.skinnedMaterials[num3];
-                }
-                List<Material> list2 = Enumerable.ToList<Material>(rendererArray2[num3].sharedMaterials);
-                int num4 = 0;
-                while (true)
-                {
-                    if (num4 >= list2.Count)
-                    {
-                        rendererArray2[num3].sharedMaterials = list2.ToArray();
-                        num3++;
-                        break;
-                    }
-                    if (list2[num4].name.Contains("MeshEffect"))
-                    {
-                        list2.RemoveAt(num4);
-                    }
-                    num4++;
-                }
-            }
-            this.rendererMaterials.Clear();
-            this.skinnedMaterials.Clear();
-        }
-    }
 
     private void OnEnable()
     {
@@ -280,89 +61,271 @@ public class PSMeshRendererUpdater : MonoBehaviour
 
     private void Update()
     {
-        if (Application.isPlaying)
+        if (!Application.isPlaying)
         {
-            if (this.startAlphaColors == null)
-            {
-                this.InitStartAlphaColors();
-            }
-            if (this.IsActive && (this.alpha < 1f))
-            {
-                this.alpha += Time.deltaTime / this.FadeTime;
-            }
-            if (!this.IsActive && (this.alpha > 0f))
-            {
-                this.alpha -= Time.deltaTime / this.FadeTime;
-            }
-            if ((this.alpha > 0f) && (this.alpha < 1f))
-            {
-                this.needUpdate = true;
-            }
-            else
-            {
-                this.needUpdate = false;
-                this.alpha = Mathf.Clamp01(this.alpha);
-                if (Mathf.Abs((float) (this.prevAlpha - this.alpha)) >= Mathf.Epsilon)
-                {
-                    this.UpdateVisibleStatus();
-                }
-            }
-            this.prevAlpha = this.alpha;
-            if (this.needUpdate)
+            return;
+        }
+        if (this.startAlphaColors == null)
+        {
+            this.InitStartAlphaColors();
+        }
+        if (this.IsActive && this.alpha < 1f)
+        {
+            this.alpha += Time.deltaTime / this.FadeTime;
+        }
+        if (!this.IsActive && this.alpha > 0f)
+        {
+            this.alpha -= Time.deltaTime / this.FadeTime;
+        }
+        if (this.alpha > 0f && this.alpha < 1f)
+        {
+            this.needUpdate = true;
+        }
+        else
+        {
+            this.needUpdate = false;
+            this.alpha = Mathf.Clamp01(this.alpha);
+            if (Mathf.Abs(this.prevAlpha - this.alpha) >= Mathf.Epsilon)
             {
                 this.UpdateVisibleStatus();
             }
-            if (this.Color != this.oldColor)
+        }
+        this.prevAlpha = this.alpha;
+        if (this.needUpdate)
+        {
+            this.UpdateVisibleStatus();
+        }
+        if (this.Color != this.oldColor)
+        {
+            this.oldColor = this.Color;
+            this.UpdateColor(this.Color);
+        }
+    }
+
+    private void InitStartAlphaColors()
+    {
+        this.startAlphaColors = new Dictionary<string, float>();
+        Renderer[] componentsInChildren = base.GetComponentsInChildren<Renderer>(includeInactive: true);
+        foreach (Renderer renderer in componentsInChildren)
+        {
+            Material[] materials = renderer.materials;
+            for (int j = 0; j < materials.Length; j++)
             {
-                this.oldColor = this.Color;
-                this.UpdateColor(this.Color);
+                if (materials[j].name.Contains("MeshEffect"))
+                {
+                    this.GetStartAlphaByProperties(renderer.GetHashCode().ToString(), j, materials[j]);
+                }
             }
+        }
+        SkinnedMeshRenderer[] componentsInChildren2 = base.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true);
+        foreach (SkinnedMeshRenderer skinnedMeshRenderer in componentsInChildren2)
+        {
+            Material[] materials2 = skinnedMeshRenderer.materials;
+            for (int k = 0; k < materials2.Length; k++)
+            {
+                if (materials2[k].name.Contains("MeshEffect"))
+                {
+                    this.GetStartAlphaByProperties(skinnedMeshRenderer.GetHashCode().ToString(), k, materials2[k]);
+                }
+            }
+        }
+        Light[] componentsInChildren3 = base.GetComponentsInChildren<Light>(includeInactive: true);
+        for (int l = 0; l < componentsInChildren3.Length; l++)
+        {
+            ME_LightCurves component = componentsInChildren3[l].GetComponent<ME_LightCurves>();
+            float value = 1f;
+            if (component != null)
+            {
+                value = component.GraphIntensityMultiplier;
+            }
+            this.startAlphaColors.Add(componentsInChildren3[l].GetHashCode().ToString() + l, value);
+        }
+        componentsInChildren = this.MeshObject.GetComponentsInChildren<Renderer>(includeInactive: true);
+        foreach (Renderer renderer2 in componentsInChildren)
+        {
+            Material[] materials3 = renderer2.materials;
+            for (int m = 0; m < materials3.Length; m++)
+            {
+                if (materials3[m].name.Contains("MeshEffect"))
+                {
+                    this.GetStartAlphaByProperties(renderer2.GetHashCode().ToString(), m, materials3[m]);
+                }
+            }
+        }
+        componentsInChildren2 = this.MeshObject.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true);
+        foreach (SkinnedMeshRenderer skinnedMeshRenderer2 in componentsInChildren2)
+        {
+            Material[] materials4 = skinnedMeshRenderer2.materials;
+            for (int n = 0; n < materials4.Length; n++)
+            {
+                if (materials4[n].name.Contains("MeshEffect"))
+                {
+                    this.GetStartAlphaByProperties(skinnedMeshRenderer2.GetHashCode().ToString(), n, materials4[n]);
+                }
+            }
+        }
+    }
+
+    private void InitStartParticleParameters()
+    {
+        this.startParticleParameters = new Dictionary<ParticleSystem, ParticleStartInfo>();
+        ParticleSystem[] componentsInChildren = this.MeshObject.GetComponentsInChildren<ParticleSystem>(includeInactive: true);
+        foreach (ParticleSystem particleSystem in componentsInChildren)
+        {
+            this.startParticleParameters.Add(particleSystem, new ParticleStartInfo
+            {
+                StartSize = particleSystem.main.startSize,
+                StartSpeed = particleSystem.main.startSpeed
+            });
+        }
+    }
+
+    private void UpdateVisibleStatus()
+    {
+        Renderer[] componentsInChildren = base.GetComponentsInChildren<Renderer>(includeInactive: true);
+        foreach (Renderer renderer in componentsInChildren)
+        {
+            Material[] materials = renderer.materials;
+            for (int j = 0; j < materials.Length; j++)
+            {
+                if (materials[j].name.Contains("MeshEffect"))
+                {
+                    this.UpdateAlphaByProperties(renderer.GetHashCode().ToString(), j, materials[j], this.alpha);
+                }
+            }
+        }
+        componentsInChildren = base.GetComponentsInChildren<Renderer>(includeInactive: true);
+        foreach (Renderer renderer2 in componentsInChildren)
+        {
+            Material[] materials2 = renderer2.materials;
+            for (int k = 0; k < materials2.Length; k++)
+            {
+                if (materials2[k].name.Contains("MeshEffect"))
+                {
+                    this.UpdateAlphaByProperties(renderer2.GetHashCode().ToString(), k, materials2[k], this.alpha);
+                }
+            }
+        }
+        componentsInChildren = this.MeshObject.GetComponentsInChildren<Renderer>(includeInactive: true);
+        foreach (Renderer renderer3 in componentsInChildren)
+        {
+            Material[] materials3 = renderer3.materials;
+            for (int l = 0; l < materials3.Length; l++)
+            {
+                if (materials3[l].name.Contains("MeshEffect"))
+                {
+                    this.UpdateAlphaByProperties(renderer3.GetHashCode().ToString(), l, materials3[l], this.alpha);
+                }
+            }
+        }
+        componentsInChildren = this.MeshObject.GetComponentsInChildren<Renderer>(includeInactive: true);
+        foreach (Renderer renderer4 in componentsInChildren)
+        {
+            Material[] materials4 = renderer4.materials;
+            for (int m = 0; m < materials4.Length; m++)
+            {
+                if (materials4[m].name.Contains("MeshEffect"))
+                {
+                    this.UpdateAlphaByProperties(renderer4.GetHashCode().ToString(), m, materials4[m], this.alpha);
+                }
+            }
+        }
+        ME_LightCurves[] componentsInChildren2 = base.GetComponentsInChildren<ME_LightCurves>(includeInactive: true);
+        for (int i = 0; i < componentsInChildren2.Length; i++)
+        {
+            componentsInChildren2[i].enabled = this.IsActive;
+        }
+        Light[] componentsInChildren3 = base.GetComponentsInChildren<Light>(includeInactive: true);
+        for (int n = 0; n < componentsInChildren3.Length; n++)
+        {
+            if (!this.IsActive)
+            {
+                float num = this.startAlphaColors[componentsInChildren3[n].GetHashCode().ToString() + n];
+                componentsInChildren3[n].intensity = this.alpha * num;
+            }
+        }
+        ParticleSystem[] componentsInChildren4 = base.GetComponentsInChildren<ParticleSystem>(includeInactive: true);
+        foreach (ParticleSystem particleSystem in componentsInChildren4)
+        {
+            if (!this.IsActive && !particleSystem.isStopped)
+            {
+                particleSystem.Stop();
+            }
+            if (this.IsActive && particleSystem.isStopped)
+            {
+                particleSystem.Play();
+            }
+        }
+        ME_TrailRendererNoise[] componentsInChildren5 = base.GetComponentsInChildren<ME_TrailRendererNoise>();
+        for (int i = 0; i < componentsInChildren5.Length; i++)
+        {
+            componentsInChildren5[i].IsActive = this.IsActive;
         }
     }
 
     private void UpdateAlphaByProperties(string rendName, int materialNumber, Material mat, float alpha)
     {
-        foreach (string str in this.colorProperties)
+        string[] array = this.colorProperties;
+        foreach (string text in array)
         {
-            if (mat.HasProperty(str))
+            if (mat.HasProperty(text))
             {
-                float num2 = this.startAlphaColors[rendName + materialNumber.ToString() + str.ToString()];
-                UnityEngine.Color color = mat.GetColor(str);
-                color.a = alpha * num2;
-                mat.SetColor(str, color);
+                float num = this.startAlphaColors[rendName + materialNumber + text.ToString()];
+                Color color = mat.GetColor(text);
+                color.a = alpha * num;
+                mat.SetColor(text, color);
             }
+        }
+    }
+
+    private void GetStartAlphaByProperties(string rendName, int materialNumber, Material mat)
+    {
+        string[] array = this.colorProperties;
+        foreach (string text in array)
+        {
+            if (mat.HasProperty(text))
+            {
+                string key = rendName + materialNumber + text.ToString();
+                if (!this.startAlphaColors.ContainsKey(key))
+                {
+                    this.startAlphaColors.Add(rendName + materialNumber + text.ToString(), mat.GetColor(text).a);
+                }
+            }
+        }
+    }
+
+    public void UpdateColor(Color color)
+    {
+        if (!(this.MeshObject == null))
+        {
+            ME_ColorHelper.HSBColor hSBColor = ME_ColorHelper.ColorToHSV(color);
+            ME_ColorHelper.ChangeObjectColorByHUE(this.MeshObject, hSBColor.H);
         }
     }
 
     public void UpdateColor(float HUE)
     {
-        if (this.MeshObject != null)
+        if (!(this.MeshObject == null))
         {
             ME_ColorHelper.ChangeObjectColorByHUE(this.MeshObject, HUE);
-        }
-    }
-
-    public void UpdateColor(UnityEngine.Color color)
-    {
-        if (this.MeshObject != null)
-        {
-            ME_ColorHelper.HSBColor color2 = ME_ColorHelper.ColorToHSV(color);
-            ME_ColorHelper.ChangeObjectColorByHUE(this.MeshObject, color2.H);
         }
     }
 
     public void UpdateMeshEffect()
     {
         base.transform.localPosition = Vector3.zero;
-        Quaternion quaternion = new Quaternion();
-        base.transform.localRotation = quaternion;
+        base.transform.localRotation = default(Quaternion);
         this.rendererMaterials.Clear();
         this.skinnedMaterials.Clear();
-        if (this.MeshObject != null)
+        if (!(this.MeshObject == null))
         {
             this.UpdatePSMesh(this.MeshObject);
             this.AddMaterialToMesh(this.MeshObject);
         }
+    }
+
+    private void CheckScaleIncludedParticles()
+    {
     }
 
     public void UpdateMeshEffect(GameObject go)
@@ -372,12 +335,74 @@ public class PSMeshRendererUpdater : MonoBehaviour
         if (go == null)
         {
             Debug.Log("You need set a gameObject");
+            return;
         }
-        else
+        this.MeshObject = go;
+        this.UpdatePSMesh(this.MeshObject);
+        this.AddMaterialToMesh(this.MeshObject);
+    }
+
+    private void UpdatePSMesh(GameObject go)
+    {
+        if (this.startParticleParameters == null)
         {
-            this.MeshObject = go;
-            this.UpdatePSMesh(this.MeshObject);
-            this.AddMaterialToMesh(this.MeshObject);
+            this.InitStartParticleParameters();
+        }
+        ParticleSystem[] componentsInChildren = base.GetComponentsInChildren<ParticleSystem>();
+        MeshRenderer componentInChildren = go.GetComponentInChildren<MeshRenderer>();
+        SkinnedMeshRenderer componentInChildren2 = go.GetComponentInChildren<SkinnedMeshRenderer>();
+        Light[] componentsInChildren2 = base.GetComponentsInChildren<Light>();
+        float num = 1f;
+        float num2 = 1f;
+        if (componentInChildren != null)
+        {
+            num = componentInChildren.bounds.size.magnitude;
+            num2 = componentInChildren.transform.lossyScale.magnitude;
+        }
+        if (componentInChildren2 != null)
+        {
+            num = componentInChildren2.bounds.size.magnitude;
+            num2 = componentInChildren2.transform.lossyScale.magnitude;
+        }
+        ParticleSystem[] array = componentsInChildren;
+        foreach (ParticleSystem particleSystem in array)
+        {
+            particleSystem.transform.gameObject.SetActive(value: false);
+            ParticleSystem.ShapeModule shape = particleSystem.shape;
+            if (shape.enabled)
+            {
+                if (componentInChildren != null)
+                {
+                    shape.shapeType = ParticleSystemShapeType.MeshRenderer;
+                    shape.meshRenderer = componentInChildren;
+                }
+                if (componentInChildren2 != null)
+                {
+                    shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
+                    shape.skinnedMeshRenderer = componentInChildren2;
+                }
+            }
+            ParticleSystem.MainModule main = particleSystem.main;
+            ParticleStartInfo particleStartInfo = this.startParticleParameters[particleSystem];
+            main.startSize = this.UpdateParticleParam(particleStartInfo.StartSize, main.startSize, num / num2 * this.StartScaleMultiplier);
+            main.startSpeed = this.UpdateParticleParam(particleStartInfo.StartSpeed, main.startSpeed, num / num2 * this.StartScaleMultiplier);
+            particleSystem.transform.gameObject.SetActive(value: true);
+        }
+        if (componentInChildren != null)
+        {
+            Light[] array2 = componentsInChildren2;
+            for (int i = 0; i < array2.Length; i++)
+            {
+                array2[i].transform.position = componentInChildren.bounds.center;
+            }
+        }
+        if (componentInChildren2 != null)
+        {
+            Light[] array2 = componentsInChildren2;
+            for (int i = 0; i < array2.Length; i++)
+            {
+                array2[i].transform.position = componentInChildren2.bounds.center;
+            }
         }
     }
 
@@ -395,202 +420,85 @@ public class PSMeshRendererUpdater : MonoBehaviour
         return currentParam;
     }
 
-    private void UpdatePSMesh(GameObject go)
+    private void AddMaterialToMesh(GameObject go)
     {
-        Bounds bounds;
-        Light[] lightArray2;
-        if (this.startParticleParameters == null)
+        ME_MeshMaterialEffect componentInChildren = base.GetComponentInChildren<ME_MeshMaterialEffect>();
+        if (!(componentInChildren == null))
         {
-            this.InitStartParticleParameters();
-        }
-        MeshRenderer componentInChildren = go.GetComponentInChildren<MeshRenderer>();
-        SkinnedMeshRenderer renderer2 = go.GetComponentInChildren<SkinnedMeshRenderer>();
-        Light[] componentsInChildren = base.GetComponentsInChildren<Light>();
-        float magnitude = 1f;
-        float magnitude = 1f;
-        if (componentInChildren != null)
-        {
-            magnitude = componentInChildren.bounds.size.magnitude;
-            magnitude = componentInChildren.transform.lossyScale.magnitude;
-        }
-        if (renderer2 != null)
-        {
-            magnitude = renderer2.bounds.size.magnitude;
-            magnitude = renderer2.transform.lossyScale.magnitude;
-        }
-        ParticleSystem[] systemArray = base.GetComponentsInChildren<ParticleSystem>();
-        int index = 0;
-        while (index < systemArray.Length)
-        {
-            ParticleSystem system = systemArray[index];
-            system.transform.gameObject.SetActive(false);
-            ParticleSystem.ShapeModule shape = system.shape;
-            if (shape.enabled)
+            MeshRenderer componentInChildren2 = go.GetComponentInChildren<MeshRenderer>();
+            SkinnedMeshRenderer componentInChildren3 = go.GetComponentInChildren<SkinnedMeshRenderer>();
+            if (componentInChildren2 != null)
             {
-                if (componentInChildren != null)
-                {
-                    shape.shapeType = ParticleSystemShapeType.MeshRenderer;
-                    shape.meshRenderer = componentInChildren;
-                }
-                if (renderer2 != null)
-                {
-                    shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
-                    shape.skinnedMeshRenderer = renderer2;
-                }
+                this.rendererMaterials.Add(componentInChildren2.sharedMaterials);
+                componentInChildren2.sharedMaterials = this.AddToSharedMaterial(componentInChildren2.sharedMaterials, componentInChildren);
             }
-            ParticleSystem.MainModule main = system.main;
-            ParticleStartInfo info = this.startParticleParameters[system];
-            main.startSize = this.UpdateParticleParam(info.StartSize, main.startSize, (magnitude / magnitude) * this.StartScaleMultiplier);
-            main.startSpeed = this.UpdateParticleParam(info.StartSpeed, main.startSpeed, (magnitude / magnitude) * this.StartScaleMultiplier);
-            system.transform.gameObject.SetActive(true);
-            index++;
-        }
-        if (componentInChildren != null)
-        {
-            lightArray2 = componentsInChildren;
-            index = 0;
-            while (index < lightArray2.Length)
+            if (componentInChildren3 != null)
             {
-                bounds = componentInChildren.bounds;
-                lightArray2[index].transform.position = bounds.center;
-                index++;
-            }
-        }
-        if (renderer2 != null)
-        {
-            lightArray2 = componentsInChildren;
-            for (index = 0; index < lightArray2.Length; index++)
-            {
-                bounds = renderer2.bounds;
-                lightArray2[index].transform.position = bounds.center;
+                this.skinnedMaterials.Add(componentInChildren3.sharedMaterials);
+                componentInChildren3.sharedMaterials = this.AddToSharedMaterial(componentInChildren3.sharedMaterials, componentInChildren);
             }
         }
     }
 
-    private void UpdateVisibleStatus()
+    private Material[] AddToSharedMaterial(Material[] sharedMaterials, ME_MeshMaterialEffect meshMatEffect)
     {
-        Renderer[] componentsInChildren = base.GetComponentsInChildren<Renderer>(true);
-        int index = 0;
-        while (index < componentsInChildren.Length)
+        if (meshMatEffect.IsFirstMaterial)
         {
-            Renderer renderer = componentsInChildren[index];
-            Material[] materials = renderer.materials;
-            int num2 = 0;
-            while (true)
+            return new Material[1] { meshMatEffect.Material };
+        }
+        List<Material> list = sharedMaterials.ToList();
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].name.Contains("MeshEffect"))
             {
-                if (num2 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num2].name.Contains("MeshEffect"))
-                {
-                    this.UpdateAlphaByProperties(renderer.GetHashCode().ToString(), num2, materials[num2], this.alpha);
-                }
-                num2++;
+                list.RemoveAt(i);
             }
         }
-        componentsInChildren = base.GetComponentsInChildren<Renderer>(true);
-        index = 0;
-        while (index < componentsInChildren.Length)
-        {
-            Renderer renderer2 = componentsInChildren[index];
-            Material[] materials = renderer2.materials;
-            int num4 = 0;
-            while (true)
-            {
-                if (num4 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num4].name.Contains("MeshEffect"))
-                {
-                    this.UpdateAlphaByProperties(renderer2.GetHashCode().ToString(), num4, materials[num4], this.alpha);
-                }
-                num4++;
-            }
-        }
-        componentsInChildren = this.MeshObject.GetComponentsInChildren<Renderer>(true);
-        index = 0;
-        while (index < componentsInChildren.Length)
-        {
-            Renderer renderer3 = componentsInChildren[index];
-            Material[] materials = renderer3.materials;
-            int num5 = 0;
-            while (true)
-            {
-                if (num5 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num5].name.Contains("MeshEffect"))
-                {
-                    this.UpdateAlphaByProperties(renderer3.GetHashCode().ToString(), num5, materials[num5], this.alpha);
-                }
-                num5++;
-            }
-        }
-        componentsInChildren = this.MeshObject.GetComponentsInChildren<Renderer>(true);
-        index = 0;
-        while (index < componentsInChildren.Length)
-        {
-            Renderer renderer4 = componentsInChildren[index];
-            Material[] materials = renderer4.materials;
-            int num6 = 0;
-            while (true)
-            {
-                if (num6 >= materials.Length)
-                {
-                    index++;
-                    break;
-                }
-                if (materials[num6].name.Contains("MeshEffect"))
-                {
-                    this.UpdateAlphaByProperties(renderer4.GetHashCode().ToString(), num6, materials[num6], this.alpha);
-                }
-                num6++;
-            }
-        }
-        ME_LightCurves[] curvesArray = base.GetComponentsInChildren<ME_LightCurves>(true);
-        for (index = 0; index < curvesArray.Length; index++)
-        {
-            curvesArray[index].enabled = this.IsActive;
-        }
-        Light[] lightArray = base.GetComponentsInChildren<Light>(true);
-        for (int i = 0; i < lightArray.Length; i++)
-        {
-            if (!this.IsActive)
-            {
-                float num8 = this.startAlphaColors[lightArray[i].GetHashCode().ToString() + i.ToString()];
-                lightArray[i].intensity = this.alpha * num8;
-            }
-        }
-        ParticleSystem[] systemArray = base.GetComponentsInChildren<ParticleSystem>(true);
-        for (index = 0; index < systemArray.Length; index++)
-        {
-            ParticleSystem system = systemArray[index];
-            if (!this.IsActive && !system.isStopped)
-            {
-                system.Stop();
-            }
-            if (this.IsActive && system.isStopped)
-            {
-                system.Play();
-            }
-        }
-        ME_TrailRendererNoise[] noiseArray = base.GetComponentsInChildren<ME_TrailRendererNoise>();
-        for (index = 0; index < noiseArray.Length; index++)
-        {
-            noiseArray[index].IsActive = this.IsActive;
-        }
+        list.Add(meshMatEffect.Material);
+        return list.ToArray();
     }
 
-    private class ParticleStartInfo
+    private void OnDestroy()
     {
-        public ParticleSystem.MinMaxCurve StartSize;
-        public ParticleSystem.MinMaxCurve StartSpeed;
+        if (this.MeshObject == null)
+        {
+            return;
+        }
+        MeshRenderer[] componentsInChildren = this.MeshObject.GetComponentsInChildren<MeshRenderer>();
+        SkinnedMeshRenderer[] componentsInChildren2 = this.MeshObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+        for (int i = 0; i < componentsInChildren.Length; i++)
+        {
+            if (this.rendererMaterials.Count == componentsInChildren.Length)
+            {
+                componentsInChildren[i].sharedMaterials = this.rendererMaterials[i];
+            }
+            List<Material> list = componentsInChildren[i].sharedMaterials.ToList();
+            for (int j = 0; j < list.Count; j++)
+            {
+                if (list[j].name.Contains("MeshEffect"))
+                {
+                    list.RemoveAt(j);
+                }
+            }
+            componentsInChildren[i].sharedMaterials = list.ToArray();
+        }
+        for (int k = 0; k < componentsInChildren2.Length; k++)
+        {
+            if (this.skinnedMaterials.Count == componentsInChildren2.Length)
+            {
+                componentsInChildren2[k].sharedMaterials = this.skinnedMaterials[k];
+            }
+            List<Material> list2 = componentsInChildren2[k].sharedMaterials.ToList();
+            for (int l = 0; l < list2.Count; l++)
+            {
+                if (list2[l].name.Contains("MeshEffect"))
+                {
+                    list2.RemoveAt(l);
+                }
+            }
+            componentsInChildren2[k].sharedMaterials = list2.ToArray();
+        }
+        this.rendererMaterials.Clear();
+        this.skinnedMaterials.Clear();
     }
 }
-

@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public class SettlerDataManager : MonoBehaviour
@@ -11,4 +10,3 @@ public class SettlerDataManager : MonoBehaviour
     {
     }
 }
-

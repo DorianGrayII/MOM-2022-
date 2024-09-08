@@ -1,8 +1,5 @@
-﻿namespace LitJson
+namespace LitJson
 {
-    using System;
-    using System.Runtime.CompilerServices;
-
     internal delegate void ExporterFunc(object obj, JsonWriter writer);
+    public delegate void ExporterFunc<T>(T obj, JsonWriter writer);
 }
-

@@ -1,12 +1,9 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum EEnchantmentCategory
     {
-        None,
-        Positive,
-        Negative
+        None = 0,
+        Positive = 1,
+        Negative = 2
     }
 }
-

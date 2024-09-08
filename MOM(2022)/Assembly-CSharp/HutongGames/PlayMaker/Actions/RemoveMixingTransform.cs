@@ -1,30 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animation), HutongGames.PlayMaker.Tooltip("Removes a mixing transform previously added with Add Mixing Transform. If transform has been added as recursive, then it will be removed as recursive. Once you remove all mixing transforms added to animation state all curves become animated again.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animation)]
+    [Tooltip("Removes a mixing transform previously added with Add Mixing Transform. If transform has been added as recursive, then it will be removed as recursive. Once you remove all mixing transforms added to animation state all curves become animated again.")]
     public class RemoveMixingTransform : BaseAnimationAction
     {
-        [RequiredField, CheckForComponent(typeof(Animation)), HutongGames.PlayMaker.Tooltip("The GameObject playing the animation.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animation))]
+        [Tooltip("The GameObject playing the animation.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The name of the animation.")]
+
+        [RequiredField]
+        [Tooltip("The name of the animation.")]
         public FsmString animationName;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The mixing transform to remove. E.g., root/upper_body/left_shoulder")]
+
+        [RequiredField]
+        [Tooltip("The mixing transform to remove. E.g., root/upper_body/left_shoulder")]
         public FsmString transfrom;
 
-        private void DoRemoveMixingTransform()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                AnimationState state = base.animation[this.animationName.Value];
-                if (state != null)
-                {
-                    state.AddMixingTransform(ownerDefaultTarget.transform.Find(this.transfrom.Value));
-                }
-            }
+            this.gameObject = null;
+            this.animationName = "";
         }
 
         public override void OnEnter()
@@ -33,11 +31,18 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoRemoveMixingTransform()
         {
-            this.gameObject = null;
-            this.animationName = "";
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                AnimationState animationState = base.animation[this.animationName.Value];
+                if (!(animationState == null))
+                {
+                    Transform mix = ownerDefaultTarget.transform.Find(this.transfrom.Value);
+                    animationState.AddMixingTransform(mix);
+                }
+            }
         }
     }
 }
-

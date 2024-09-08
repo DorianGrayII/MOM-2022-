@@ -1,66 +1,51 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Input), ActionTarget(typeof(UnityEngine.GameObject), "GameObject", false), HutongGames.PlayMaker.Tooltip("Sends Events based on mouse interactions with a Game Object: MouseOver, MouseDown, MouseUp, MouseOff. Use Ray Distance to set how close the camera must be to pick the object.\n\nNOTE: Picking uses the Main Camera.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Input)]
+    [ActionTarget(typeof(GameObject), "GameObject", false)]
+    [Tooltip("Sends Events based on mouse interactions with a Game Object: MouseOver, MouseDown, MouseUp, MouseOff. Use Ray Distance to set how close the camera must be to pick the object.\n\nNOTE: Picking uses the Main Camera.")]
     public class MousePickEvent : FsmStateAction
     {
         [CheckForComponent(typeof(Collider))]
         public FsmOwnerDefault GameObject;
-        [HutongGames.PlayMaker.Tooltip("Length of the ray to cast from the camera.")]
+
+        [Tooltip("Length of the ray to cast from the camera.")]
         public FsmFloat rayDistance = 100f;
-        [HutongGames.PlayMaker.Tooltip("Event to send when the mouse is over the GameObject.")]
+
+        [Tooltip("Event to send when the mouse is over the GameObject.")]
         public FsmEvent mouseOver;
-        [HutongGames.PlayMaker.Tooltip("Event to send when the mouse is pressed while over the GameObject.")]
+
+        [Tooltip("Event to send when the mouse is pressed while over the GameObject.")]
         public FsmEvent mouseDown;
-        [HutongGames.PlayMaker.Tooltip("Event to send when the mouse is released while over the GameObject.")]
+
+        [Tooltip("Event to send when the mouse is released while over the GameObject.")]
         public FsmEvent mouseUp;
-        [HutongGames.PlayMaker.Tooltip("Event to send when the mouse moves off the GameObject.")]
+
+        [Tooltip("Event to send when the mouse moves off the GameObject.")]
         public FsmEvent mouseOff;
-        [HutongGames.PlayMaker.Tooltip("Pick only from these layers."), UIHint(UIHint.Layer)]
+
+        [Tooltip("Pick only from these layers.")]
+        [UIHint(UIHint.Layer)]
         public FsmInt[] layerMask;
-        [HutongGames.PlayMaker.Tooltip("Invert the mask, so you pick from all layers except those defined above.")]
+
+        [Tooltip("Invert the mask, so you pick from all layers except those defined above.")]
         public FsmBool invertMask;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoMousePickEvent()
+        public override void Reset()
         {
-            base.Fsm.set_RaycastHitInfo(ActionHelpers.mousePickInfo);
-            if (!this.DoRaycast())
-            {
-                if (this.mouseOff != null)
-                {
-                    base.Fsm.Event(this.mouseOff);
-                }
-            }
-            else
-            {
-                if ((this.mouseDown != null) && Input.GetMouseButtonDown(0))
-                {
-                    base.Fsm.Event(this.mouseDown);
-                }
-                if (this.mouseOver != null)
-                {
-                    base.Fsm.Event(this.mouseOver);
-                }
-                if ((this.mouseUp != null) && Input.GetMouseButtonUp(0))
-                {
-                    base.Fsm.Event(this.mouseUp);
-                }
-            }
-        }
-
-        private bool DoRaycast()
-        {
-            return ActionHelpers.IsMouseOver((this.GameObject.OwnerOption == OwnerDefaultOption.UseOwner) ? base.get_Owner() : this.GameObject.GameObject.get_Value(), this.rayDistance.Value, ActionHelpers.LayerArrayToLayerMask(this.layerMask, this.invertMask.Value));
-        }
-
-        public override string ErrorCheck()
-        {
-            return ("" + ActionHelpers.CheckRayDistance(this.rayDistance.Value) + ActionHelpers.CheckPhysicsSetup(base.Fsm.GetOwnerDefaultTarget(this.GameObject)));
+            this.GameObject = null;
+            this.rayDistance = 100f;
+            this.mouseOver = null;
+            this.mouseDown = null;
+            this.mouseUp = null;
+            this.mouseOff = null;
+            this.layerMask = new FsmInt[0];
+            this.invertMask = false;
+            this.everyFrame = true;
         }
 
         public override void OnEnter()
@@ -77,18 +62,39 @@
             this.DoMousePickEvent();
         }
 
-        public override void Reset()
+        private void DoMousePickEvent()
         {
-            this.GameObject = null;
-            this.rayDistance = 100f;
-            this.mouseOver = null;
-            this.mouseDown = null;
-            this.mouseUp = null;
-            this.mouseOff = null;
-            this.layerMask = new FsmInt[0];
-            this.invertMask = false;
-            this.everyFrame = true;
+            bool num = this.DoRaycast();
+            base.Fsm.RaycastHitInfo = ActionHelpers.mousePickInfo;
+            if (num)
+            {
+                if (this.mouseDown != null && Input.GetMouseButtonDown(0))
+                {
+                    base.Fsm.Event(this.mouseDown);
+                }
+                if (this.mouseOver != null)
+                {
+                    base.Fsm.Event(this.mouseOver);
+                }
+                if (this.mouseUp != null && Input.GetMouseButtonUp(0))
+                {
+                    base.Fsm.Event(this.mouseUp);
+                }
+            }
+            else if (this.mouseOff != null)
+            {
+                base.Fsm.Event(this.mouseOff);
+            }
+        }
+
+        private bool DoRaycast()
+        {
+            return ActionHelpers.IsMouseOver((this.GameObject.OwnerOption == OwnerDefaultOption.UseOwner) ? base.Owner : this.GameObject.GameObject.Value, this.rayDistance.Value, ActionHelpers.LayerArrayToLayerMask(this.layerMask, this.invertMask.Value));
+        }
+
+        public override string ErrorCheck()
+        {
+            return string.Concat("" + ActionHelpers.CheckRayDistance(this.rayDistance.Value), ActionHelpers.CheckPhysicsSetup(base.Fsm.GetOwnerDefaultTarget(this.GameObject)));
         }
     }
 }
-

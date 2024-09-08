@@ -1,22 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Quaternion), HutongGames.PlayMaker.Tooltip("Creates a rotation which rotates angle degrees around axis.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Quaternion)]
+    [Tooltip("Creates a rotation which rotates angle degrees around axis.")]
     public class QuaternionAngleAxis : QuaternionBaseAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The angle.")]
+        [RequiredField]
+        [Tooltip("The angle.")]
         public FsmFloat angle;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The rotation axis.")]
+
+        [RequiredField]
+        [Tooltip("The rotation axis.")]
         public FsmVector3 axis;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the rotation of this quaternion variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the rotation of this quaternion variable.")]
         public FsmQuaternion result;
 
-        private void DoQuatAngleAxis()
+        public override void Reset()
         {
-            this.result.set_Value(Quaternion.AngleAxis(this.angle.Value, this.axis.get_Value()));
+            this.angle = null;
+            this.axis = null;
+            this.result = null;
+            base.everyFrame = true;
+            base.everyFrameOption = everyFrameOptions.Update;
         }
 
         public override void OnEnter()
@@ -28,9 +37,9 @@
             }
         }
 
-        public override void OnFixedUpdate()
+        public override void OnUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.FixedUpdate)
+            if (base.everyFrameOption == everyFrameOptions.Update)
             {
                 this.DoQuatAngleAxis();
             }
@@ -38,28 +47,23 @@
 
         public override void OnLateUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.LateUpdate)
+            if (base.everyFrameOption == everyFrameOptions.LateUpdate)
             {
                 this.DoQuatAngleAxis();
             }
         }
 
-        public override void OnUpdate()
+        public override void OnFixedUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.Update)
+            if (base.everyFrameOption == everyFrameOptions.FixedUpdate)
             {
                 this.DoQuatAngleAxis();
             }
         }
 
-        public override void Reset()
+        private void DoQuatAngleAxis()
         {
-            this.angle = null;
-            this.axis = null;
-            this.result = null;
-            base.everyFrame = true;
-            base.everyFrameOption = QuaternionBaseAction.everyFrameOptions.Update;
+            this.result.Value = Quaternion.AngleAxis(this.angle.Value, this.axis.Value);
         }
     }
 }
-

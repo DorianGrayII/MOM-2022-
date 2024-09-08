@@ -1,22 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Gets a Game Object's Transform and stores it in an Object Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Gets a Game Object's Transform and stores it in an Object Variable.")]
     public class GetTransform : FsmStateAction
     {
         [RequiredField]
         public FsmGameObject gameObject;
-        [RequiredField, UIHint(UIHint.Variable), ObjectType(typeof(Transform))]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [ObjectType(typeof(Transform))]
         public FsmObject storeTransform;
+
         public bool everyFrame;
 
-        private void DoGetGameObjectName()
+        public override void Reset()
         {
-            GameObject obj2 = this.gameObject.get_Value();
-            this.storeTransform.set_Value(obj2?.transform);
+            this.gameObject = new FsmGameObject
+            {
+                UseVariable = true
+            };
+            this.storeTransform = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -33,14 +40,10 @@
             this.DoGetGameObjectName();
         }
 
-        public override void Reset()
+        private void DoGetGameObjectName()
         {
-            FsmGameObject obj1 = new FsmGameObject();
-            obj1.UseVariable = true;
-            this.gameObject = obj1;
-            this.storeTransform = null;
-            this.everyFrame = false;
+            GameObject value = this.gameObject.Value;
+            this.storeTransform.Value = ((value != null) ? value.transform : null);
         }
     }
 }
-

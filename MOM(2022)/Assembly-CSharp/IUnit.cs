@@ -1,10 +1,10 @@
-﻿using DBDef;
-using System;
+using DBDef;
 
 public interface IUnit
 {
-    int FigureCount();
-    string GetDBName();
     DescriptionInfo GetDescriptionInfo();
-}
 
+    string GetDBName();
+
+    int FigureCount();
+}

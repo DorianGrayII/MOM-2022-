@@ -1,27 +1,26 @@
-﻿namespace UnrealByte.EasyJira
-{
-    using LitJson;
-    using System;
+using System;
+using LitJson;
 
+namespace UnrealByte.EasyJira
+{
     public class JErrorHandler
     {
         public static string ReadError(string errorCode, string text, string errorText)
         {
-            string str = "";
+            string result = "";
             try
             {
-                JsonData data = JsonMapper.ToObject(text);
-                if (data["errorMessages"].Count > 0)
+                JsonData jsonData = JsonMapper.ToObject(text);
+                if (jsonData["errorMessages"].Count > 0)
                 {
-                    str = data["errorMessages"][0].ToString();
+                    result = jsonData["errorMessages"][0].ToString();
                 }
             }
             catch (Exception)
             {
-                str = !errorCode.Equals("401") ? (!errorCode.Equals("404") ? errorText : "Host not found, check de base URL.") : "Please check the Jira user and password.";
+                result = (errorCode.Equals("401") ? "Please check the Jira user and password." : ((!errorCode.Equals("404")) ? errorText : "Host not found, check de base URL."));
             }
-            return str;
+            return result;
         }
     }
 }
-

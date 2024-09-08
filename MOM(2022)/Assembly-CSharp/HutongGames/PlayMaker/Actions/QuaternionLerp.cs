@@ -1,24 +1,43 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Quaternion), HutongGames.PlayMaker.Tooltip("Interpolates between from and to by t and normalizes the result afterwards.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Quaternion)]
+    [Tooltip("Interpolates between from and to by t and normalizes the result afterwards.")]
     public class QuaternionLerp : QuaternionBaseAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("From Quaternion.")]
+        [RequiredField]
+        [Tooltip("From Quaternion.")]
         public FsmQuaternion fromQuaternion;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("To Quaternion.")]
+
+        [RequiredField]
+        [Tooltip("To Quaternion.")]
         public FsmQuaternion toQuaternion;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Interpolate between fromQuaternion and toQuaternion by this amount. Value is clamped to 0-1 range. 0 = fromQuaternion; 1 = toQuaternion; 0.5 = half way between."), HasFloatSlider(0f, 1f)]
+
+        [RequiredField]
+        [Tooltip("Interpolate between fromQuaternion and toQuaternion by this amount. Value is clamped to 0-1 range. 0 = fromQuaternion; 1 = toQuaternion; 0.5 = half way between.")]
+        [HasFloatSlider(0f, 1f)]
         public FsmFloat amount;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the result in this quaternion variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in this quaternion variable.")]
         public FsmQuaternion storeResult;
 
-        private void DoQuatLerp()
+        public override void Reset()
         {
-            this.storeResult.set_Value(Quaternion.Lerp(this.fromQuaternion.get_Value(), this.toQuaternion.get_Value(), this.amount.Value));
+            this.fromQuaternion = new FsmQuaternion
+            {
+                UseVariable = true
+            };
+            this.toQuaternion = new FsmQuaternion
+            {
+                UseVariable = true
+            };
+            this.amount = 0.5f;
+            this.storeResult = null;
+            base.everyFrame = true;
+            base.everyFrameOption = everyFrameOptions.Update;
         }
 
         public override void OnEnter()
@@ -30,9 +49,9 @@
             }
         }
 
-        public override void OnFixedUpdate()
+        public override void OnUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.FixedUpdate)
+            if (base.everyFrameOption == everyFrameOptions.Update)
             {
                 this.DoQuatLerp();
             }
@@ -40,33 +59,23 @@
 
         public override void OnLateUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.LateUpdate)
+            if (base.everyFrameOption == everyFrameOptions.LateUpdate)
             {
                 this.DoQuatLerp();
             }
         }
 
-        public override void OnUpdate()
+        public override void OnFixedUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.Update)
+            if (base.everyFrameOption == everyFrameOptions.FixedUpdate)
             {
                 this.DoQuatLerp();
             }
         }
 
-        public override void Reset()
+        private void DoQuatLerp()
         {
-            FsmQuaternion quaternion1 = new FsmQuaternion();
-            quaternion1.UseVariable = true;
-            this.fromQuaternion = quaternion1;
-            FsmQuaternion quaternion2 = new FsmQuaternion();
-            quaternion2.UseVariable = true;
-            this.toQuaternion = quaternion2;
-            this.amount = 0.5f;
-            this.storeResult = null;
-            base.everyFrame = true;
-            base.everyFrameOption = QuaternionBaseAction.everyFrameOptions.Update;
+            this.storeResult.Value = Quaternion.Lerp(this.fromQuaternion.Value, this.toQuaternion.Value, this.amount.Value);
         }
     }
 }
-

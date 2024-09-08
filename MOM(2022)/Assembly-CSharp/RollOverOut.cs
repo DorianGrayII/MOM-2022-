@@ -1,21 +1,12 @@
-﻿using MHUtils;
-using System;
+using MHUtils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class RollOverOut : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
     public object data;
-    private bool rolledOver;
 
-    private void DoEnter()
-    {
-        if (!this.rolledOver)
-        {
-            MHEventSystem.TriggerEvent<RollOverOut>(this, "Enter");
-            this.rolledOver = true;
-        }
-    }
+    private bool rolledOver;
 
     private void DoExit()
     {
@@ -26,14 +17,13 @@ public class RollOverOut : MonoBehaviour, IPointerEnterHandler, IEventSystemHand
         }
     }
 
-    private void OnDestroy()
+    private void DoEnter()
     {
-        this.DoExit();
-    }
-
-    private void OnDisable()
-    {
-        this.DoExit();
+        if (!this.rolledOver)
+        {
+            MHEventSystem.TriggerEvent<RollOverOut>(this, "Enter");
+            this.rolledOver = true;
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -45,5 +35,14 @@ public class RollOverOut : MonoBehaviour, IPointerEnterHandler, IEventSystemHand
     {
         this.DoExit();
     }
-}
 
+    private void OnDestroy()
+    {
+        this.DoExit();
+    }
+
+    private void OnDisable()
+    {
+        this.DoExit();
+    }
+}

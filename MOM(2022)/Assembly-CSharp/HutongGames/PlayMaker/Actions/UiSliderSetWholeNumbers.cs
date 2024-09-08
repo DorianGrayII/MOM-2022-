@@ -1,28 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the wholeNumbers property of a UI Slider component. This defines if the slider will be constrained to integer values ")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the wholeNumbers property of a UI Slider component. This defines if the slider will be constrained to integer values ")]
     public class UiSliderSetWholeNumbers : ComponentAction<Slider>
     {
-        [RequiredField, CheckForComponent(typeof(Slider)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Slider component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Slider))]
+        [Tooltip("The GameObject with the UI Slider component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Should the slider be constrained to integer values?")]
+
+        [RequiredField]
+        [Tooltip("Should the slider be constrained to integer values?")]
         public FsmBool wholeNumbers;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private Slider slider;
+
         private bool originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.slider != null)
-            {
-                this.slider.wholeNumbers = this.wholeNumbers.Value;
-            }
+            this.gameObject = null;
+            this.wholeNumbers = null;
+            this.resetOnExit = null;
         }
 
         public override void OnEnter()
@@ -37,20 +42,20 @@
             base.Finish();
         }
 
+        private void DoSetValue()
+        {
+            if (this.slider != null)
+            {
+                this.slider.wholeNumbers = this.wholeNumbers.Value;
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.slider != null) && this.resetOnExit.Value)
+            if (!(this.slider == null) && this.resetOnExit.Value)
             {
                 this.slider.wholeNumbers = this.originalValue;
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.wholeNumbers = null;
-            this.resetOnExit = null;
-        }
     }
 }
-

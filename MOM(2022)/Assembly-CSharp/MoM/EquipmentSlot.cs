@@ -1,19 +1,58 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using MHUtils;
-    using ProtoBuf;
-    using System;
+using System;
+using DBDef;
+using MHUtils;
+using ProtoBuf;
 
+namespace MOM
+{
     [ProtoContract]
     public class EquipmentSlot
     {
         [ProtoMember(1)]
         public DBReference<ArtefactSlot> slotType;
+
         [ProtoMember(2)]
-        private MOM.Artefact _item;
+        private Artefact _item;
+
         [ProtoMember(3)]
         public Reference<BaseUnit> owner;
+
+        public Artefact item
+        {
+            get
+            {
+                return this._item;
+            }
+            set
+            {
+                if (this._item == value)
+                {
+                    return;
+                }
+                if (this._item != null)
+                {
+                    foreach (DBReference<ArtefactPower> artefactPower in this._item.artefactPowers)
+                    {
+                        this.owner.Get().RemoveSkill(artefactPower.Get().skill);
+                    }
+                }
+                this._item = value;
+                this.owner.Get().artefactManager.UpdateSkills(this);
+                if (this.owner.Get() is Unit)
+                {
+                    Group group = (this.owner.Get() as Unit).group?.Get();
+                    if (group != null)
+                    {
+                        group.UpdateMovementFlags();
+                        if (FSMSelectionManager.Get().GetSelectedGroup() == group)
+                        {
+                            MHEventSystem.TriggerEvent<FSMSelectionManager>(group, null);
+                        }
+                    }
+                }
+                MHEventSystem.TriggerEvent<EquipmentSlot>(this, null);
+            }
+        }
 
         public EquipmentSlot()
         {
@@ -24,56 +63,9 @@
             this.owner = owner;
         }
 
-        public bool IsCompatible(MOM.Artefact a)
+        public bool IsCompatible(Artefact a)
         {
-            return (Array.FindIndex<EEquipmentType>(this.slotType.Get().eTypes, o => o == a.equipmentType) > -1);
-        }
-
-        public MOM.Artefact item
-        {
-            get
-            {
-                return this._item;
-            }
-            set
-            {
-                if (!ReferenceEquals(this._item, value))
-                {
-                    if (this._item != null)
-                    {
-                        foreach (DBReference<ArtefactPower> reference in this._item.artefactPowers)
-                        {
-                            ISkillableExtension.RemoveSkill(this.owner.Get(), reference.Get().skill);
-                        }
-                    }
-                    this._item = value;
-                    this.owner.Get().artefactManager.UpdateSkills(this);
-                    if (this.owner.Get() is MOM.Unit)
-                    {
-                        MOM.Group local2;
-                        if ((this.owner.Get() as MOM.Unit).group != null)
-                        {
-                            local2 = (this.owner.Get() as MOM.Unit).group.Get();
-                        }
-                        else
-                        {
-                            Reference<MOM.Group> group = (this.owner.Get() as MOM.Unit).group;
-                            local2 = null;
-                        }
-                        MOM.Group objB = local2;
-                        if (objB != null)
-                        {
-                            objB.UpdateMovementFlags();
-                            if (ReferenceEquals(FSMSelectionManager.Get().GetSelectedGroup(), objB))
-                            {
-                                MHEventSystem.TriggerEvent<FSMSelectionManager>(objB, null);
-                            }
-                        }
-                    }
-                    MHEventSystem.TriggerEvent<EquipmentSlot>(this, null);
-                }
-            }
+            return Array.FindIndex(this.slotType.Get().eTypes, (EEquipmentType o) => o == a.equipmentType) > -1;
         }
     }
 }
-

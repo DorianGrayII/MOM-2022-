@@ -1,7 +1,5 @@
-﻿namespace HutongGames.PlayMaker
+namespace HutongGames.PlayMaker
 {
-    using System;
-
     public class UpdateHelper
     {
         private static bool editorPrefLoaded;
@@ -11,4 +9,3 @@
         }
     }
 }
-

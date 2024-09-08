@@ -1,23 +1,15 @@
-﻿namespace MOM
+namespace MOM
 {
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-
-    [Extension]
     public static class EntityExtension
     {
-        [Extension]
-        public static void RegisterEntity(Entity obj, int forcedID)
+        public static void RegisterEntity(this Entity obj, int forcedID = 0)
         {
             EntityManager.RegisterEntity(obj, forcedID);
         }
 
-        [Extension]
-        public static void UnregisterEntity(Entity obj)
+        public static void UnregisterEntity(this Entity obj)
         {
             EntityManager.UnregisterEntity(obj);
         }
     }
 }
-

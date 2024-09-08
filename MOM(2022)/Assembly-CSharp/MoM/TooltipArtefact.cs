@@ -1,47 +1,47 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.TooltipArtefact
 using System;
 using DBDef;
 using DBUtils;
 using MHUtils;
 using MHUtils.UI;
-using MOM;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TooltipArtefact : TooltipBase
+namespace MOM
 {
-    public TextMeshProUGUI artefactName;
-
-    public TextMeshProUGUI RMBInfo;
-
-    public GridItemManager gridEnchantments;
-
-    public RawImage icon;
-
-    public GameObject goRMBInfo;
-
-    [NonSerialized]
-    public global::MOM.Artefact artefact;
-
-    public override void Populate(object o)
+    public class TooltipArtefact : TooltipBase
     {
-        this.artefact = o as global::MOM.Artefact;
-        this.artefactName.text = this.artefact.name;
-        this.RMBInfo.text = global::DBUtils.Localization.Get("UI_CLICK_TO_DISMANTLE", true);
-        this.icon.texture = AssetManager.Get<Texture2D>(this.artefact.graphic);
-        this.gridEnchantments.CustomDynamicItem(delegate(GameObject itemSource, object source, object data, int index)
+        public TextMeshProUGUI artefactName;
+
+        public TextMeshProUGUI RMBInfo;
+
+        public GridItemManager gridEnchantments;
+
+        public RawImage icon;
+
+        public GameObject goRMBInfo;
+
+        [NonSerialized]
+        public Artefact artefact;
+
+        public override void Populate(object o)
         {
-            itemSource.GetComponentInChildren<TextMeshProUGUI>().text = (source as DBReference<ArtefactPower>).Get().skill.GetDescriptionInfo().GetLocalizedName();
-        }, delegate
-        {
+            this.artefact = o as Artefact;
+            this.artefactName.text = this.artefact.name;
+            this.RMBInfo.text = global::DBUtils.Localization.Get("UI_CLICK_TO_DISMANTLE", true);
+            this.icon.texture = AssetManager.Get<Texture2D>(this.artefact.graphic);
+            this.gridEnchantments.CustomDynamicItem(delegate(GameObject itemSource, object source, object data, int index)
+            {
+                itemSource.GetComponentInChildren<TextMeshProUGUI>().text = (source as DBReference<ArtefactPower>).Get().skill.GetDescriptionInfo().GetLocalizedName();
+            }, delegate
+            {
+                this.gridEnchantments.UpdateGrid(this.artefact.artefactPowers);
+            });
             this.gridEnchantments.UpdateGrid(this.artefact.artefactPowers);
-        });
-        this.gridEnchantments.UpdateGrid(this.artefact.artefactPowers);
-        if (UIManager.GetScreen<AdventureScreen>(UIManager.Layer.Standard) != null || UIManager.GetScreen<Trade>(UIManager.Layer.Standard) != null)
-        {
-            this.goRMBInfo.SetActive(value: false);
+            if (UIManager.GetScreen<AdventureScreen>(UIManager.Layer.Standard) != null || UIManager.GetScreen<Trade>(UIManager.Layer.Standard) != null)
+            {
+                this.goRMBInfo.SetActive(value: false);
+            }
         }
     }
 }

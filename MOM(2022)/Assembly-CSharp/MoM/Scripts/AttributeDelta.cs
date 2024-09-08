@@ -1,32 +1,27 @@
-﻿namespace MoM.Scripts
-{
-    using DBDef;
-    using MHUtils;
-    using MOM;
-    using ProtoBuf;
-    using System;
-    using System.Collections.Generic;
+using System.Collections.Generic;
+using DBDef;
+using MHUtils;
+using MOM;
+using ProtoBuf;
 
+namespace MoM.Scripts
+{
     [ProtoContract]
     public class AttributeDelta
     {
         [ProtoMember(1)]
-        public NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> originalAttributeSets;
-        public NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> currentAttributeSets;
-        public NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> deltaAttributeSets;
+        public NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> originalAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
+
+        public NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> currentAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
+
+        public NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> deltaAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
 
         public AttributeDelta()
         {
-            this.originalAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
-            this.currentAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
-            this.deltaAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
         }
 
         public AttributeDelta(IAttributable a)
         {
-            this.originalAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
-            this.currentAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
-            this.deltaAttributeSets = new NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>>();
             this.originalAttributeSets.Clear();
             this.GetCurrentAttributes(a, this.originalAttributeSets);
         }
@@ -35,99 +30,70 @@
         {
             this.deltaAttributeSets.Clear();
             this.GetCurrentAttributes(a, this.currentAttributeSets);
-            foreach (KeyValuePair<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> pair in this.currentAttributeSets)
+            foreach (KeyValuePair<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> currentAttributeSet in this.currentAttributeSets)
             {
-                NetDictionary<DBReference<Tag>, FInt> dictionary = pair.Value;
-                NetDictionary<DBReference<Tag>, FInt> dictionary2 = this.originalAttributeSets[pair.Key];
-                NetDictionary<DBReference<Tag>, FInt> dictionary3 = new NetDictionary<DBReference<Tag>, FInt>();
-                foreach (KeyValuePair<DBReference<Tag>, FInt> pair2 in dictionary2)
+                NetDictionary<DBReference<Tag>, FInt> value = currentAttributeSet.Value;
+                NetDictionary<DBReference<Tag>, FInt> netDictionary = this.originalAttributeSets[currentAttributeSet.Key];
+                NetDictionary<DBReference<Tag>, FInt> netDictionary2 = new NetDictionary<DBReference<Tag>, FInt>();
+                foreach (KeyValuePair<DBReference<Tag>, FInt> item in netDictionary)
                 {
-                    FInt num = pair2.Value;
-                    FInt num2 = dictionary[pair2.Key];
-                    dictionary3[pair2.Key] = num2 - num;
+                    FInt value2 = item.Value;
+                    FInt fInt = value[item.Key];
+                    netDictionary2[item.Key] = fInt - value2;
                 }
-                foreach (KeyValuePair<DBReference<Tag>, FInt> pair3 in dictionary)
+                foreach (KeyValuePair<DBReference<Tag>, FInt> item2 in value)
                 {
-                    if (!dictionary2.ContainsKey(pair3.Key))
+                    if (!netDictionary.ContainsKey(item2.Key))
                     {
-                        dictionary3[pair3.Key] = pair3.Value;
+                        netDictionary2[item2.Key] = item2.Value;
                     }
                 }
-                this.deltaAttributeSets[pair.Key] = dictionary3;
+                this.deltaAttributeSets[currentAttributeSet.Key] = netDictionary2;
             }
-            foreach (KeyValuePair<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> pair4 in this.originalAttributeSets)
+            foreach (KeyValuePair<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> originalAttributeSet in this.originalAttributeSets)
             {
-                if (!this.currentAttributeSets.ContainsKey(pair4.Key))
+                if (this.currentAttributeSets.ContainsKey(originalAttributeSet.Key))
                 {
-                    NetDictionary<DBReference<Tag>, FInt> dictionary4 = new NetDictionary<DBReference<Tag>, FInt>();
-                    foreach (KeyValuePair<DBReference<Tag>, FInt> pair5 in pair4.Value)
-                    {
-                        dictionary4[pair5.Key] = FInt.ZERO - pair5.Value;
-                    }
-                    this.deltaAttributeSets[pair4.Key] = dictionary4;
+                    continue;
                 }
+                NetDictionary<DBReference<Tag>, FInt> value3 = originalAttributeSet.Value;
+                NetDictionary<DBReference<Tag>, FInt> netDictionary3 = new NetDictionary<DBReference<Tag>, FInt>();
+                foreach (KeyValuePair<DBReference<Tag>, FInt> item3 in value3)
+                {
+                    netDictionary3[item3.Key] = FInt.ZERO - item3.Value;
+                }
+                this.deltaAttributeSets[originalAttributeSet.Key] = netDictionary3;
             }
         }
 
         private void GetCurrentAttributes(IAttributable a, NetDictionary<DBReference<Skill>, NetDictionary<DBReference<Tag>, FInt>> skillDeltas)
         {
-            if (a is ISkillable)
+            if (!(a is ISkillable))
             {
-                ISkillable skillable = a as ISkillable;
-                if (ISkillableExtension.GetSkills(skillable) != null)
+                return;
+            }
+            ISkillable skillable = a as ISkillable;
+            if (skillable.GetSkills() == null)
+            {
+                return;
+            }
+            foreach (DBReference<Skill> skill2 in skillable.GetSkills())
+            {
+                Skill skill = skill2.Get();
+                if (skill.script == null)
                 {
-                    using (List<DBReference<Skill>>.Enumerator enumerator = ISkillableExtension.GetSkills(skillable).GetEnumerator())
+                    continue;
+                }
+                SkillScript[] script = skill.script;
+                foreach (SkillScript skillScript in script)
+                {
+                    if (skillScript.triggerType == ESkillType.AttributeChange)
                     {
-                        Skill skill;
-                        SkillScript[] script;
-                        int num;
-                        goto TR_0010;
-                    TR_0002:
-                        num++;
-                    TR_000B:
-                        while (true)
+                        NetDictionary<DBReference<Tag>, FInt> netDictionary = new NetDictionary<DBReference<Tag>, FInt>();
+                        if (string.IsNullOrEmpty(skillScript.trigger) || (bool)ScriptLibrary.Call(skillScript.trigger, skillable, null, skill2.Get(), skillScript, netDictionary))
                         {
-                            if (num >= script.Length)
-                            {
-                                break;
-                            }
-                            SkillScript script = script[num];
-                            if (script.triggerType == ESkillType.AttributeChange)
-                            {
-                                DBReference<Skill> reference;
-                                NetDictionary<DBReference<Tag>, FInt> dictionary = new NetDictionary<DBReference<Tag>, FInt>();
-                                if (!string.IsNullOrEmpty(script.trigger))
-                                {
-                                    object[] objArray1 = new object[5];
-                                    objArray1[0] = skillable;
-                                    objArray1[2] = reference.Get();
-                                    objArray1[3] = script;
-                                    objArray1[4] = dictionary;
-                                    if (!((bool) ScriptLibrary.Call(script.trigger, objArray1)))
-                                    {
-                                        goto TR_0002;
-                                    }
-                                }
-                                object[] parameters = new object[] { skillable, reference.Get(), script, dictionary };
-                                ScriptLibrary.Call(script.activatorMain, parameters);
-                                skillDeltas[skill] = dictionary;
-                            }
-                            goto TR_0002;
-                        }
-                    TR_0010:
-                        while (true)
-                        {
-                            if (!enumerator.MoveNext())
-                            {
-                                break;
-                            }
-                            skill = enumerator.Current.Get();
-                            if (skill.script != null)
-                            {
-                                script = skill.script;
-                                num = 0;
-                                goto TR_000B;
-                            }
+                            ScriptLibrary.Call(skillScript.activatorMain, skillable, skill2.Get(), skillScript, netDictionary);
+                            skillDeltas[skill] = netDictionary;
                         }
                     }
                 }
@@ -135,4 +101,3 @@
         }
     }
 }
-

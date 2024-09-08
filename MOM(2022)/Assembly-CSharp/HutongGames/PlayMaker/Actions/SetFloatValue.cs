@@ -1,16 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Math), Tooltip("Sets the value of a Float Variable.")]
+    [ActionCategory(ActionCategory.Math)]
+    [Tooltip("Sets the value of a Float Variable.")]
     public class SetFloatValue : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmFloat floatVariable;
+
         [RequiredField]
         public FsmFloat floatValue;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.floatVariable = null;
+            this.floatValue = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
@@ -25,13 +33,5 @@
         {
             this.floatVariable.Value = this.floatValue.Value;
         }
-
-        public override void Reset()
-        {
-            this.floatVariable = null;
-            this.floatValue = null;
-            this.everyFrame = false;
-        }
     }
 }
-

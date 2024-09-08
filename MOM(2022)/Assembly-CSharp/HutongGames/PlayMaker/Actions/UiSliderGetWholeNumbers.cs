@@ -1,32 +1,35 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the wholeNumbers property of a UI Slider component. If true, the Slider is constrained to integer values")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the wholeNumbers property of a UI Slider component. If true, the Slider is constrained to integer values")]
     public class UiSliderGetWholeNumbers : ComponentAction<Slider>
     {
-        [RequiredField, CheckForComponent(typeof(Slider)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Slider component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Slider))]
+        [Tooltip("The GameObject with the UI Slider component.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Is the Slider constrained to integer values?")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Is the Slider constrained to integer values?")]
         public FsmBool wholeNumbers;
-        [HutongGames.PlayMaker.Tooltip("Event sent if slider is showing integers")]
+
+        [Tooltip("Event sent if slider is showing integers")]
         public FsmEvent isShowingWholeNumbersEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if slider is showing floats")]
+
+        [Tooltip("Event sent if slider is showing floats")]
         public FsmEvent isNotShowingWholeNumbersEvent;
+
         private Slider slider;
 
-        private void DoGetValue()
+        public override void Reset()
         {
-            bool wholeNumbers = false;
-            if (this.slider != null)
-            {
-                wholeNumbers = this.slider.wholeNumbers;
-            }
-            this.wholeNumbers.Value = wholeNumbers;
-            base.Fsm.Event(wholeNumbers ? this.isShowingWholeNumbersEvent : this.isNotShowingWholeNumbersEvent);
+            this.gameObject = null;
+            this.isShowingWholeNumbersEvent = null;
+            this.isNotShowingWholeNumbersEvent = null;
+            this.wholeNumbers = null;
         }
 
         public override void OnEnter()
@@ -40,13 +43,15 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetValue()
         {
-            this.gameObject = null;
-            this.isShowingWholeNumbersEvent = null;
-            this.isNotShowingWholeNumbersEvent = null;
-            this.wholeNumbers = null;
+            bool flag = false;
+            if (this.slider != null)
+            {
+                flag = this.slider.wholeNumbers;
+            }
+            this.wholeNumbers.Value = flag;
+            base.Fsm.Event(flag ? this.isShowingWholeNumbersEvent : this.isNotShowingWholeNumbersEvent);
         }
     }
 }
-

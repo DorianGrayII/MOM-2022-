@@ -1,21 +1,25 @@
-﻿namespace MOM.Adventures
-{
-    using System;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
+namespace MOM.Adventures
+{
     public class EditorDraggableHeader : MonoBehaviour, IBeginDragHandler, IEventSystemHandler, IDragHandler, IEndDragHandler
     {
         private Vector2 startPosition;
+
         private Vector3 initialLocalPosition;
+
         private RectTransform draggedTransform;
+
         private RectTransform dragingSpace;
+
         public Callback dragStarted;
+
         public Callback dragUpdate;
+
         public Callback dragEnd;
 
-        public void Initialize(RectTransform draggedTransform, int transformPopLimit, Callback dragStarted, Callback dragUpdate, Callback dragEnd)
+        public void Initialize(RectTransform draggedTransform, int transformPopLimit = 0, Callback dragStarted = null, Callback dragUpdate = null, Callback dragEnd = null)
         {
             this.draggedTransform = draggedTransform;
             this.dragingSpace = draggedTransform.parent as RectTransform;
@@ -39,11 +43,11 @@
         {
             Vector2 vector = eventData.position - this.startPosition;
             Vector3 lossyScale = this.dragingSpace.lossyScale;
-            Vector3 o = this.initialLocalPosition + new Vector3(vector.x / lossyScale.x, vector.y / lossyScale.z, 0f);
-            this.draggedTransform.localPosition = o;
+            Vector3 vector2 = this.initialLocalPosition + new Vector3(vector.x / lossyScale.x, vector.y / lossyScale.z, 0f);
+            this.draggedTransform.localPosition = vector2;
             if (this.dragUpdate != null)
             {
-                this.dragUpdate(o);
+                this.dragUpdate(vector2);
             }
         }
 
@@ -51,12 +55,11 @@
         {
             Vector2 vector = eventData.position - this.startPosition;
             Vector3 lossyScale = this.dragingSpace.lossyScale;
-            Vector3 o = this.initialLocalPosition + new Vector3(vector.x / lossyScale.x, vector.y / lossyScale.z, 0f);
+            Vector3 vector2 = this.initialLocalPosition + new Vector3(vector.x / lossyScale.x, vector.y / lossyScale.z, 0f);
             if (this.dragEnd != null)
             {
-                this.dragEnd(o);
+                this.dragEnd(vector2);
             }
         }
     }
 }
-

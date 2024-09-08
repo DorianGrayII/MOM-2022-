@@ -1,41 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Get the normalized position in the parent RectTransform that the lower left corner is anchored to.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Get the normalized position in the parent RectTransform that the lower left corner is anchored to.")]
     public class RectTransformGetAnchorMin : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The anchorMin"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The anchorMin")]
+        [UIHint(UIHint.Variable)]
         public FsmVector2 anchorMin;
-        [HutongGames.PlayMaker.Tooltip("The x component of the anchorMin"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The x component of the anchorMin")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("The y component of the anchorMin"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The y component of the anchorMin")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoGetValues()
+        public override void Reset()
         {
-            if (!this.anchorMin.IsNone)
-            {
-                this.anchorMin.set_Value(this._rt.anchorMin);
-            }
-            if (!this.x.IsNone)
-            {
-                this.x.Value = this._rt.anchorMin.x;
-            }
-            if (!this.y.IsNone)
-            {
-                this.y.Value = this._rt.anchorMin.y;
-            }
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoGetValues();
+            base.Reset();
+            this.gameObject = null;
+            this.anchorMin = null;
+            this.x = null;
+            this.y = null;
         }
 
         public override void OnEnter()
@@ -52,14 +48,25 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.anchorMin = null;
-            this.x = null;
-            this.y = null;
+            this.DoGetValues();
+        }
+
+        private void DoGetValues()
+        {
+            if (!this.anchorMin.IsNone)
+            {
+                this.anchorMin.Value = this._rt.anchorMin;
+            }
+            if (!this.x.IsNone)
+            {
+                this.x.Value = this._rt.anchorMin.x;
+            }
+            if (!this.y.IsNone)
+            {
+                this.y.Value = this._rt.anchorMin.y;
+            }
         }
     }
 }
-

@@ -1,25 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Sets the Color of a Light.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Sets the Color of a Light.")]
     public class SetLightColor : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmColor lightColor;
+
         public bool everyFrame;
 
-        private void DoSetLightColor()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.light.color = this.lightColor.get_Value();
-            }
+            this.gameObject = null;
+            this.lightColor = Color.white;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,12 +36,13 @@
             this.DoSetLightColor();
         }
 
-        public override void Reset()
+        private void DoSetLightColor()
         {
-            this.gameObject = null;
-            this.lightColor = (FsmColor) Color.white;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.light.color = this.lightColor.Value;
+            }
         }
     }
 }
-

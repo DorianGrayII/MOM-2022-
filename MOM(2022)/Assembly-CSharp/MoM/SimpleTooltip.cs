@@ -1,61 +1,49 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using DBUtils;
-    using MHUtils;
-    using System;
-    using TMPro;
-    using UnityEngine;
-    using UnityEngine.UI;
+using System;
+using DBDef;
+using DBUtils;
+using MHUtils;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class SimpleTooltip : TooltipBase
     {
         public TextMeshProUGUI labelName;
+
         public TextMeshProUGUI labelDescription;
+
         public RawImage icon;
+
         public GameObject infoBackground;
+
         public GameObject info;
+
         public GameObject graphicWrapper;
+
         public GameObject thisTooltip;
+
         private bool haveInfo;
 
         protected override void DoExpand()
         {
             if (this.haveInfo)
             {
-                this.infoBackground.SetActive(true);
-                this.info.SetActive(true);
+                this.infoBackground.SetActive(value: true);
+                this.info.SetActive(value: true);
             }
             base.DoExpand();
         }
 
-        private string GetDynamicParameter(GameObject go)
-        {
-            Settings.KeyActions actions;
-            UIKeyboardClick component = go.GetComponent<UIKeyboardClick>();
-            if ((component != null) && (component.action != Settings.KeyActions.None))
-            {
-                return SettingsBlock.GetKeyForAction(component.action).ToString();
-            }
-            RolloverSimpleTooltip tooltip = go.GetComponent<RolloverSimpleTooltip>();
-            if ((tooltip == null) || string.IsNullOrEmpty(tooltip.data))
-            {
-                return "";
-            }
-            Enum.TryParse<Settings.KeyActions>(tooltip.data, out actions);
-            return SettingsBlock.GetKeyForAction(actions).ToString();
-        }
-
         public override void Populate(object o)
         {
-            Texture2D icon = null;
+            Texture2D texture2D = null;
             this.haveInfo = false;
-            RolloverSimpleTooltip tooltip = o as RolloverSimpleTooltip;
-            if (tooltip != null)
+            if (o is RolloverSimpleTooltip rolloverSimpleTooltip)
             {
-                object[] parameters = new object[] { this.GetDynamicParameter(tooltip.gameObject) };
-                this.labelName.text = DBUtils.Localization.Get(tooltip.GetTitle(), true, parameters);
-                string description = tooltip.GetDescription();
+                this.labelName.text = global::DBUtils.Localization.Get(rolloverSimpleTooltip.GetTitle(), true, this.GetDynamicParameter(rolloverSimpleTooltip.gameObject));
+                string description = rolloverSimpleTooltip.GetDescription();
                 if (string.IsNullOrEmpty(description))
                 {
                     this.thisTooltip.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 300f);
@@ -63,66 +51,71 @@
                 else
                 {
                     this.haveInfo = true;
-                    this.labelDescription.text = DBUtils.Localization.Get(description, true, Array.Empty<object>());
-                    icon = tooltip.GetIcon();
+                    this.labelDescription.text = global::DBUtils.Localization.Get(description, true);
+                    texture2D = rolloverSimpleTooltip.GetIcon();
                 }
+            }
+            else if (o is RolloverObject rolloverObject)
+            {
+                this.labelName.text = global::DBUtils.Localization.Get(rolloverObject.overrideTitle, true);
+                this.labelDescription.text = global::DBUtils.Localization.Get(rolloverObject.overrideDescription, true);
+                this.haveInfo = !string.IsNullOrEmpty(this.labelDescription.text);
+                texture2D = rolloverObject.overrideTexture;
             }
             else
             {
-                RolloverObject obj2 = o as RolloverObject;
-                if (obj2 != null)
+                if (o is string instanceName)
                 {
-                    this.labelName.text = DBUtils.Localization.Get(obj2.overrideTitle, true, Array.Empty<object>());
-                    this.labelDescription.text = DBUtils.Localization.Get(obj2.overrideDescription, true, Array.Empty<object>());
-                    this.haveInfo = !string.IsNullOrEmpty(this.labelDescription.text);
-                    icon = obj2.overrideTexture;
+                    o = DataBase.Get(instanceName, reportMissing: true);
                 }
-                else
+                DescriptionInfo descriptionInfo = o as DescriptionInfo;
+                if (descriptionInfo == null && o is IDescriptionInfoType)
                 {
-                    string instanceName = o as string;
-                    if (instanceName != null)
-                    {
-                        o = DataBase.Get(instanceName, true);
-                    }
-                    DescriptionInfo descriptionInfo = o as DescriptionInfo;
-                    if ((descriptionInfo == null) && (o is IDescriptionInfoType))
-                    {
-                        descriptionInfo = (o as IDescriptionInfoType).GetDescriptionInfo();
-                    }
-                    if (descriptionInfo != null)
-                    {
-                        this.labelName.text = descriptionInfo.GetLocalizedName();
-                    }
-                    PlayerWizard wizard = o as PlayerWizard;
-                    if (wizard != null)
-                    {
-                        descriptionInfo = wizard.GetBaseWizard().GetDescriptionInfo();
-                        this.labelName.text = wizard.name;
-                    }
-                    if (descriptionInfo != null)
-                    {
-                        this.haveInfo = true;
-                        this.labelDescription.text = descriptionInfo.GetLocalizedDescription();
-                        icon = AssetManager.Get<Texture2D>(descriptionInfo.graphic, true);
-                    }
-                    else
-                    {
-                        MOM.Artefact artefact = o as MOM.Artefact;
-                        if (artefact != null)
-                        {
-                            this.haveInfo = true;
-                            this.labelName.text = artefact.name;
-                            this.labelDescription.text = artefact.localizedDescription;
-                            icon = AssetManager.Get<Texture2D>(artefact.graphic, true);
-                        }
-                    }
+                    descriptionInfo = (o as IDescriptionInfoType).GetDescriptionInfo();
+                }
+                if (descriptionInfo != null)
+                {
+                    this.labelName.text = descriptionInfo.GetLocalizedName();
+                }
+                if (o is PlayerWizard playerWizard)
+                {
+                    descriptionInfo = playerWizard.GetBaseWizard().GetDescriptionInfo();
+                    this.labelName.text = playerWizard.name;
+                }
+                if (descriptionInfo != null)
+                {
+                    this.haveInfo = true;
+                    this.labelDescription.text = descriptionInfo.GetLocalizedDescription();
+                    texture2D = AssetManager.Get<Texture2D>(descriptionInfo.graphic);
+                }
+                else if (o is Artefact artefact)
+                {
+                    this.haveInfo = true;
+                    this.labelName.text = artefact.name;
+                    this.labelDescription.text = artefact.localizedDescription;
+                    texture2D = AssetManager.Get<Texture2D>(artefact.graphic);
                 }
             }
             this.info.SetActive(this.haveInfo && !base.collapse);
             this.infoBackground.SetActive(this.info.activeSelf);
-            this.graphicWrapper.SetActive(icon != null);
-            this.icon.texture = icon;
+            this.graphicWrapper.SetActive(texture2D != null);
+            this.icon.texture = texture2D;
+        }
+
+        private string GetDynamicParameter(GameObject go)
+        {
+            UIKeyboardClick component = go.GetComponent<UIKeyboardClick>();
+            if (component != null && component.action != 0)
+            {
+                return SettingsBlock.GetKeyForAction(component.action).ToString();
+            }
+            RolloverSimpleTooltip component2 = go.GetComponent<RolloverSimpleTooltip>();
+            if (component2 != null && !string.IsNullOrEmpty(component2.data))
+            {
+                Enum.TryParse<Settings.KeyActions>(component2.data, out var result);
+                return SettingsBlock.GetKeyForAction(result).ToString();
+            }
+            return "";
         }
     }
 }
-

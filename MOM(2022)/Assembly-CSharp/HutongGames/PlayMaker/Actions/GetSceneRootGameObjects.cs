@@ -1,26 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Scene), Tooltip("Get a scene Root GameObjects.")]
+    [ActionCategory(ActionCategory.Scene)]
+    [Tooltip("Get a scene Root GameObjects.")]
     public class GetSceneRootGameObjects : GetSceneActionBase
     {
-        [ActionSection("Result"), Tooltip("The scene Root GameObjects"), RequiredField, UIHint(UIHint.Variable), ArrayEditor(VariableType.GameObject, "", 0, 0, 0x10000)]
+        [ActionSection("Result")]
+        [Tooltip("The scene Root GameObjects")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [ArrayEditor(VariableType.GameObject, "", 0, 0, 65536)]
         public FsmArray rootGameObjects;
+
         [Tooltip("Repeat every Frame")]
         public bool everyFrame;
 
-        private void DoGetSceneRootGameObjects()
+        public override void Reset()
         {
-            if (base._sceneFound)
-            {
-                if (!this.rootGameObjects.IsNone)
-                {
-                    this.rootGameObjects.Values = base._scene.GetRootGameObjects();
-                }
-                base.Fsm.Event(base.sceneFoundEvent);
-            }
+            base.Reset();
+            this.rootGameObjects = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,12 +36,18 @@
             this.DoGetSceneRootGameObjects();
         }
 
-        public override void Reset()
+        private void DoGetSceneRootGameObjects()
         {
-            base.Reset();
-            this.rootGameObjects = null;
-            this.everyFrame = false;
+            if (base._sceneFound)
+            {
+                if (!this.rootGameObjects.IsNone)
+                {
+                    FsmArray fsmArray = this.rootGameObjects;
+                    object[] values = base._scene.GetRootGameObjects();
+                    fsmArray.Values = values;
+                }
+                base.Fsm.Event(base.sceneFoundEvent);
+            }
         }
     }
 }
-

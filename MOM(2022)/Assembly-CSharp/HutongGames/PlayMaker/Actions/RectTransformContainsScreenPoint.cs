@@ -1,68 +1,62 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Check if a RectTransform contains the screen point as seen from the given camera.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Check if a RectTransform contains the screen point as seen from the given camera.")]
     public class RectTransformContainsScreenPoint : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The screenPoint as a Vector2. Leave to none if you want to use the Vector3 alternative")]
+
+        [Tooltip("The screenPoint as a Vector2. Leave to none if you want to use the Vector3 alternative")]
         public FsmVector2 screenPointVector2;
-        [HutongGames.PlayMaker.Tooltip("The screenPoint as a Vector3. Leave to none if you want to use the Vector2 alternative")]
+
+        [Tooltip("The screenPoint as a Vector3. Leave to none if you want to use the Vector2 alternative")]
         public FsmVector3 orScreenPointVector3;
-        [HutongGames.PlayMaker.Tooltip("Define if screenPoint are expressed as normalized screen coordinates (0-1). Otherwise coordinates are in pixels.")]
+
+        [Tooltip("Define if screenPoint are expressed as normalized screen coordinates (0-1). Otherwise coordinates are in pixels.")]
         public bool normalizedScreenPoint;
-        [HutongGames.PlayMaker.Tooltip("The Camera. For a RectTransform in a Canvas set to Screen Space - Overlay mode, the cam parameter should be set to null explicitly (default).\nLeave to none and the camera will be the one from EventSystem.current.camera"), CheckForComponent(typeof(Camera))]
+
+        [Tooltip("The Camera. For a RectTransform in a Canvas set to Screen Space - Overlay mode, the cam parameter should be set to null explicitly (default).\nLeave to none and the camera will be the one from EventSystem.current.camera")]
+        [CheckForComponent(typeof(Camera))]
         public FsmGameObject camera;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame")]
+
+        [Tooltip("Repeat every frame")]
         public bool everyFrame;
-        [ActionSection("Result"), HutongGames.PlayMaker.Tooltip("Store the result."), UIHint(UIHint.Variable)]
+
+        [ActionSection("Result")]
+        [Tooltip("Store the result.")]
+        [UIHint(UIHint.Variable)]
         public FsmBool isContained;
-        [HutongGames.PlayMaker.Tooltip("Event sent if screenPoint is contained in RectTransform.")]
+
+        [Tooltip("Event sent if screenPoint is contained in RectTransform.")]
         public FsmEvent isContainedEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if screenPoint is NOT contained in RectTransform.")]
+
+        [Tooltip("Event sent if screenPoint is NOT contained in RectTransform.")]
         public FsmEvent isNotContainedEvent;
+
         private RectTransform _rt;
+
         private Camera _camera;
 
-        private unsafe void DoCheck()
+        public override void Reset()
         {
-            if (this._rt != null)
+            this.gameObject = null;
+            this.screenPointVector2 = null;
+            this.orScreenPointVector3 = new FsmVector3
             {
-                Vector2 screenPoint = this.screenPointVector2.get_Value();
-                if (!this.orScreenPointVector3.IsNone)
-                {
-                    screenPoint.x = this.orScreenPointVector3.get_Value().x;
-                    screenPoint.y = this.orScreenPointVector3.get_Value().y;
-                }
-                if (this.normalizedScreenPoint)
-                {
-                    float* singlePtr1 = &screenPoint.x;
-                    singlePtr1[0] *= Screen.width;
-                    float* singlePtr2 = &screenPoint.y;
-                    singlePtr2[0] *= Screen.height;
-                }
-                bool flag = RectTransformUtility.RectangleContainsScreenPoint(this._rt, screenPoint, this._camera);
-                if (!this.isContained.IsNone)
-                {
-                    this.isContained.Value = flag;
-                }
-                if (!flag)
-                {
-                    if (this.isNotContainedEvent != null)
-                    {
-                        base.Fsm.Event(this.isNotContainedEvent);
-                    }
-                }
-                else if (this.isContainedEvent != null)
-                {
-                    base.Fsm.Event(this.isContainedEvent);
-                }
-            }
+                UseVariable = true
+            };
+            this.normalizedScreenPoint = false;
+            this.camera = null;
+            this.everyFrame = false;
+            this.isContained = null;
+            this.isContainedEvent = null;
+            this.isNotContainedEvent = null;
         }
 
         public override void OnEnter()
@@ -72,7 +66,14 @@
             {
                 this._rt = ownerDefaultTarget.GetComponent<RectTransform>();
             }
-            this._camera = this.camera.IsNone ? EventSystem.current.GetComponent<Camera>() : this.camera.get_Value().GetComponent<Camera>();
+            if (!this.camera.IsNone)
+            {
+                this._camera = this.camera.Value.GetComponent<Camera>();
+            }
+            else
+            {
+                this._camera = EventSystem.current.GetComponent<Camera>();
+            }
             this.DoCheck();
             if (!this.everyFrame)
             {
@@ -85,20 +86,39 @@
             this.DoCheck();
         }
 
-        public override void Reset()
+        private void DoCheck()
         {
-            this.gameObject = null;
-            this.screenPointVector2 = null;
-            FsmVector3 vector1 = new FsmVector3();
-            vector1.UseVariable = true;
-            this.orScreenPointVector3 = vector1;
-            this.normalizedScreenPoint = false;
-            this.camera = null;
-            this.everyFrame = false;
-            this.isContained = null;
-            this.isContainedEvent = null;
-            this.isNotContainedEvent = null;
+            if (this._rt == null)
+            {
+                return;
+            }
+            Vector2 value = this.screenPointVector2.Value;
+            if (!this.orScreenPointVector3.IsNone)
+            {
+                value.x = this.orScreenPointVector3.Value.x;
+                value.y = this.orScreenPointVector3.Value.y;
+            }
+            if (this.normalizedScreenPoint)
+            {
+                value.x *= Screen.width;
+                value.y *= Screen.height;
+            }
+            bool flag = RectTransformUtility.RectangleContainsScreenPoint(this._rt, value, this._camera);
+            if (!this.isContained.IsNone)
+            {
+                this.isContained.Value = flag;
+            }
+            if (flag)
+            {
+                if (this.isContainedEvent != null)
+                {
+                    base.Fsm.Event(this.isContainedEvent);
+                }
+            }
+            else if (this.isNotContainedEvent != null)
+            {
+                base.Fsm.Event(this.isNotContainedEvent);
+            }
         }
     }
 }
-

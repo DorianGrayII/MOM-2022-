@@ -1,49 +1,56 @@
-﻿using MHUtils;
-using MOM;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using MHUtils;
+using MOM;
 using UnityEngine;
 using WorldCode;
 
 public class SingleRegion : IPlanePosition
 {
     public Vector3i center;
+
     public int radius;
+
     public int value;
+
     public int dangers;
+
     public HashSet<Vector3i> area;
+
     public List<Vector3i> islandHexes;
+
     public List<TownLocation> locations;
+
     public V3iRect rectArea;
-    public WorldCode.Plane plane;
+
+    public global::WorldCode.Plane plane;
+
     public SingleRegion enemyRegionAssignment;
 
     public void FindArea()
     {
         if (this.area == null)
+        {
             this.area = new HashSet<Vector3i>();
+        }
         this.area.Clear();
         ReadOnlyCollection<Vector3i> rangeSimple = HexNeighbors.GetRangeSimple(7);
-        List<Vector3i> includedPoints = new List<Vector3i>();
+        List<Vector3i> list = new List<Vector3i>();
         foreach (TownLocation location in this.locations)
         {
             Vector3i position = location.Position;
-            includedPoints.Add(position);
-            using (IEnumerator<Vector3i> enumerator2 = rangeSimple.GetEnumerator())
+            list.Add(position);
+            foreach (Vector3i item in rangeSimple)
             {
-                while (enumerator2.MoveNext())
+                Vector3i pos = item + position;
+                Hex hexAtWrapped = location.GetPlane().GetHexAtWrapped(pos);
+                if (hexAtWrapped != null)
                 {
-                    Vector3i pos = enumerator2.Current + position;
-                    Hex hexAtWrapped = location.GetPlane().GetHexAtWrapped(pos);
-                    if (hexAtWrapped != null)
-                    {
-                        this.area.Add(hexAtWrapped.Position);
-                    }
+                    this.area.Add(hexAtWrapped.Position);
                 }
             }
         }
-        this.rectArea = new V3iRect(includedPoints);
+        this.rectArea = new V3iRect(list);
     }
 
     public void FindValue()
@@ -57,15 +64,16 @@ public class SingleRegion : IPlanePosition
 
     public Vector3 GetPhysicalPosition()
     {
-        if (this.plane == null)
+        if (this.plane != null)
         {
-            return Vector3.zero;
+            Chunk chunkFor = this.plane.GetChunkFor(this.GetPosition());
+            Vector3 vector = HexCoordinates.HexToWorld3D(this.GetPosition());
+            return chunkFor.go.transform.position + vector;
         }
-        Vector3 vector = HexCoordinates.HexToWorld3D(this.GetPosition());
-        return (this.plane.GetChunkFor(this.GetPosition()).go.transform.position + vector);
+        return Vector3.zero;
     }
 
-    public WorldCode.Plane GetPlane()
+    public global::WorldCode.Plane GetPlane()
     {
         return this.plane;
     }
@@ -77,12 +85,6 @@ public class SingleRegion : IPlanePosition
 
     public int TotalLocations()
     {
-        if (this.locations != null)
-        {
-            return this.locations.Count;
-        }
-        List<TownLocation> locations = this.locations;
-        return 0;
+        return this.locations?.Count ?? 0;
     }
 }
-

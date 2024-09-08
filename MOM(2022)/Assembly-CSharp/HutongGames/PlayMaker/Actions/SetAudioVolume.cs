@@ -1,25 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Audio), HutongGames.PlayMaker.Tooltip("Sets the Volume of the Audio Clip played by the AudioSource component on a Game Object.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Audio)]
+    [Tooltip("Sets the Volume of the Audio Clip played by the AudioSource component on a Game Object.")]
     public class SetAudioVolume : ComponentAction<AudioSource>
     {
-        [RequiredField, CheckForComponent(typeof(AudioSource))]
+        [RequiredField]
+        [CheckForComponent(typeof(AudioSource))]
         public FsmOwnerDefault gameObject;
+
         [HasFloatSlider(0f, 1f)]
         public FsmFloat volume;
+
         public bool everyFrame;
 
-        private void DoSetAudioVolume()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget) && !this.volume.IsNone)
-            {
-                base.audio.volume = this.volume.Value;
-            }
+            this.gameObject = null;
+            this.volume = 1f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,12 +36,13 @@
             this.DoSetAudioVolume();
         }
 
-        public override void Reset()
+        private void DoSetAudioVolume()
         {
-            this.gameObject = null;
-            this.volume = 1f;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget) && !this.volume.IsNone)
+            {
+                base.audio.volume = this.volume.Value;
+            }
         }
     }
 }
-

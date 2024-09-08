@@ -1,26 +1,41 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets the value of a float parameter")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets the value of a float parameter")]
     public class SetAnimatorFloat : FsmStateActionAnimatorBase
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.AnimatorFloat), HutongGames.PlayMaker.Tooltip("The animator parameter")]
+
+        [RequiredField]
+        [UIHint(UIHint.AnimatorFloat)]
+        [Tooltip("The animator parameter")]
         public FsmString parameter;
-        [HutongGames.PlayMaker.Tooltip("The float value to assign to the animator parameter")]
+
+        [Tooltip("The float value to assign to the animator parameter")]
         public FsmFloat Value;
-        [HutongGames.PlayMaker.Tooltip("Optional: The time allowed to parameter to reach the value. Requires everyFrame Checked on")]
+
+        [Tooltip("Optional: The time allowed to parameter to reach the value. Requires everyFrame Checked on")]
         public FsmFloat dampTime;
+
         private Animator _animator;
+
         private int _paramID;
 
-        public override void OnActionUpdate()
+        public override void Reset()
         {
-            this.SetParameter();
+            base.Reset();
+            this.gameObject = null;
+            this.parameter = null;
+            this.dampTime = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.Value = null;
         }
 
         public override void OnEnter()
@@ -29,40 +44,30 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this._paramID = Animator.StringToHash(this.parameter.Value);
-                    this.SetParameter();
-                    if (!base.everyFrame)
-                    {
-                        base.Finish();
-                    }
-                }
+                base.Finish();
+                return;
+            }
+            this._paramID = Animator.StringToHash(this.parameter.Value);
+            this.SetParameter();
+            if (!base.everyFrame)
+            {
+                base.Finish();
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.parameter = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.dampTime = num1;
-            this.Value = null;
+            this.SetParameter();
         }
 
         private void SetParameter()
         {
-            if (this._animator != null)
+            if (!(this._animator == null))
             {
                 if (this.dampTime.Value > 0f)
                 {
@@ -76,4 +81,3 @@
         }
     }
 }
-

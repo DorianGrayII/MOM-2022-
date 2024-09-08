@@ -1,28 +1,35 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics2D), HutongGames.PlayMaker.Tooltip("Adds a 2d torque (rotational force) to a Game Object.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics2D)]
+    [Tooltip("Adds a 2d torque (rotational force) to a Game Object.")]
     public class AddTorque2d : ComponentAction<Rigidbody2D>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody2D)), HutongGames.PlayMaker.Tooltip("The GameObject to add torque to.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody2D))]
+        [Tooltip("The GameObject to add torque to.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Option for applying the force")]
+
+        [Tooltip("Option for applying the force")]
         public ForceMode2D forceMode;
-        [HutongGames.PlayMaker.Tooltip("Torque")]
+
+        [Tooltip("Torque")]
         public FsmFloat torque;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame while the state is active.")]
+
+        [Tooltip("Repeat every frame while the state is active.")]
         public bool everyFrame;
 
-        private void DoAddTorque()
+        public override void OnPreprocess()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.rigidbody2d.AddTorque(this.torque.Value, this.forceMode);
-            }
+            base.Fsm.HandleFixedUpdate = true;
+        }
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.torque = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -39,17 +46,13 @@
             this.DoAddTorque();
         }
 
-        public override void OnPreprocess()
+        private void DoAddTorque()
         {
-            base.Fsm.HandleFixedUpdate = true;
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.torque = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.rigidbody2d.AddTorque(this.torque.Value, this.forceMode);
+            }
         }
     }
 }
-

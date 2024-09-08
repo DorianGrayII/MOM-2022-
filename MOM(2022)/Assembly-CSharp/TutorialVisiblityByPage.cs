@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public class TutorialVisiblityByPage : MonoBehaviour
@@ -7,33 +6,26 @@ public class TutorialVisiblityByPage : MonoBehaviour
 
     private void Awake()
     {
-        TutorialPage[] visibleWithPages = this.visibleWithPages;
-        for (int i = 0; i < visibleWithPages.Length; i++)
+        TutorialPage[] array = this.visibleWithPages;
+        for (int i = 0; i < array.Length; i++)
         {
-            visibleWithPages[i].Register(this);
+            array[i].Register(this);
         }
         this.UpdateVisibility();
     }
 
     public void UpdateVisibility()
     {
-        bool flag = false;
-        TutorialPage[] visibleWithPages = this.visibleWithPages;
-        int index = 0;
-        while (true)
+        bool active = false;
+        TutorialPage[] array = this.visibleWithPages;
+        for (int i = 0; i < array.Length; i++)
         {
-            if (index < visibleWithPages.Length)
+            if (array[i].gameObject.activeSelf)
             {
-                if (!visibleWithPages[index].gameObject.activeSelf)
-                {
-                    index++;
-                    continue;
-                }
-                flag = true;
+                active = true;
+                break;
             }
-            base.gameObject.SetActive(flag);
-            return;
         }
+        base.gameObject.SetActive(active);
     }
 }
-

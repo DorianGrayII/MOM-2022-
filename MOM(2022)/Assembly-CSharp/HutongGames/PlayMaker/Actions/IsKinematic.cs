@@ -1,29 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Tests if a Game Object's Rigid Body is Kinematic.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Tests if a Game Object's Rigid Body is Kinematic.")]
     public class IsKinematic : ComponentAction<Rigidbody>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody))]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody))]
         public FsmOwnerDefault gameObject;
+
         public FsmEvent trueEvent;
+
         public FsmEvent falseEvent;
+
         [UIHint(UIHint.Variable)]
         public FsmBool store;
+
         public bool everyFrame;
 
-        private void DoIsKinematic()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                bool isKinematic = base.rigidbody.isKinematic;
-                this.store.Value = isKinematic;
-                base.Fsm.Event(isKinematic ? this.trueEvent : this.falseEvent);
-            }
+            this.gameObject = null;
+            this.trueEvent = null;
+            this.falseEvent = null;
+            this.store = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -40,14 +42,15 @@
             this.DoIsKinematic();
         }
 
-        public override void Reset()
+        private void DoIsKinematic()
         {
-            this.gameObject = null;
-            this.trueEvent = null;
-            this.falseEvent = null;
-            this.store = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                bool isKinematic = base.rigidbody.isKinematic;
+                this.store.Value = isKinematic;
+                base.Fsm.Event(isKinematic ? this.trueEvent : this.falseEvent);
+            }
         }
     }
 }
-

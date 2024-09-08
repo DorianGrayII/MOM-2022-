@@ -1,26 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets the playback position in the recording buffer. When in playback mode (use AnimatorStartPlayback), this value is used for controlling the current playback position in the buffer (in seconds). The value can range between recordingStartTime and recordingStopTime ")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets the playback position in the recording buffer. When in playback mode (use AnimatorStartPlayback), this value is used for controlling the current playback position in the buffer (in seconds). The value can range between recordingStartTime and recordingStopTime ")]
     public class SetAnimatorPlayBackTime : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The playBack time")]
+
+        [Tooltip("The playBack time")]
         public FsmFloat playbackTime;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful for changing over time.")]
+
+        [Tooltip("Repeat every frame. Useful for changing over time.")]
         public bool everyFrame;
+
         private Animator _animator;
 
-        private void DoPlaybackTime()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this._animator.playbackTime = this.playbackTime.Value;
-            }
+            this.gameObject = null;
+            this.playbackTime = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -29,22 +32,18 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoPlaybackTime();
-                    if (!this.everyFrame)
-                    {
-                        base.Finish();
-                    }
-                }
+                base.Finish();
+                return;
+            }
+            this.DoPlaybackTime();
+            if (!this.everyFrame)
+            {
+                base.Finish();
             }
         }
 
@@ -53,12 +52,12 @@
             this.DoPlaybackTime();
         }
 
-        public override void Reset()
+        private void DoPlaybackTime()
         {
-            this.gameObject = null;
-            this.playbackTime = null;
-            this.everyFrame = false;
+            if (!(this._animator == null))
+            {
+                this._animator.playbackTime = this.playbackTime.Value;
+            }
         }
     }
 }
-

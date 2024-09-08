@@ -1,37 +1,47 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the text value of a UI InputField component as an Int.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the text value of a UI InputField component as an Int.")]
     public class UiInputFieldGetTextAsInt : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the text value as an int.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the text value as an int.")]
         public FsmInt value;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("True if text resolves to an int")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("True if text resolves to an int")]
         public FsmBool isInt;
-        [HutongGames.PlayMaker.Tooltip("Event to send if text resolves to an int")]
+
+        [Tooltip("Event to send if text resolves to an int")]
         public FsmEvent isIntEvent;
-        [HutongGames.PlayMaker.Tooltip("Event to send if text does NOT resolve to an int")]
+
+        [Tooltip("Event to send if text does NOT resolve to an int")]
         public FsmEvent isNotIntEvent;
+
         public bool everyFrame;
+
         private InputField inputField;
+
         private int _value;
+
         private bool _success;
 
-        private void DoGetTextValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this._success = int.TryParse(this.inputField.text, out this._value);
-                this.value.Value = this._value;
-                this.isInt.Value = this._success;
-                base.Fsm.Event(this._success ? this.isIntEvent : this.isNotIntEvent);
-            }
+            this.value = null;
+            this.isInt = null;
+            this.isIntEvent = null;
+            this.isNotIntEvent = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -53,14 +63,15 @@
             this.DoGetTextValue();
         }
 
-        public override void Reset()
+        private void DoGetTextValue()
         {
-            this.value = null;
-            this.isInt = null;
-            this.isIntEvent = null;
-            this.isNotIntEvent = null;
-            this.everyFrame = false;
+            if (!(this.inputField == null))
+            {
+                this._success = int.TryParse(this.inputField.text, out this._value);
+                this.value.Value = this._value;
+                this.isInt.Value = this._success;
+                base.Fsm.Event(this._success ? this.isIntEvent : this.isNotIntEvent);
+            }
         }
     }
 }
-

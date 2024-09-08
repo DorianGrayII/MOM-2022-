@@ -1,14 +1,19 @@
-﻿using System;
 using UnityEngine;
 
 public class ME_LightCurves : MonoBehaviour
 {
     public AnimationCurve LightCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
     public float GraphTimeMultiplier = 1f;
+
     public float GraphIntensityMultiplier = 1f;
+
     public bool IsLoop;
+
     private bool canUpdate;
+
     private float startTime;
+
     private Light lightSource;
 
     private void Awake()
@@ -28,8 +33,8 @@ public class ME_LightCurves : MonoBehaviour
         float num = Time.time - this.startTime;
         if (this.canUpdate)
         {
-            float num2 = this.LightCurve.Evaluate(num / this.GraphTimeMultiplier) * this.GraphIntensityMultiplier;
-            this.lightSource.intensity = num2;
+            float intensity = this.LightCurve.Evaluate(num / this.GraphTimeMultiplier) * this.GraphIntensityMultiplier;
+            this.lightSource.intensity = intensity;
         }
         if (num >= this.GraphTimeMultiplier)
         {
@@ -44,4 +49,3 @@ public class ME_LightCurves : MonoBehaviour
         }
     }
 }
-

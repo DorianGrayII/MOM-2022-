@@ -1,28 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.String), Tooltip("Select a Random String from an array of Strings.")]
+    [ActionCategory(ActionCategory.String)]
+    [Tooltip("Select a Random String from an array of Strings.")]
     public class SelectRandomString : FsmStateAction
     {
         [CompoundArray("Strings", "String", "Weight")]
         public FsmString[] strings;
+
         [HasFloatSlider(0f, 1f)]
         public FsmFloat[] weights;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString storeString;
 
-        private void DoSelectRandomString()
+        public override void Reset()
         {
-            if (((this.strings != null) && (this.strings.Length != 0)) && (this.storeString != null))
-            {
-                int randomWeightedIndex = ActionHelpers.GetRandomWeightedIndex(this.weights);
-                if (randomWeightedIndex != -1)
-                {
-                    this.storeString.Value = this.strings[randomWeightedIndex].Value;
-                }
-            }
+            this.strings = new FsmString[3];
+            this.weights = new FsmFloat[3] { 1f, 1f, 1f };
+            this.storeString = null;
         }
 
         public override void OnEnter()
@@ -31,12 +27,16 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSelectRandomString()
         {
-            this.strings = new FsmString[3];
-            this.weights = new FsmFloat[] { 1f, 1f, 1f };
-            this.storeString = null;
+            if (this.strings != null && this.strings.Length != 0 && this.storeString != null)
+            {
+                int randomWeightedIndex = ActionHelpers.GetRandomWeightedIndex(this.weights);
+                if (randomWeightedIndex != -1)
+                {
+                    this.storeString.Value = this.strings[randomWeightedIndex].Value;
+                }
+            }
         }
     }
 }
-

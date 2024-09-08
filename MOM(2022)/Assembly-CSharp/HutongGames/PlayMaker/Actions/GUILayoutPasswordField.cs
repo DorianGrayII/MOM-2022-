@@ -1,47 +1,50 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("GUILayout Password Field. Optionally send an event if the text has been edited.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("GUILayout Password Field. Optionally send an event if the text has been edited.")]
     public class GUILayoutPasswordField : GUILayoutAction
     {
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The password Text")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The password Text")]
         public FsmString text;
-        [HutongGames.PlayMaker.Tooltip("The Maximum Length of the field")]
+
+        [Tooltip("The Maximum Length of the field")]
         public FsmInt maxLength;
-        [HutongGames.PlayMaker.Tooltip("The Style of the Field")]
+
+        [Tooltip("The Style of the Field")]
         public FsmString style;
-        [HutongGames.PlayMaker.Tooltip("Event sent when field content changed")]
+
+        [Tooltip("Event sent when field content changed")]
         public FsmEvent changedEvent;
-        [HutongGames.PlayMaker.Tooltip("Replacement character to hide the password")]
+
+        [Tooltip("Replacement character to hide the password")]
         public FsmString mask;
+
+        public override void Reset()
+        {
+            this.text = null;
+            this.maxLength = 25;
+            this.style = "TextField";
+            this.mask = "*";
+            this.changedEvent = null;
+        }
 
         public override void OnGUI()
         {
             bool changed = GUI.changed;
             GUI.changed = false;
             this.text.Value = GUILayout.PasswordField(this.text.Value, this.mask.Value[0], this.style.Value, base.LayoutOptions);
-            if (!GUI.changed)
-            {
-                GUI.changed = changed;
-            }
-            else
+            if (GUI.changed)
             {
                 base.Fsm.Event(this.changedEvent);
                 GUIUtility.ExitGUI();
             }
-        }
-
-        public override void Reset()
-        {
-            this.text = null;
-            this.maxLength = 0x19;
-            this.style = "TextField";
-            this.mask = "*";
-            this.changedEvent = null;
+            else
+            {
+                GUI.changed = changed;
+            }
         }
     }
 }
-

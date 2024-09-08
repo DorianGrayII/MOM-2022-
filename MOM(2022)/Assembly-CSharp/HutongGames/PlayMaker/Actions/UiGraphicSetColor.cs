@@ -1,59 +1,64 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Set Graphic Color. E.g. to set Sprite Color.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Set Graphic Color. E.g. to set Sprite Color.")]
     public class UiGraphicSetColor : ComponentAction<Graphic>
     {
-        [RequiredField, CheckForComponent(typeof(Graphic)), HutongGames.PlayMaker.Tooltip("The GameObject with a UI component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Graphic))]
+        [Tooltip("The GameObject with a UI component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The Color of the UI component. Leave to none and set the individual color values, for example to affect just the alpha channel")]
+
+        [Tooltip("The Color of the UI component. Leave to none and set the individual color values, for example to affect just the alpha channel")]
         public FsmColor color;
-        [HutongGames.PlayMaker.Tooltip("The red channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
+
+        [Tooltip("The red channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
         public FsmFloat red;
-        [HutongGames.PlayMaker.Tooltip("The green channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
+
+        [Tooltip("The green channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
         public FsmFloat green;
-        [HutongGames.PlayMaker.Tooltip("The blue channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
+
+        [Tooltip("The blue channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
         public FsmFloat blue;
-        [HutongGames.PlayMaker.Tooltip("The alpha channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
+
+        [Tooltip("The alpha channel Color of the UI component. Leave to none for no effect, else it overrides the color property")]
         public FsmFloat alpha;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame, useful for animation")]
+
+        [Tooltip("Repeats every frame, useful for animation")]
         public bool everyFrame;
+
         private Graphic uiComponent;
+
         private Color originalColor;
 
-        private void DoSetColorValue()
+        public override void Reset()
         {
-            if (this.uiComponent != null)
+            this.gameObject = null;
+            this.color = null;
+            this.red = new FsmFloat
             {
-                Color color = this.uiComponent.color;
-                if (!this.color.IsNone)
-                {
-                    color = this.color.get_Value();
-                }
-                if (!this.red.IsNone)
-                {
-                    color.r = this.red.Value;
-                }
-                if (!this.green.IsNone)
-                {
-                    color.g = this.green.Value;
-                }
-                if (!this.blue.IsNone)
-                {
-                    color.b = this.blue.Value;
-                }
-                if (!this.alpha.IsNone)
-                {
-                    color.a = this.alpha.Value;
-                }
-                this.uiComponent.color = color;
-            }
+                UseVariable = true
+            };
+            this.green = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.blue = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.alpha = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -71,38 +76,46 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.uiComponent != null) && this.resetOnExit.Value)
-            {
-                this.uiComponent.color = this.originalColor;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetColorValue();
         }
 
-        public override void Reset()
+        private void DoSetColorValue()
         {
-            this.gameObject = null;
-            this.color = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.red = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.green = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.blue = num3;
-            FsmFloat num4 = new FsmFloat();
-            num4.UseVariable = true;
-            this.alpha = num4;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (!(this.uiComponent == null))
+            {
+                Color value = this.uiComponent.color;
+                if (!this.color.IsNone)
+                {
+                    value = this.color.Value;
+                }
+                if (!this.red.IsNone)
+                {
+                    value.r = this.red.Value;
+                }
+                if (!this.green.IsNone)
+                {
+                    value.g = this.green.Value;
+                }
+                if (!this.blue.IsNone)
+                {
+                    value.b = this.blue.Value;
+                }
+                if (!this.alpha.IsNone)
+                {
+                    value.a = this.alpha.Value;
+                }
+                this.uiComponent.color = value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.uiComponent == null) && this.resetOnExit.Value)
+            {
+                this.uiComponent.color = this.originalColor;
+            }
         }
     }
 }
-

@@ -1,10 +1,10 @@
-﻿using MOM;
-using System;
+using MOM;
 
 public interface IAttributable
 {
-    void AfterDeserialize();
-    void AttributesChanged();
     Attributes GetAttributes();
-}
 
+    void AfterDeserialize();
+
+    void AttributesChanged();
+}

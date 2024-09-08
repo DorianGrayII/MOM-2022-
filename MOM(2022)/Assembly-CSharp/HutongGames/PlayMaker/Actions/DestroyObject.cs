@@ -1,35 +1,44 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Destroys a Game Object.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Destroys a Game Object.")]
     public class DestroyObject : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The GameObject to destroy.")]
+        [RequiredField]
+        [Tooltip("The GameObject to destroy.")]
         public FsmGameObject gameObject;
-        [HasFloatSlider(0f, 5f), HutongGames.PlayMaker.Tooltip("Optional delay before destroying the Game Object.")]
+
+        [HasFloatSlider(0f, 5f)]
+        [Tooltip("Optional delay before destroying the Game Object.")]
         public FsmFloat delay;
-        [HutongGames.PlayMaker.Tooltip("Detach children before destroying the Game Object.")]
+
+        [Tooltip("Detach children before destroying the Game Object.")]
         public FsmBool detachChildren;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.delay = 0f;
+        }
 
         public override void OnEnter()
         {
-            GameObject obj2 = this.gameObject.get_Value();
-            if (obj2 != null)
+            GameObject value = this.gameObject.Value;
+            if (value != null)
             {
                 if (this.delay.Value <= 0f)
                 {
-                    UnityEngine.Object.Destroy(obj2);
+                    Object.Destroy(value);
                 }
                 else
                 {
-                    UnityEngine.Object.Destroy(obj2, this.delay.Value);
+                    Object.Destroy(value, this.delay.Value);
                 }
                 if (this.detachChildren.Value)
                 {
-                    obj2.transform.DetachChildren();
+                    value.transform.DetachChildren();
                 }
             }
             base.Finish();
@@ -38,12 +47,5 @@
         public override void OnUpdate()
         {
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.delay = 0f;
-        }
     }
 }
-

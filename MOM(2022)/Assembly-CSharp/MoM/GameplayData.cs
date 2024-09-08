@@ -1,11 +1,9 @@
-﻿namespace MOM
-{
-    using ProtoBuf;
-    using System;
+using ProtoBuf;
 
+namespace MOM
+{
     [ProtoContract]
     public class GameplayData
     {
     }
 }
-

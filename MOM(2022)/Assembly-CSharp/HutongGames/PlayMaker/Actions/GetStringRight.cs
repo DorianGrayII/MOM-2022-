@@ -1,29 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.String), HutongGames.PlayMaker.Tooltip("Gets the Right n characters from a String.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.String)]
+    [Tooltip("Gets the Right n characters from a String.")]
     public class GetStringRight : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString stringVariable;
-        [HutongGames.PlayMaker.Tooltip("Number of characters to get.")]
+
+        [Tooltip("Number of characters to get.")]
         public FsmInt charCount;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString storeResult;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoGetStringRight()
+        public override void Reset()
         {
-            if (!this.stringVariable.IsNone && !this.storeResult.IsNone)
-            {
-                string str = this.stringVariable.Value;
-                int length = Mathf.Clamp(this.charCount.Value, 0, str.Length);
-                this.storeResult.Value = str.Substring(str.Length - length, length);
-            }
+            this.stringVariable = null;
+            this.charCount = 0;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -40,13 +42,14 @@
             this.DoGetStringRight();
         }
 
-        public override void Reset()
+        private void DoGetStringRight()
         {
-            this.stringVariable = null;
-            this.charCount = 0;
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (!this.stringVariable.IsNone && !this.storeResult.IsNone)
+            {
+                string value = this.stringVariable.Value;
+                int num = Mathf.Clamp(this.charCount.Value, 0, value.Length);
+                this.storeResult.Value = value.Substring(value.Length - num, num);
+            }
         }
     }
 }
-

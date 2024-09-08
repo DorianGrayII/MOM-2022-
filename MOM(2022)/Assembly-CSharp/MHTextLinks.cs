@@ -1,12 +1,17 @@
-﻿using MHUtils.UI;
-using System;
+using MHUtils.UI;
 using TMPro;
 using UnityEngine;
 
 public class MHTextLinks : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;
+
     private bool tooltipOpen;
+
+    private void Start()
+    {
+        this.textMesh = base.GetComponent<TextMeshProUGUI>();
+    }
 
     private void OnDestroy()
     {
@@ -17,31 +22,22 @@ public class MHTextLinks : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        this.textMesh = base.GetComponent<TextMeshProUGUI>();
-    }
-
     private void Update()
     {
-        int index = TMP_TextUtilities.FindIntersectingLink(this.textMesh, Input.mousePosition, null);
-        if (index == -1)
+        int num = TMP_TextUtilities.FindIntersectingLink(this.textMesh, Input.mousePosition, null);
+        if (num != -1)
         {
-            if (this.tooltipOpen)
-            {
-                TooltipBase.Close();
-                this.tooltipOpen = false;
-            }
-        }
-        else
-        {
-            TMP_LinkInfo info = this.textMesh.textInfo.linkInfo[index];
+            TMP_LinkInfo tMP_LinkInfo = this.textMesh.textInfo.linkInfo[num];
             if (UIManager.IsTopForInput(base.gameObject.GetComponentInParent<ScreenBase>()) && !this.tooltipOpen)
             {
-                TooltipBase.Open(info.GetLinkID(), null);
+                TooltipBase.Open(tMP_LinkInfo.GetLinkID());
                 this.tooltipOpen = true;
             }
         }
+        else if (this.tooltipOpen)
+        {
+            TooltipBase.Close();
+            this.tooltipOpen = false;
+        }
     }
 }
-

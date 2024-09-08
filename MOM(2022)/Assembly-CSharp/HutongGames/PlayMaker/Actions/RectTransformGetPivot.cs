@@ -1,41 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Get the normalized position in this RectTransform that it rotates around.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Get the normalized position in this RectTransform that it rotates around.")]
     public class RectTransformGetPivot : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The pivot"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The pivot")]
+        [UIHint(UIHint.Variable)]
         public FsmVector2 pivot;
-        [HutongGames.PlayMaker.Tooltip("The x component of the pivot"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The x component of the pivot")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("The y component of the pivot"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The y component of the pivot")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoGetValues()
+        public override void Reset()
         {
-            if (!this.pivot.IsNone)
-            {
-                this.pivot.set_Value(this._rt.pivot);
-            }
-            if (!this.x.IsNone)
-            {
-                this.x.Value = this._rt.pivot.x;
-            }
-            if (!this.y.IsNone)
-            {
-                this.y.Value = this._rt.pivot.y;
-            }
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoGetValues();
+            base.Reset();
+            this.gameObject = null;
+            this.pivot = null;
+            this.x = null;
+            this.y = null;
         }
 
         public override void OnEnter()
@@ -52,14 +48,25 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.pivot = null;
-            this.x = null;
-            this.y = null;
+            this.DoGetValues();
+        }
+
+        private void DoGetValues()
+        {
+            if (!this.pivot.IsNone)
+            {
+                this.pivot.Value = this._rt.pivot;
+            }
+            if (!this.x.IsNone)
+            {
+                this.x.Value = this._rt.pivot.x;
+            }
+            if (!this.y.IsNone)
+            {
+                this.y.Value = this._rt.pivot.y;
+            }
         }
     }
 }
-

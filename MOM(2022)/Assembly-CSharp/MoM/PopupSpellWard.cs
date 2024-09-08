@@ -1,99 +1,99 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.PopupSpellWard
 using System.Collections;
 using DBDef;
 using DBEnum;
 using MHUtils.UI;
-using MOM;
 using UnityEngine.UI;
 
-public class PopupSpellWard : ScreenBase
+namespace MOM
 {
-    public Button btCancel;
-
-    public Button btNatureWard;
-
-    public Button btSorceryWard;
-
-    public Button btChaosWard;
-
-    public Button btLifeWard;
-
-    public Button btDeathWard;
-
-    private static PopupSpellWard instance;
-
-    private Callback select;
-
-    private Callback cancel;
-
-    public static void OpenPopup(ScreenBase parent, Callback cancel = null, Callback select = null)
+    public class PopupSpellWard : ScreenBase
     {
-        PopupSpellWard.instance = UIManager.Open<PopupSpellWard>(UIManager.Layer.Popup, parent);
-        PopupSpellWard.instance.cancel = cancel;
-        PopupSpellWard.instance.select = select;
-    }
+        public Button btCancel;
 
-    public static bool IsOpen()
-    {
-        return PopupSpellWard.instance != null;
-    }
+        public Button btNatureWard;
 
-    public override IEnumerator Closing()
-    {
-        PopupSpellWard.instance = null;
-        yield return base.Closing();
-    }
+        public Button btSorceryWard;
 
-    protected override void ButtonClick(Selectable s)
-    {
-        base.ButtonClick(s);
-        if (s == this.btCancel)
+        public Button btChaosWard;
+
+        public Button btLifeWard;
+
+        public Button btDeathWard;
+
+        private static PopupSpellWard instance;
+
+        private Callback select;
+
+        private Callback cancel;
+
+        public static void OpenPopup(ScreenBase parent, Callback cancel = null, Callback select = null)
         {
-            UIManager.Close(this);
-            if (this.cancel != null)
-            {
-                this.cancel(null);
-            }
+            PopupSpellWard.instance = UIManager.Open<PopupSpellWard>(UIManager.Layer.Popup, parent);
+            PopupSpellWard.instance.cancel = cancel;
+            PopupSpellWard.instance.select = select;
         }
-        else if (s == this.btNatureWard)
+
+        public static bool IsOpen()
         {
-            UIManager.Close(this);
-            if (this.select != null)
-            {
-                this.select((Enchantment)ENCH.SPELL_WARD_NATURE);
-            }
+            return PopupSpellWard.instance != null;
         }
-        else if (s == this.btSorceryWard)
+
+        public override IEnumerator Closing()
         {
-            UIManager.Close(this);
-            if (this.select != null)
-            {
-                this.select((Enchantment)ENCH.SPELL_WARD_SORCERY);
-            }
+            PopupSpellWard.instance = null;
+            yield return base.Closing();
         }
-        else if (s == this.btChaosWard)
+
+        protected override void ButtonClick(Selectable s)
         {
-            UIManager.Close(this);
-            if (this.select != null)
+            base.ButtonClick(s);
+            if (s == this.btCancel)
             {
-                this.select((Enchantment)ENCH.SPELL_WARD_CHAOS);
+                UIManager.Close(this);
+                if (this.cancel != null)
+                {
+                    this.cancel(null);
+                }
             }
-        }
-        else if (s == this.btLifeWard)
-        {
-            UIManager.Close(this);
-            if (this.select != null)
+            else if (s == this.btNatureWard)
             {
-                this.select((Enchantment)ENCH.SPELL_WARD_LIFE);
+                UIManager.Close(this);
+                if (this.select != null)
+                {
+                    this.select((Enchantment)ENCH.SPELL_WARD_NATURE);
+                }
             }
-        }
-        else if (s == this.btDeathWard)
-        {
-            UIManager.Close(this);
-            if (this.select != null)
+            else if (s == this.btSorceryWard)
             {
-                this.select((Enchantment)ENCH.SPELL_WARD_DEATH);
+                UIManager.Close(this);
+                if (this.select != null)
+                {
+                    this.select((Enchantment)ENCH.SPELL_WARD_SORCERY);
+                }
+            }
+            else if (s == this.btChaosWard)
+            {
+                UIManager.Close(this);
+                if (this.select != null)
+                {
+                    this.select((Enchantment)ENCH.SPELL_WARD_CHAOS);
+                }
+            }
+            else if (s == this.btLifeWard)
+            {
+                UIManager.Close(this);
+                if (this.select != null)
+                {
+                    this.select((Enchantment)ENCH.SPELL_WARD_LIFE);
+                }
+            }
+            else if (s == this.btDeathWard)
+            {
+                UIManager.Close(this);
+                if (this.select != null)
+                {
+                    this.select((Enchantment)ENCH.SPELL_WARD_DEATH);
+                }
             }
         }
     }

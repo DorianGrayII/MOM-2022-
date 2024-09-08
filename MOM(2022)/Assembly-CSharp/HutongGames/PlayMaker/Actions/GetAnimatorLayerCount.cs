@@ -1,24 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Returns the Animator controller layer count")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Returns the Animator controller layer count")]
     public class GetAnimatorLayerCount : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [ActionSection("Results"), RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Animator controller layer count")]
+
+        [ActionSection("Results")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Animator controller layer count")]
         public FsmInt layerCount;
+
         private Animator _animator;
 
-        private void DoGetLayerCount()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this.layerCount.Value = this._animator.layerCount;
-            }
+            this.gameObject = null;
+            this.layerCount = null;
         }
 
         public override void OnEnter()
@@ -27,27 +31,24 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoGetLayerCount();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
+            this.DoGetLayerCount();
+            base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetLayerCount()
         {
-            this.gameObject = null;
-            this.layerCount = null;
+            if (!(this._animator == null))
+            {
+                this.layerCount.Value = this._animator.layerCount;
+            }
         }
     }
 }
-

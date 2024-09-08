@@ -1,36 +1,39 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Transform), HutongGames.PlayMaker.Tooltip("Gets the Position of a Game Object and stores it in a Vector3 Variable or each Axis in a Float Variable")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Transform)]
+    [Tooltip("Gets the Position of a Game Object and stores it in a Vector3 Variable or each Axis in a Float Variable")]
     public class GetPosition : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [UIHint(UIHint.Variable)]
         public FsmVector3 vector;
+
         [UIHint(UIHint.Variable)]
         public FsmFloat x;
+
         [UIHint(UIHint.Variable)]
         public FsmFloat y;
+
         [UIHint(UIHint.Variable)]
         public FsmFloat z;
+
         public Space space;
+
         public bool everyFrame;
 
-        private void DoGetPosition()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                Vector3 vector = (this.space == Space.World) ? ownerDefaultTarget.transform.position : ownerDefaultTarget.transform.localPosition;
-                this.vector.set_Value(vector);
-                this.x.Value = vector.x;
-                this.y.Value = vector.y;
-                this.z.Value = vector.z;
-            }
+            this.gameObject = null;
+            this.vector = null;
+            this.x = null;
+            this.y = null;
+            this.z = null;
+            this.space = Space.World;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -47,16 +50,17 @@
             this.DoGetPosition();
         }
 
-        public override void Reset()
+        private void DoGetPosition()
         {
-            this.gameObject = null;
-            this.vector = null;
-            this.x = null;
-            this.y = null;
-            this.z = null;
-            this.space = Space.World;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                Vector3 value = ((this.space == Space.World) ? ownerDefaultTarget.transform.position : ownerDefaultTarget.transform.localPosition);
+                this.vector.Value = value;
+                this.x.Value = value.x;
+                this.y.Value = value.y;
+                this.z.Value = value.z;
+            }
         }
     }
 }
-

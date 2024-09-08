@@ -1,11 +1,12 @@
-﻿using MOM;
-using System;
+using DBDef;
+using MOM;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class TownMapBuilding : RolloverObject
 {
     public TownMap townMap;
+
     public DBReference<Building> building;
 
     public void Awake()
@@ -18,15 +19,15 @@ public class TownMapBuilding : RolloverObject
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
-        if (this.building.dbName != "SUMMONING_CIRCLE")
-        {
-            base.source = this.building.Get();
-        }
-        else
+        if (this.building.dbName == "SUMMONING_CIRCLE")
         {
             base.overrideTitle = "DES_EXTRA_SUMMONING_CIRCLE";
             base.overrideDescription = "DES_EXTRA_SUMMONING_CIRCLE_DES";
             base.source = null;
+        }
+        else
+        {
+            base.source = this.building.Get();
         }
         this.townMap.Select(this.building);
         base.OnPointerEnter(eventData);
@@ -38,4 +39,3 @@ public class TownMapBuilding : RolloverObject
         base.OnPointerExit(eventData);
     }
 }
-

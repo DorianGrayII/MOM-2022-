@@ -1,24 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("If true, automatically stabilize feet during transition and blending")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("If true, automatically stabilize feet during transition and blending")]
     public class SetAnimatorStabilizeFeet : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("If true, automatically stabilize feet during transition and blending")]
+
+        [Tooltip("If true, automatically stabilize feet during transition and blending")]
         public FsmBool stabilizeFeet;
+
         private Animator _animator;
 
-        private void DoStabilizeFeet()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this._animator.stabilizeFeet = this.stabilizeFeet.Value;
-            }
+            this.gameObject = null;
+            this.stabilizeFeet = null;
         }
 
         public override void OnEnter()
@@ -27,27 +28,24 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoStabilizeFeet();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
+            this.DoStabilizeFeet();
+            base.Finish();
         }
 
-        public override void Reset()
+        private void DoStabilizeFeet()
         {
-            this.gameObject = null;
-            this.stabilizeFeet = null;
+            if (!(this._animator == null))
+            {
+                this._animator.stabilizeFeet = this.stabilizeFeet.Value;
+            }
         }
     }
 }
-

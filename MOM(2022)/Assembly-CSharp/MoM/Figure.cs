@@ -1,7 +1,6 @@
-﻿namespace MOM
+namespace MOM
 {
     public class Figure : CharacterActor
     {
     }
 }
-

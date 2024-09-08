@@ -1,31 +1,36 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Logic), ActionTarget(typeof(GameObject), "gameObject", false), HutongGames.PlayMaker.Tooltip("Tests if a Game Object is visible.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Logic)]
+    [ActionTarget(typeof(GameObject), "gameObject", false)]
+    [Tooltip("Tests if a Game Object is visible.")]
     public class GameObjectIsVisible : ComponentAction<Renderer>
     {
-        [RequiredField, CheckForComponent(typeof(Renderer)), HutongGames.PlayMaker.Tooltip("The GameObject to test.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Renderer))]
+        [Tooltip("The GameObject to test.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Event to send if the GameObject is visible.")]
+
+        [Tooltip("Event to send if the GameObject is visible.")]
         public FsmEvent trueEvent;
-        [HutongGames.PlayMaker.Tooltip("Event to send if the GameObject is NOT visible.")]
+
+        [Tooltip("Event to send if the GameObject is NOT visible.")]
         public FsmEvent falseEvent;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the result in a bool variable.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in a bool variable.")]
         public FsmBool storeResult;
+
         public bool everyFrame;
 
-        private void DoIsVisible()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                bool isVisible = base.renderer.isVisible;
-                this.storeResult.Value = isVisible;
-                base.Fsm.Event(isVisible ? this.trueEvent : this.falseEvent);
-            }
+            this.gameObject = null;
+            this.trueEvent = null;
+            this.falseEvent = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,14 +47,15 @@
             this.DoIsVisible();
         }
 
-        public override void Reset()
+        private void DoIsVisible()
         {
-            this.gameObject = null;
-            this.trueEvent = null;
-            this.falseEvent = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                bool isVisible = base.renderer.isVisible;
+                this.storeResult.Value = isVisible;
+                base.Fsm.Event(isVisible ? this.trueEvent : this.falseEvent);
+            }
         }
     }
 }
-

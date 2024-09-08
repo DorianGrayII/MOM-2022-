@@ -1,16 +1,19 @@
-﻿namespace MOM
-{
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Threading;
-    using UnityEngine;
+using UnityEngine;
 
+namespace MOM
+{
     public class AnimatorTrigger : MonoBehaviour
     {
+        public delegate void Listener(AnimatorTrigger source);
+
         public Transform location;
+
         public GameObject instanceSource;
+
         public GameObject onHitEffect;
+
         public bool highLobProjectile;
+
         public bool lowLobProjectile;
 
         public event Listener onTrigger;
@@ -20,29 +23,19 @@
             this.onTrigger += listener;
         }
 
-        public void RemoveAllListeners()
-        {
-            this.onTrigger = null;
-        }
-
         public void RemoveListener(Listener listener)
         {
             this.onTrigger -= listener;
         }
 
-        public void Trigger()
+        public void RemoveAllListeners()
         {
-            if (this.onTrigger == null)
-            {
-                Listener onTrigger = this.onTrigger;
-            }
-            else
-            {
-                this.onTrigger(this);
-            }
+            this.onTrigger = null;
         }
 
-        public delegate void Listener(AnimatorTrigger source);
+        public void Trigger()
+        {
+            this.onTrigger?.Invoke(this);
+        }
     }
 }
-

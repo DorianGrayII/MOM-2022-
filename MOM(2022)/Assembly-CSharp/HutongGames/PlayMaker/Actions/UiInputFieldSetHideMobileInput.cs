@@ -1,28 +1,34 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the Hide Mobile Input property of a UI InputField component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the Hide Mobile Input property of a UI InputField component.")]
     public class UiInputFieldSetHideMobileInput : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.TextArea), HutongGames.PlayMaker.Tooltip("The Hide Mobile Input flag value of the UI InputField component.")]
+
+        [RequiredField]
+        [UIHint(UIHint.TextArea)]
+        [Tooltip("The Hide Mobile Input flag value of the UI InputField component.")]
         public FsmBool hideMobileInput;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private InputField inputField;
+
         private bool originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.inputField.shouldHideMobileInput = this.hideMobileInput.Value;
-            }
+            this.gameObject = null;
+            this.hideMobileInput = null;
+            this.resetOnExit = null;
         }
 
         public override void OnEnter()
@@ -37,20 +43,20 @@
             base.Finish();
         }
 
+        private void DoSetValue()
+        {
+            if (this.inputField != null)
+            {
+                this.inputField.shouldHideMobileInput = this.hideMobileInput.Value;
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.inputField != null) && this.resetOnExit.Value)
+            if (!(this.inputField == null) && this.resetOnExit.Value)
             {
                 this.inputField.shouldHideMobileInput = this.originalValue;
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.hideMobileInput = null;
-            this.resetOnExit = null;
-        }
     }
 }
-

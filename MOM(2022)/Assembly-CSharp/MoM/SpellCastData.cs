@@ -1,26 +1,24 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using DBEnum;
-    using MHUtils;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using DBDef;
+using DBEnum;
+using MHUtils;
+using UnityEngine;
 
+namespace MOM
+{
     public class SpellCastData
     {
         public ISpellCaster caster;
-        public List<BattleUnit> casterFriendly;
-        public List<BattleUnit> casterEnemy;
-        public Battle battle;
-        public int friendlyValue;
-        public int enemyValue;
 
-        public SpellCastData(ISpellCaster caster, Battle source)
-        {
-            this.caster = caster;
-            this.battle = source;
-        }
+        public List<BattleUnit> casterFriendly;
+
+        public List<BattleUnit> casterEnemy;
+
+        public Battle battle;
+
+        public int friendlyValue;
+
+        public int enemyValue;
 
         public SpellCastData(ISpellCaster caster, List<BattleUnit> own, List<BattleUnit> opposing)
         {
@@ -29,98 +27,51 @@
             this.casterEnemy = opposing;
         }
 
-        public BattleUnit CreateSummon(int owner, DBDef.Unit unit)
+        public SpellCastData(ISpellCaster caster, Battle source)
         {
-            bool attackingSide = !(this.caster is BattleUnit) ? (((this.casterFriendly == null) || (this.casterFriendly.Count <= 0)) || this.casterFriendly[0].attackingSide) : (this.caster as BattleUnit).attackingSide;
-            MOM.Unit source = MOM.Unit.CreateFrom(unit, false);
-            BattleUnit unit2 = BattleUnit.Create(source, false, owner, attackingSide);
-            unit2.battlePosition = Vector3i.zero;
-            source.simulationUnit = true;
-            unit2.simulated = true;
-            if (unit2.GetWizardOwner() != null)
-            {
-                unit2.GetWizardOwner().ModifyUnitSkillsByTraits(unit2);
-            }
-            this.casterFriendly.Add(unit2);
-            return unit2;
-        }
-
-        public void DebugUnitRefresh()
-        {
-            foreach (BattleUnit local1 in this.GetFriendlyUnits())
-            {
-                local1.figureCount = local1.maxCount;
-                FInt attFinal = IAttributeableExtension.GetAttFinal(local1, TAG.HIT_POINTS);
-                local1.currentFigureHP = attFinal.ToInt();
-            }
-            foreach (BattleUnit local2 in this.GetEnemyUnits())
-            {
-                local2.figureCount = local2.maxCount;
-                local2.currentFigureHP = IAttributeableExtension.GetAttFinal(local2, TAG.HIT_POINTS).ToInt();
-            }
+            this.caster = caster;
+            this.battle = source;
         }
 
         private void EnsureFriendlyFoeInitialization()
         {
-            if (this.casterFriendly == null)
+            if (this.casterFriendly != null)
             {
-                if (this.caster is PlayerWizard)
+                return;
+            }
+            if (this.caster is PlayerWizard)
+            {
+                if (this.battle.attacker.GetWizardOwner() == this.caster)
                 {
-                    if (ReferenceEquals(this.battle.attacker.GetWizardOwner(), this.caster))
-                    {
-                        this.casterFriendly = this.battle.GetUnits(true);
-                        this.casterEnemy = this.battle.GetUnits(false);
-                    }
-                    else
-                    {
-                        this.casterFriendly = this.battle.GetUnits(false);
-                        this.casterEnemy = this.battle.GetUnits(true);
-                    }
-                }
-                else if (!(this.caster is BattleUnit))
-                {
-                    Debug.LogError("Unsupported! battle cast data");
+                    this.casterFriendly = this.battle.GetUnits(attacker: true);
+                    this.casterEnemy = this.battle.GetUnits(attacker: false);
                 }
                 else
                 {
-                    BattleUnit caster = this.caster as BattleUnit;
-                    if (ReferenceEquals(this.battle.attacker.GetWizardOwner(), caster.GetWizardOwner()))
-                    {
-                        this.casterFriendly = this.battle.GetUnits(true);
-                        this.casterEnemy = this.battle.GetUnits(false);
-                    }
-                    else
-                    {
-                        this.casterFriendly = this.battle.GetUnits(false);
-                        this.casterEnemy = this.battle.GetUnits(true);
-                    }
+                    this.casterFriendly = this.battle.GetUnits(attacker: false);
+                    this.casterEnemy = this.battle.GetUnits(attacker: true);
                 }
-                this.friendlyValue = 0;
-                this.enemyValue = 0;
             }
-        }
-
-        public BattleUnit GetCasterAsBattleUnit()
-        {
-            return (this.caster as BattleUnit);
-        }
-
-        public List<BattleUnit> GetEnemyUnits()
-        {
-            this.EnsureFriendlyFoeInitialization();
-            return this.casterEnemy;
-        }
-
-        public int GetEnemyValue()
-        {
-            if (this.enemyValue == 0)
+            else if (this.caster is BattleUnit)
             {
-                foreach (BattleUnit unit in this.GetEnemyUnits())
+                BattleUnit battleUnit = this.caster as BattleUnit;
+                if (this.battle.attacker.GetWizardOwner() == battleUnit.GetWizardOwner())
                 {
-                    this.enemyValue += unit.GetBattleUnitValue();
+                    this.casterFriendly = this.battle.GetUnits(attacker: true);
+                    this.casterEnemy = this.battle.GetUnits(attacker: false);
+                }
+                else
+                {
+                    this.casterFriendly = this.battle.GetUnits(attacker: false);
+                    this.casterEnemy = this.battle.GetUnits(attacker: true);
                 }
             }
-            return this.enemyValue;
+            else
+            {
+                Debug.LogError("Unsupported! battle cast data");
+            }
+            this.friendlyValue = 0;
+            this.enemyValue = 0;
         }
 
         public List<BattleUnit> GetFriendlyUnits()
@@ -129,39 +80,89 @@
             return this.casterFriendly;
         }
 
-        public int GetFriendlyValue()
+        public List<BattleUnit> GetEnemyUnits()
         {
-            if (this.friendlyValue == 0)
-            {
-                foreach (BattleUnit unit in this.GetFriendlyUnits())
-                {
-                    this.friendlyValue += unit.GetBattleUnitValue();
-                }
-            }
-            return this.friendlyValue;
+            this.EnsureFriendlyFoeInitialization();
+            return this.casterEnemy;
+        }
+
+        public int GetWizardID()
+        {
+            return this.caster.GetWizardOwner()?.ID ?? 0;
         }
 
         public PlayerWizard GetPlayerWizard()
         {
             int wizardID = this.GetWizardID();
-            return ((wizardID != 0) ? GameManager.GetWizard(wizardID) : null);
-        }
-
-        public int GetWizardID()
-        {
-            PlayerWizard wizardOwner = this.caster.GetWizardOwner();
-            if (wizardOwner != null)
+            if (wizardID == 0)
             {
-                return wizardOwner.ID;
+                return null;
             }
-            PlayerWizard local1 = wizardOwner;
-            return 0;
+            return GameManager.GetWizard(wizardID);
         }
 
         public bool IsCasterAttackingSide()
         {
-            return (this.battle.attacker.GetID() == this.GetWizardID());
+            return this.battle.attacker.GetID() == this.GetWizardID();
+        }
+
+        public BattleUnit GetCasterAsBattleUnit()
+        {
+            return this.caster as BattleUnit;
+        }
+
+        public void DebugUnitRefresh()
+        {
+            foreach (BattleUnit friendlyUnit in this.GetFriendlyUnits())
+            {
+                friendlyUnit.figureCount = friendlyUnit.maxCount;
+                friendlyUnit.currentFigureHP = friendlyUnit.GetAttFinal(TAG.HIT_POINTS).ToInt();
+            }
+            foreach (BattleUnit enemyUnit in this.GetEnemyUnits())
+            {
+                enemyUnit.figureCount = enemyUnit.maxCount;
+                enemyUnit.currentFigureHP = enemyUnit.GetAttFinal(TAG.HIT_POINTS).ToInt();
+            }
+        }
+
+        public BattleUnit CreateSummon(int owner, global::DBDef.Unit unit)
+        {
+            bool attackingSide = ((this.caster is BattleUnit) ? (this.caster as BattleUnit).attackingSide : (this.casterFriendly == null || this.casterFriendly.Count <= 0 || this.casterFriendly[0].attackingSide));
+            Unit unit2 = Unit.CreateFrom(unit);
+            BattleUnit battleUnit = BattleUnit.Create(unit2, abstractMode: false, owner, attackingSide);
+            battleUnit.battlePosition = Vector3i.zero;
+            unit2.simulationUnit = true;
+            battleUnit.simulated = true;
+            if (battleUnit.GetWizardOwner() != null)
+            {
+                battleUnit.GetWizardOwner().ModifyUnitSkillsByTraits(battleUnit);
+            }
+            this.casterFriendly.Add(battleUnit);
+            return battleUnit;
+        }
+
+        public int GetFriendlyValue()
+        {
+            if (this.friendlyValue == 0)
+            {
+                foreach (BattleUnit friendlyUnit in this.GetFriendlyUnits())
+                {
+                    this.friendlyValue += friendlyUnit.GetBattleUnitValue();
+                }
+            }
+            return this.friendlyValue;
+        }
+
+        public int GetEnemyValue()
+        {
+            if (this.enemyValue == 0)
+            {
+                foreach (BattleUnit enemyUnit in this.GetEnemyUnits())
+                {
+                    this.enemyValue += enemyUnit.GetBattleUnitValue();
+                }
+            }
+            return this.enemyValue;
         }
     }
 }
-

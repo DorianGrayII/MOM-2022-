@@ -1,28 +1,25 @@
-﻿namespace LitJson
+namespace LitJson
 {
-    using System;
-
     internal enum ParserToken
     {
-        None = 0x10000,
-        Number = 0x10001,
-        True = 0x10002,
-        False = 0x10003,
-        Null = 0x10004,
-        CharSeq = 0x10005,
-        Char = 0x10006,
-        Text = 0x10007,
-        Object = 0x10008,
-        ObjectPrime = 0x10009,
-        Pair = 0x1000a,
-        PairRest = 0x1000b,
-        Array = 0x1000c,
-        ArrayPrime = 0x1000d,
-        Value = 0x1000e,
-        ValueRest = 0x1000f,
-        String = 0x10010,
-        End = 0x10011,
-        Epsilon = 0x10012
+        None = 65536,
+        Number = 65537,
+        True = 65538,
+        False = 65539,
+        Null = 65540,
+        CharSeq = 65541,
+        Char = 65542,
+        Text = 65543,
+        Object = 65544,
+        ObjectPrime = 65545,
+        Pair = 65546,
+        PairRest = 65547,
+        Array = 65548,
+        ArrayPrime = 65549,
+        Value = 65550,
+        ValueRest = 65551,
+        String = 65552,
+        End = 65553,
+        Epsilon = 65554
     }
 }
-

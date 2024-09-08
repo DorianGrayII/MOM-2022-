@@ -1,7 +1,6 @@
-﻿using DBUtils;
-using MOM;
-using System;
 using System.Collections.Generic;
+using DBUtils;
+using MOM;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,13 +8,21 @@ using UnityEngine.UI;
 public class Owner : MonoBehaviour
 {
     public List<GameObject> neutral;
+
     public List<GameObject> green;
+
     public List<GameObject> blue;
+
     public List<GameObject> red;
+
     public List<GameObject> purple;
+
     public List<GameObject> yellow;
+
     public RawImage riWizardPortrait;
+
     public TextMeshProUGUI labelOwner;
+
     private Dictionary<PlayerWizard.Color, List<GameObject>> listsByColor = new Dictionary<PlayerWizard.Color, List<GameObject>>();
 
     private void Awake()
@@ -30,25 +37,21 @@ public class Owner : MonoBehaviour
 
     public void SetWizard(PlayerWizard w)
     {
-        PlayerWizard.Color none = PlayerWizard.Color.None;
+        PlayerWizard.Color color = PlayerWizard.Color.None;
         if (w != null)
         {
-            none = w.color;
-            this.riWizardPortrait.gameObject.SetActive(true);
+            color = w.color;
+            this.riWizardPortrait.gameObject.SetActive(value: true);
             this.riWizardPortrait.texture = w.Graphic;
         }
-        foreach (KeyValuePair<PlayerWizard.Color, List<GameObject>> pair in this.listsByColor)
+        foreach (KeyValuePair<PlayerWizard.Color, List<GameObject>> item in this.listsByColor)
         {
-            bool flag = ((PlayerWizard.Color) pair.Key) == none;
-            using (List<GameObject>.Enumerator enumerator2 = pair.Value.GetEnumerator())
+            bool active = item.Key == color;
+            foreach (GameObject item2 in item.Value)
             {
-                while (enumerator2.MoveNext())
-                {
-                    enumerator2.Current.SetActive(flag);
-                }
+                item2.SetActive(active);
             }
         }
-        this.labelOwner.text = (w != null) ? w.name : Localization.Get("UI_INDEPENDENT", true, Array.Empty<object>());
+        this.labelOwner.text = ((w != null) ? w.name : Localization.Get("UI_INDEPENDENT", true));
     }
 }
-

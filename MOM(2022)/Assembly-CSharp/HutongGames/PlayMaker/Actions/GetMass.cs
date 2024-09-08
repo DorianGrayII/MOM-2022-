@@ -1,16 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Gets the Mass of a Game Object's Rigid Body.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Gets the Mass of a Game Object's Rigid Body.")]
     public class GetMass : ComponentAction<Rigidbody>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody)), HutongGames.PlayMaker.Tooltip("The GameObject that owns the Rigidbody")]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody))]
+        [Tooltip("The GameObject that owns the Rigidbody")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the mass in a float variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the mass in a float variable.")]
         public FsmFloat storeResult;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.storeResult = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoGetMass();
+            base.Finish();
+        }
 
         private void DoGetMass()
         {
@@ -20,18 +36,5 @@
                 this.storeResult.Value = base.rigidbody.mass;
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoGetMass();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.storeResult = null;
-        }
     }
 }
-

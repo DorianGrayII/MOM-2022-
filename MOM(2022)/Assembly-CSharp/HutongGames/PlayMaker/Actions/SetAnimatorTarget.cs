@@ -1,25 +1,38 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets an AvatarTarget and a targetNormalizedTime for the current state")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets an AvatarTarget and a targetNormalizedTime for the current state")]
     public class SetAnimatorTarget : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The avatar target")]
+
+        [Tooltip("The avatar target")]
         public AvatarTarget avatarTarget;
-        [HutongGames.PlayMaker.Tooltip("The current state Time that is queried")]
+
+        [Tooltip("The current state Time that is queried")]
         public FsmFloat targetNormalizedTime;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame during OnAnimatorMove. Useful when changing over time.")]
+
+        [Tooltip("Repeat every frame during OnAnimatorMove. Useful when changing over time.")]
         public bool everyFrame;
+
         private Animator _animator;
 
-        public override void DoAnimatorMove()
+        public override void Reset()
         {
-            this.SetTarget();
+            this.gameObject = null;
+            this.avatarTarget = AvatarTarget.Body;
+            this.targetNormalizedTime = null;
+            this.everyFrame = false;
+        }
+
+        public override void OnPreprocess()
+        {
+            base.Fsm.HandleAnimatorMove = true;
         }
 
         public override void OnEnter()
@@ -28,36 +41,24 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.SetTarget();
-                    if (!this.everyFrame)
-                    {
-                        base.Finish();
-                    }
-                }
+                base.Finish();
+                return;
+            }
+            this.SetTarget();
+            if (!this.everyFrame)
+            {
+                base.Finish();
             }
         }
 
-        public override void OnPreprocess()
+        public override void DoAnimatorMove()
         {
-            base.Fsm.HandleAnimatorMove = true;
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.avatarTarget = AvatarTarget.Body;
-            this.targetNormalizedTime = null;
-            this.everyFrame = false;
+            this.SetTarget();
         }
 
         private void SetTarget()
@@ -69,4 +70,3 @@
         }
     }
 }
-

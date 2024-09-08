@@ -1,34 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Sets the gravity vector, or individual axis.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Sets the gravity vector, or individual axis.")]
     public class SetGravity : FsmStateAction
     {
         public FsmVector3 vector;
+
         public FsmFloat x;
+
         public FsmFloat y;
+
         public FsmFloat z;
+
         public bool everyFrame;
 
-        private void DoSetGravity()
+        public override void Reset()
         {
-            Vector3 vector = this.vector.get_Value();
-            if (!this.x.IsNone)
+            this.vector = null;
+            this.x = new FsmFloat
             {
-                vector.x = this.x.Value;
-            }
-            if (!this.y.IsNone)
+                UseVariable = true
+            };
+            this.y = new FsmFloat
             {
-                vector.y = this.y.Value;
-            }
-            if (!this.z.IsNone)
+                UseVariable = true
+            };
+            this.z = new FsmFloat
             {
-                vector.z = this.z.Value;
-            }
-            Physics.gravity = vector;
+                UseVariable = true
+            };
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -45,20 +48,22 @@
             this.DoSetGravity();
         }
 
-        public override void Reset()
+        private void DoSetGravity()
         {
-            this.vector = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.z = num3;
-            this.everyFrame = false;
+            Vector3 value = this.vector.Value;
+            if (!this.x.IsNone)
+            {
+                value.x = this.x.Value;
+            }
+            if (!this.y.IsNone)
+            {
+                value.y = this.y.Value;
+            }
+            if (!this.z.IsNone)
+            {
+                value.z = this.z.Value;
+            }
+            Physics.gravity = value;
         }
     }
 }
-

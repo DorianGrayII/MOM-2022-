@@ -1,26 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets the playback speed of the Animator. 1 is normal playback speed")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets the playback speed of the Animator. 1 is normal playback speed")]
     public class SetAnimatorPlayBackSpeed : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("If true, automatically stabilize feet during transition and blending")]
+
+        [Tooltip("If true, automatically stabilize feet during transition and blending")]
         public FsmFloat playBackSpeed;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful for changing over time.")]
+
+        [Tooltip("Repeat every frame. Useful for changing over time.")]
         public bool everyFrame;
+
         private Animator _animator;
 
-        private void DoPlayBackSpeed()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this._animator.speed = this.playBackSpeed.Value;
-            }
+            this.gameObject = null;
+            this.playBackSpeed = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -29,22 +32,18 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoPlayBackSpeed();
-                    if (!this.everyFrame)
-                    {
-                        base.Finish();
-                    }
-                }
+                base.Finish();
+                return;
+            }
+            this.DoPlayBackSpeed();
+            if (!this.everyFrame)
+            {
+                base.Finish();
             }
         }
 
@@ -53,12 +52,12 @@
             this.DoPlayBackSpeed();
         }
 
-        public override void Reset()
+        private void DoPlayBackSpeed()
         {
-            this.gameObject = null;
-            this.playBackSpeed = null;
-            this.everyFrame = false;
+            if (!(this._animator == null))
+            {
+                this._animator.speed = this.playBackSpeed.Value;
+            }
         }
     }
 }
-

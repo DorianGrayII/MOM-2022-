@@ -1,42 +1,42 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Vector2), HutongGames.PlayMaker.Tooltip("Sets the XY channels of a Vector2 Variable. To leave any channel unchanged, set variable to 'None'.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Vector2)]
+    [Tooltip("Sets the XY channels of a Vector2 Variable. To leave any channel unchanged, set variable to 'None'.")]
     public class SetVector2XY : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The vector2 target")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The vector2 target")]
         public FsmVector2 vector2Variable;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The vector2 source")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The vector2 source")]
         public FsmVector2 vector2Value;
-        [HutongGames.PlayMaker.Tooltip("The x component. Override vector2Value if set")]
+
+        [Tooltip("The x component. Override vector2Value if set")]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("The y component.Override vector2Value if set")]
+
+        [Tooltip("The y component.Override vector2Value if set")]
         public FsmFloat y;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame")]
+
+        [Tooltip("Repeat every frame")]
         public bool everyFrame;
 
-        private void DoSetVector2XYZ()
+        public override void Reset()
         {
-            if (this.vector2Variable != null)
+            this.vector2Variable = null;
+            this.vector2Value = null;
+            this.x = new FsmFloat
             {
-                Vector2 vector = this.vector2Variable.get_Value();
-                if (!this.vector2Value.IsNone)
-                {
-                    vector = this.vector2Value.get_Value();
-                }
-                if (!this.x.IsNone)
-                {
-                    vector.x = this.x.Value;
-                }
-                if (!this.y.IsNone)
-                {
-                    vector.y = this.y.Value;
-                }
-                this.vector2Variable.set_Value(vector);
-            }
+                UseVariable = true
+            };
+            this.y = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -53,18 +53,25 @@
             this.DoSetVector2XYZ();
         }
 
-        public override void Reset()
+        private void DoSetVector2XYZ()
         {
-            this.vector2Variable = null;
-            this.vector2Value = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
-            this.everyFrame = false;
+            if (this.vector2Variable != null)
+            {
+                Vector2 value = this.vector2Variable.Value;
+                if (!this.vector2Value.IsNone)
+                {
+                    value = this.vector2Value.Value;
+                }
+                if (!this.x.IsNone)
+                {
+                    value.x = this.x.Value;
+                }
+                if (!this.y.IsNone)
+                {
+                    value.y = this.y.Value;
+                }
+                this.vector2Variable.Value = value;
+            }
         }
     }
 }
-

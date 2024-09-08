@@ -1,18 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Tests if the value of a Float variable changed. Use this to send an event on change, or store a bool that can be used in other operations.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Tests if the value of a Float variable changed. Use this to send an event on change, or store a bool that can be used in other operations.")]
     public class FloatChanged : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Float variable to watch for a change.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Float variable to watch for a change.")]
         public FsmFloat floatVariable;
+
         [Tooltip("Event to send if the float variable changes.")]
         public FsmEvent changedEvent;
-        [UIHint(UIHint.Variable), Tooltip("Set to True if the float variable changes.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Set to True if the float variable changes.")]
         public FsmBool storeResult;
+
         private float previousValue;
+
+        public override void Reset()
+        {
+            this.floatVariable = null;
+            this.changedEvent = null;
+            this.storeResult = null;
+        }
 
         public override void OnEnter()
         {
@@ -36,13 +47,5 @@
                 base.Fsm.Event(this.changedEvent);
             }
         }
-
-        public override void Reset()
-        {
-            this.floatVariable = null;
-            this.changedEvent = null;
-            this.storeResult = null;
-        }
     }
 }
-

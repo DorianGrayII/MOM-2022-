@@ -1,50 +1,64 @@
-﻿namespace MOM.Adventures
-{
-    using DBDef;
-    using MHUtils;
-    using MHUtils.UI;
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml.Serialization;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Xml.Serialization;
+using DBDef;
+using MHUtils;
+using MHUtils.UI;
 
+namespace MOM.Adventures
+{
     public class NodeWorldEnchantment : BaseNode
     {
-        [XmlAttribute, DefaultValue((string) null)]
+        public enum WizardCriteria
+        {
+            AllWizzards = 0,
+            CurrentWizzard = 1
+        }
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string enchantmentName;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptTypeParameter;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptStringParameter;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptStringDuration;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string targetName;
 
         public override void InitializeOutputs()
         {
             base.outputs = new List<AdvOutput>();
-            base.AddOutput(null);
+            base.AddOutput();
         }
 
         public override void UpdateVisuals(EditorNode editorNode)
         {
             List<string> worldEnchantments = new List<string>();
-            DataBase.GetType(typeof(Enchantment)).ForEach(o => worldEnchantments.Add(o.dbName));
+            DataBase.GetType(typeof(Enchantment)).ForEach(delegate(DBClass o)
+            {
+                worldEnchantments.Add(o.dbName);
+            });
             List<string> avaliableListsOf = editorNode.GetAvaliableListsOf();
             avaliableListsOf.AddRange(Enum.GetNames(typeof(WizardCriteria)));
-            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownWizard", "targetName", avaliableListsOf, o => this.UpdateVisuals(editorNode), false);
-            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownParameter", "enchantmentName", worldEnchantments, null, false);
-            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputParameter", "scriptStringParameter", null, null);
-            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputDuration", "scriptStringDuration", null, null);
+            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownWizard", "targetName", avaliableListsOf, delegate
+            {
+                this.UpdateVisuals(editorNode);
+            });
+            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownParameter", "enchantmentName", worldEnchantments);
+            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputParameter", "scriptStringParameter");
+            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputDuration", "scriptStringDuration");
             editorNode.UpdateOutputs();
-        }
-
-        public enum WizardCriteria
-        {
-            AllWizzards,
-            CurrentWizzard
         }
     }
 }
-

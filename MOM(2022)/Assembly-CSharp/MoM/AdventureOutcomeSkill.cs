@@ -1,52 +1,51 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using MHUtils;
-    using System;
-    using TMPro;
-    using UnityEngine;
+using DBDef;
+using MHUtils;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class AdventureOutcomeSkill : AdventureOutcome
     {
         public GameObject skill;
+
         public GameObject skillTarget;
+
         public TextMeshProUGUI skillName;
+
         public TextMeshProUGUI targetName;
 
         public override void Set(AdventureOutcomeDelta.Outcome o)
         {
             base.Set(o);
-            Skill thing = o.thing as Skill;
-            MOM.Unit additionalData = o.additionalData as MOM.Unit;
-            if (thing != null)
+            Skill skill = o.thing as Skill;
+            Unit unit = o.additionalData as Unit;
+            if (skill != null)
             {
-                DescriptionInfo descriptionInfo = thing.GetDescriptionInfo();
-                this.skill.GetComponentInChildren<RawImage>().texture = DescriptionInfoExtension.GetTexture(descriptionInfo);
-                if (string.IsNullOrEmpty(thing.descriptionScript))
+                DescriptionInfo descriptionInfo = skill.GetDescriptionInfo();
+                this.skill.GetComponentInChildren<RawImage>().texture = descriptionInfo.GetTexture();
+                if (!string.IsNullOrEmpty(skill.descriptionScript))
                 {
-                    this.skillName.text = descriptionInfo.GetLocalizedName();
+                    this.skillName.text = (string)ScriptLibrary.Call(skill.descriptionScript, unit, skill, null);
                 }
                 else
                 {
-                    object[] parameters = new object[3];
-                    parameters[0] = additionalData;
-                    parameters[1] = thing;
-                    this.skillName.text = (string) ScriptLibrary.Call(thing.descriptionScript, parameters);
+                    this.skillName.text = descriptionInfo.GetLocalizedName();
                 }
-                RolloverSimpleTooltip orAddComponent = GameObjectUtils.GetOrAddComponent<RolloverSimpleTooltip>(this.skill);
-                orAddComponent.image = DescriptionInfoExtension.GetTexture(descriptionInfo);
+                RolloverSimpleTooltip orAddComponent = this.skill.GetOrAddComponent<RolloverSimpleTooltip>();
+                orAddComponent.image = descriptionInfo.GetTexture();
                 orAddComponent.description = descriptionInfo.GetLocalizedDescription();
                 orAddComponent.title = this.skillName.text;
                 orAddComponent.sourceAsDbName = null;
             }
-            if (additionalData != null)
+            if (unit != null)
             {
-                DescriptionInfo descriptionInfo = additionalData.GetDescriptionInfo();
-                this.skillTarget.GetComponentInChildren<RawImage>((bool) this.skillTarget).texture = DescriptionInfoExtension.GetTexture(descriptionInfo);
-                this.targetName.text = descriptionInfo.GetLocalizedName();
-                GameObjectUtils.GetOrAddComponent<RolloverObject>(this.skillTarget).source = additionalData;
+                DescriptionInfo descriptionInfo2 = unit.GetDescriptionInfo();
+                this.skillTarget.GetComponentInChildren<RawImage>(this.skillTarget).texture = descriptionInfo2.GetTexture();
+                this.targetName.text = descriptionInfo2.GetLocalizedName();
+                this.skillTarget.GetOrAddComponent<RolloverObject>().source = unit;
             }
         }
     }
 }
-

@@ -1,22 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Input), HutongGames.PlayMaker.Tooltip("Gets the pressed state of the specified Button and stores it in a Bool Variable. See Unity Input Manager docs.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Input)]
+    [Tooltip("Gets the pressed state of the specified Button and stores it in a Bool Variable. See Unity Input Manager docs.")]
     public class GetButton : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The name of the button. Set in the Unity Input Manager.")]
+        [RequiredField]
+        [Tooltip("The name of the button. Set in the Unity Input Manager.")]
         public FsmString buttonName;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the result in a bool variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in a bool variable.")]
         public FsmBool storeResult;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoGetButton()
+        public override void Reset()
         {
-            this.storeResult.Value = Input.GetButton(this.buttonName.Value);
+            this.buttonName = "Fire1";
+            this.storeResult = null;
+            this.everyFrame = true;
         }
 
         public override void OnEnter()
@@ -33,12 +39,9 @@
             this.DoGetButton();
         }
 
-        public override void Reset()
+        private void DoGetButton()
         {
-            this.buttonName = "Fire1";
-            this.storeResult = null;
-            this.everyFrame = true;
+            this.storeResult.Value = Input.GetButton(this.buttonName.Value);
         }
     }
 }
-

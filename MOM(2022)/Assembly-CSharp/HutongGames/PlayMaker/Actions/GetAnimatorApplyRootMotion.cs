@@ -1,21 +1,55 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Gets the value of ApplyRootMotion of an avatar. If true, root is controlled by animations")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Gets the value of ApplyRootMotion of an avatar. If true, root is controlled by animations")]
     public class GetAnimatorApplyRootMotion : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [ActionSection("Results"), RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Is the rootMotionapplied. If true, root is controlled by animations")]
+
+        [ActionSection("Results")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Is the rootMotionapplied. If true, root is controlled by animations")]
         public FsmBool rootMotionApplied;
-        [HutongGames.PlayMaker.Tooltip("Event send if the root motion is applied")]
+
+        [Tooltip("Event send if the root motion is applied")]
         public FsmEvent rootMotionIsAppliedEvent;
-        [HutongGames.PlayMaker.Tooltip("Event send if the root motion is not applied")]
+
+        [Tooltip("Event send if the root motion is not applied")]
         public FsmEvent rootMotionIsNotAppliedEvent;
+
         private Animator _animator;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.rootMotionApplied = null;
+            this.rootMotionIsAppliedEvent = null;
+            this.rootMotionIsNotAppliedEvent = null;
+        }
+
+        public override void OnEnter()
+        {
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (ownerDefaultTarget == null)
+            {
+                base.Finish();
+                return;
+            }
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
+            {
+                base.Finish();
+                return;
+            }
+            this.GetApplyMotionRoot();
+            base.Finish();
+        }
 
         private void GetApplyMotionRoot()
         {
@@ -33,36 +67,5 @@
                 }
             }
         }
-
-        public override void OnEnter()
-        {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget == null)
-            {
-                base.Finish();
-            }
-            else
-            {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.GetApplyMotionRoot();
-                    base.Finish();
-                }
-            }
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.rootMotionApplied = null;
-            this.rootMotionIsAppliedEvent = null;
-            this.rootMotionIsNotAppliedEvent = null;
-        }
     }
 }
-

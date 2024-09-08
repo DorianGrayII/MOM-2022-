@@ -1,15 +1,16 @@
-﻿using System;
 using UnityEngine;
 
 public class LandingButtons : MonoBehaviour
 {
     public LandingSpotController _landingSpotController;
+
     public FlockController _flockController;
+
     public float hSliderValue = 250f;
 
     public void OnGUI()
     {
-        GUI.Label(new Rect(20f, 20f, 125f, 18f), "Landing Spots: " + this._landingSpotController.transform.childCount.ToString());
+        GUI.Label(new Rect(20f, 20f, 125f, 18f), "Landing Spots: " + this._landingSpotController.transform.childCount);
         if (GUI.Button(new Rect(20f, 40f, 125f, 18f), "Scare All"))
         {
             this._landingSpotController.ScareAll();
@@ -26,8 +27,7 @@ public class LandingButtons : MonoBehaviour
         {
             this._flockController.destroyBirds();
         }
-        GUI.Label(new Rect(20f, 120f, 125f, 18f), "Bird Amount: " + this._flockController._childAmount.ToString());
-        this._flockController._childAmount = (int) GUI.HorizontalSlider(new Rect(20f, 140f, 125f, 18f), (float) this._flockController._childAmount, 0f, 250f);
+        GUI.Label(new Rect(20f, 120f, 125f, 18f), "Bird Amount: " + this._flockController._childAmount);
+        this._flockController._childAmount = (int)GUI.HorizontalSlider(new Rect(20f, 140f, 125f, 18f), this._flockController._childAmount, 0f, 250f);
     }
 }
-

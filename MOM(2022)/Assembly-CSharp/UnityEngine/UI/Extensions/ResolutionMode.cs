@@ -1,12 +1,9 @@
-﻿namespace UnityEngine.UI.Extensions
+namespace UnityEngine.UI.Extensions
 {
-    using System;
-
     public enum ResolutionMode
     {
-        None,
-        PerSegment,
-        PerLine
+        None = 0,
+        PerSegment = 1,
+        PerLine = 2
     }
 }
-

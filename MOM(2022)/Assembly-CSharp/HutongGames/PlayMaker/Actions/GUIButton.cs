@@ -1,30 +1,15 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUI), HutongGames.PlayMaker.Tooltip("GUI button. Sends an Event when pressed. Optionally store the button state in a Bool Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUI)]
+    [Tooltip("GUI button. Sends an Event when pressed. Optionally store the button state in a Bool Variable.")]
     public class GUIButton : GUIContentAction
     {
         public FsmEvent sendEvent;
+
         [UIHint(UIHint.Variable)]
         public FsmBool storeButtonState;
-
-        public override void OnGUI()
-        {
-            base.OnGUI();
-            bool flag = false;
-            if (GUI.Button(base.rect, base.content, base.style.Value))
-            {
-                base.Fsm.Event(this.sendEvent);
-                flag = true;
-            }
-            if (this.storeButtonState != null)
-            {
-                this.storeButtonState.Value = flag;
-            }
-        }
 
         public override void Reset()
         {
@@ -33,6 +18,20 @@
             this.storeButtonState = null;
             base.style = "Button";
         }
+
+        public override void OnGUI()
+        {
+            base.OnGUI();
+            bool value = false;
+            if (GUI.Button(base.rect, base.content, base.style.Value))
+            {
+                base.Fsm.Event(this.sendEvent);
+                value = true;
+            }
+            if (this.storeButtonState != null)
+            {
+                this.storeButtonState.Value = value;
+            }
+        }
     }
 }
-

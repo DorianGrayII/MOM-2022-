@@ -1,26 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Time), HutongGames.PlayMaker.Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Time)]
+    [Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
     public class ScaleTime : FsmStateAction
     {
-        [RequiredField, HasFloatSlider(0f, 4f), HutongGames.PlayMaker.Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
+        [RequiredField]
+        [HasFloatSlider(0f, 4f)]
+        [Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
         public FsmFloat timeScale;
-        [HutongGames.PlayMaker.Tooltip("Adjust the fixed physics time step to match the time scale.")]
+
+        [Tooltip("Adjust the fixed physics time step to match the time scale.")]
         public FsmBool adjustFixedDeltaTime;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful when animating the value.")]
+
+        [Tooltip("Repeat every frame. Useful when animating the value.")]
         public bool everyFrame;
 
-        private void DoTimeScale()
+        public override void Reset()
         {
-            Time.timeScale = this.timeScale.Value;
-            if (this.adjustFixedDeltaTime.Value)
-            {
-                Time.fixedDeltaTime = 0.02f * Time.timeScale;
-            }
+            this.timeScale = 1f;
+            this.adjustFixedDeltaTime = true;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -37,12 +38,13 @@
             this.DoTimeScale();
         }
 
-        public override void Reset()
+        private void DoTimeScale()
         {
-            this.timeScale = 1f;
-            this.adjustFixedDeltaTime = true;
-            this.everyFrame = false;
+            Time.timeScale = this.timeScale.Value;
+            if (this.adjustFixedDeltaTime.Value)
+            {
+                Time.fixedDeltaTime = 0.02f * Time.timeScale;
+            }
         }
     }
 }
-

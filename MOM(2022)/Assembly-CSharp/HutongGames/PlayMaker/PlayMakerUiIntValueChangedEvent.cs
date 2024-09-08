@@ -1,10 +1,8 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.Events;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace HutongGames.PlayMaker
+{
     [AddComponentMenu("PlayMaker/UI/UI Int Value Changed Event")]
     public class PlayMakerUiIntValueChangedEvent : PlayMakerUiEventBase
     {
@@ -21,7 +19,7 @@
                 }
                 if (this.dropdown != null)
                 {
-                    this.dropdown.onValueChanged.AddListener(new UnityAction<int>(this.OnValueChanged));
+                    this.dropdown.onValueChanged.AddListener(OnValueChanged);
                 }
             }
         }
@@ -31,7 +29,7 @@
             base.initialized = false;
             if (this.dropdown != null)
             {
-                this.dropdown.onValueChanged.RemoveListener(new UnityAction<int>(this.OnValueChanged));
+                this.dropdown.onValueChanged.RemoveListener(OnValueChanged);
             }
         }
 
@@ -42,4 +40,3 @@
         }
     }
 }
-

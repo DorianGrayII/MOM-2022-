@@ -1,13 +1,10 @@
-﻿namespace MadGoat_SSAA
+namespace MadGoat_SSAA
 {
-    using System;
-
     public enum SSAAMode
     {
-        SSAA_OFF,
-        SSAA_HALF,
-        SSAA_X2,
-        SSAA_X4
+        SSAA_OFF = 0,
+        SSAA_HALF = 1,
+        SSAA_X2 = 2,
+        SSAA_X4 = 3
     }
 }
-

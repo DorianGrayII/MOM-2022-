@@ -1,52 +1,65 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets properties of a UI CanvasGroup component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets properties of a UI CanvasGroup component.")]
     public class UiCanvasGroupSetProperties : ComponentAction<CanvasGroup>
     {
-        [RequiredField, CheckForComponent(typeof(CanvasGroup)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI CanvasGroup component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(CanvasGroup))]
+        [Tooltip("The GameObject with the UI CanvasGroup component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Canvas group alpha. Ranges from 0.0 to 1.0."), HasFloatSlider(0f, 1f)]
+
+        [Tooltip("Canvas group alpha. Ranges from 0.0 to 1.0.")]
+        [HasFloatSlider(0f, 1f)]
         public FsmFloat alpha;
-        [HutongGames.PlayMaker.Tooltip("Is the group interactable (are the elements beneath the group enabled). Leave as None for no effect")]
+
+        [Tooltip("Is the group interactable (are the elements beneath the group enabled). Leave as None for no effect")]
         public FsmBool interactable;
-        [HutongGames.PlayMaker.Tooltip("Does this group block raycasting (allow collision). Leave as None for no effect")]
+
+        [Tooltip("Does this group block raycasting (allow collision). Leave as None for no effect")]
         public FsmBool blocksRaycasts;
-        [HutongGames.PlayMaker.Tooltip("Should the group ignore parent groups? Leave as None for no effect")]
+
+        [Tooltip("Should the group ignore parent groups? Leave as None for no effect")]
         public FsmBool ignoreParentGroup;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state. Leave as None for no effect")]
+
+        [Tooltip("Reset when exiting this state. Leave as None for no effect")]
         public FsmBool resetOnExit;
+
         public bool everyFrame;
+
         private CanvasGroup component;
+
         private float originalAlpha;
+
         private bool originalInteractable;
+
         private bool originalBlocksRaycasts;
+
         private bool originalIgnoreParentGroup;
 
-        private void DoAction()
+        public override void Reset()
         {
-            if (this.component != null)
+            this.gameObject = null;
+            this.alpha = new FsmFloat
             {
-                if (!this.alpha.IsNone)
-                {
-                    this.component.alpha = this.alpha.Value;
-                }
-                if (!this.interactable.IsNone)
-                {
-                    this.component.interactable = this.interactable.Value;
-                }
-                if (!this.blocksRaycasts.IsNone)
-                {
-                    this.component.blocksRaycasts = this.blocksRaycasts.Value;
-                }
-                if (!this.ignoreParentGroup.IsNone)
-                {
-                    this.component.ignoreParentGroups = this.ignoreParentGroup.Value;
-                }
-            }
+                UseVariable = true
+            };
+            this.interactable = new FsmBool
+            {
+                UseVariable = true
+            };
+            this.blocksRaycasts = new FsmBool
+            {
+                UseVariable = true
+            };
+            this.ignoreParentGroup = new FsmBool
+            {
+                UseVariable = true
+            };
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -70,9 +83,37 @@
             }
         }
 
+        public override void OnUpdate()
+        {
+            this.DoAction();
+        }
+
+        private void DoAction()
+        {
+            if (!(this.component == null))
+            {
+                if (!this.alpha.IsNone)
+                {
+                    this.component.alpha = this.alpha.Value;
+                }
+                if (!this.interactable.IsNone)
+                {
+                    this.component.interactable = this.interactable.Value;
+                }
+                if (!this.blocksRaycasts.IsNone)
+                {
+                    this.component.blocksRaycasts = this.blocksRaycasts.Value;
+                }
+                if (!this.ignoreParentGroup.IsNone)
+                {
+                    this.component.ignoreParentGroups = this.ignoreParentGroup.Value;
+                }
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.component != null) && this.resetOnExit.Value)
+            if (!(this.component == null) && this.resetOnExit.Value)
             {
                 if (!this.alpha.IsNone)
                 {
@@ -92,30 +133,5 @@
                 }
             }
         }
-
-        public override void OnUpdate()
-        {
-            this.DoAction();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.alpha = num1;
-            FsmBool bool1 = new FsmBool();
-            bool1.UseVariable = true;
-            this.interactable = bool1;
-            FsmBool bool2 = new FsmBool();
-            bool2.UseVariable = true;
-            this.blocksRaycasts = bool2;
-            FsmBool bool3 = new FsmBool();
-            bool3.UseVariable = true;
-            this.ignoreParentGroup = bool3;
-            this.resetOnExit = null;
-            this.everyFrame = false;
-        }
     }
 }
-

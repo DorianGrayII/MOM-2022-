@@ -1,26 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Returns the name of a layer from its index")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Returns the name of a layer from its index")]
     public class GetAnimatorLayerName : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The layer index")]
+
+        [RequiredField]
+        [Tooltip("The layer index")]
         public FsmInt layerIndex;
-        [ActionSection("Results"), RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The layer name")]
+
+        [ActionSection("Results")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The layer name")]
         public FsmString layerName;
+
         private Animator _animator;
 
-        private void DoGetLayerName()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this.layerName.Value = this._animator.GetLayerName(this.layerIndex.Value);
-            }
+            this.gameObject = null;
+            this.layerIndex = null;
+            this.layerName = null;
         }
 
         public override void OnEnter()
@@ -29,28 +36,24 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoGetLayerName();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
+            this.DoGetLayerName();
+            base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetLayerName()
         {
-            this.gameObject = null;
-            this.layerIndex = null;
-            this.layerName = null;
+            if (!(this._animator == null))
+            {
+                this.layerName.Value = this._animator.GetLayerName(this.layerIndex.Value);
+            }
         }
     }
 }
-

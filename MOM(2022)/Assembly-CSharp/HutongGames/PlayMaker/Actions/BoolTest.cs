@@ -1,19 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Sends Events based on the value of a Boolean Variable.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Sends Events based on the value of a Boolean Variable.")]
     public class BoolTest : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Readonly, Tooltip("The Bool variable to test.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Readonly]
+        [Tooltip("The Bool variable to test.")]
         public FsmBool boolVariable;
+
         [Tooltip("Event to send if the Bool variable is True.")]
         public FsmEvent isTrue;
+
         [Tooltip("Event to send if the Bool variable is False.")]
         public FsmEvent isFalse;
+
         [Tooltip("Repeat every frame while the state is active.")]
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.boolVariable = null;
+            this.isTrue = null;
+            this.isFalse = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
@@ -28,14 +40,5 @@
         {
             base.Fsm.Event(this.boolVariable.Value ? this.isTrue : this.isFalse);
         }
-
-        public override void Reset()
-        {
-            this.boolVariable = null;
-            this.isTrue = null;
-            this.isFalse = null;
-            this.everyFrame = false;
-        }
     }
 }
-

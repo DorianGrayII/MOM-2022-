@@ -1,14 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics2D), HutongGames.PlayMaker.Tooltip("Forces a Game Object's Rigid Body 2D to wake up.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics2D)]
+    [Tooltip("Forces a Game Object's Rigid Body 2D to wake up.")]
     public class WakeUp2d : ComponentAction<Rigidbody2D>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody2D)), HutongGames.PlayMaker.Tooltip("The GameObject with a Rigidbody2d attached")]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody2D))]
+        [Tooltip("The GameObject with a Rigidbody2d attached")]
         public FsmOwnerDefault gameObject;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoWakeUp();
+            base.Finish();
+        }
 
         private void DoWakeUp()
         {
@@ -18,17 +30,5 @@
                 base.rigidbody2d.WakeUp();
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoWakeUp();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-        }
     }
 }
-

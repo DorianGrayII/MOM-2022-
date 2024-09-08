@@ -1,33 +1,30 @@
-﻿namespace MOM
-{
-    using DBUtils;
-    using MHUtils.UI;
-    using System;
-    using TMPro;
-    using UnityEngine.UI;
+using DBUtils;
+using MHUtils.UI;
+using TMPro;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class Victory : ScreenBase
     {
         public TextMeshProUGUI victoryText;
+
         public Button btEndGame;
+
         public Button btKeepPlaying;
+
         public string text;
 
-        protected override void ButtonClick(Selectable s)
+        protected override void Start()
         {
-            base.ButtonClick(s);
-            if (this.btEndGame == s)
+            this.btKeepPlaying.gameObject.SetActive(value: false);
+            base.Start();
+            if (this.text != null && string.IsNullOrEmpty(this.victoryText?.text))
             {
-                TurnManager.StopTurnLoop();
-                HallOfFame.Popup(true);
-                UIManager.Close(this);
+                this.victoryText.text = Localization.Get(this.text, true);
             }
-            if (this.btKeepPlaying == s)
-            {
-                TurnManager.StopTurnLoop();
-                HallOfFame.Popup(false);
-                UIManager.Close(this);
-            }
+            PlayMusic.Play("SOUND_LIST-EMPTY", this);
+            AudioLibrary.RequestSFX("Victory");
         }
 
         public void SetMessage(string t)
@@ -35,34 +32,25 @@
             this.text = t;
             if (this.victoryText != null)
             {
-                this.victoryText.text = Localization.Get(t, true, Array.Empty<object>());
+                this.victoryText.text = Localization.Get(t, true);
             }
         }
 
-        protected override void Start()
+        protected override void ButtonClick(Selectable s)
         {
-            this.btKeepPlaying.gameObject.SetActive(false);
-            base.Start();
-            if (this.text != null)
+            base.ButtonClick(s);
+            if (this.btEndGame == s)
             {
-                string text;
-                if (this.victoryText != null)
-                {
-                    text = this.victoryText.text;
-                }
-                else
-                {
-                    TextMeshProUGUI victoryText = this.victoryText;
-                    text = null;
-                }
-                if (string.IsNullOrEmpty(text))
-                {
-                    this.victoryText.text = Localization.Get(this.text, true, Array.Empty<object>());
-                }
+                TurnManager.StopTurnLoop();
+                HallOfFame.Popup(endGame: true);
+                UIManager.Close(this);
             }
-            PlayMusic.Play("SOUND_LIST-EMPTY", this);
-            AudioLibrary.RequestSFX("Victory", 0f, 0f, 1f);
+            if (this.btKeepPlaying == s)
+            {
+                TurnManager.StopTurnLoop();
+                HallOfFame.Popup(endGame: false);
+                UIManager.Close(this);
+            }
         }
     }
 }
-

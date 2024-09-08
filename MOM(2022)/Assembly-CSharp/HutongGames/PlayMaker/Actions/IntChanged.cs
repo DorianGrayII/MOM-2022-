@@ -1,17 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Tests if the value of an integer variable changed. Use this to send an event on change, or store a bool that can be used in other operations.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Tests if the value of an integer variable changed. Use this to send an event on change, or store a bool that can be used in other operations.")]
     public class IntChanged : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmInt intVariable;
+
         public FsmEvent changedEvent;
+
         [UIHint(UIHint.Variable)]
         public FsmBool storeResult;
+
         private int previousValue;
+
+        public override void Reset()
+        {
+            this.intVariable = null;
+            this.changedEvent = null;
+            this.storeResult = null;
+        }
 
         public override void OnEnter()
         {
@@ -35,13 +44,5 @@
                 base.Fsm.Event(this.changedEvent);
             }
         }
-
-        public override void Reset()
-        {
-            this.intVariable = null;
-            this.changedEvent = null;
-            this.storeResult = null;
-        }
     }
 }
-

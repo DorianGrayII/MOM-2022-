@@ -1,8 +1,7 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
+namespace HutongGames.PlayMaker
+{
     public class PlayMakerCanvasRaycastFilterProxy : MonoBehaviour, ICanvasRaycastFilter
     {
         public bool RayCastingEnabled = true;
@@ -13,4 +12,3 @@
         }
     }
 }
-

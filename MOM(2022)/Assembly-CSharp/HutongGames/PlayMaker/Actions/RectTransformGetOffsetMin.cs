@@ -1,41 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Get the offset of the lower left corner of the rectangle relative to the lower left anchor")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Get the offset of the lower left corner of the rectangle relative to the lower left anchor")]
     public class RectTransformGetOffsetMin : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The offsetMin"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The offsetMin")]
+        [UIHint(UIHint.Variable)]
         public FsmVector2 offsetMin;
-        [HutongGames.PlayMaker.Tooltip("The x component of the offsetMin"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The x component of the offsetMin")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("The y component of the offsetMin"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The y component of the offsetMin")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoGetValues()
+        public override void Reset()
         {
-            if (!this.offsetMin.IsNone)
-            {
-                this.offsetMin.set_Value(this._rt.offsetMin);
-            }
-            if (!this.x.IsNone)
-            {
-                this.x.Value = this._rt.offsetMin.x;
-            }
-            if (!this.y.IsNone)
-            {
-                this.y.Value = this._rt.offsetMin.y;
-            }
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoGetValues();
+            base.Reset();
+            this.gameObject = null;
+            this.offsetMin = null;
+            this.x = null;
+            this.y = null;
         }
 
         public override void OnEnter()
@@ -52,14 +48,25 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.offsetMin = null;
-            this.x = null;
-            this.y = null;
+            this.DoGetValues();
+        }
+
+        private void DoGetValues()
+        {
+            if (!this.offsetMin.IsNone)
+            {
+                this.offsetMin.Value = this._rt.offsetMin;
+            }
+            if (!this.x.IsNone)
+            {
+                this.x.Value = this._rt.offsetMin.x;
+            }
+            if (!this.y.IsNone)
+            {
+                this.y.Value = this._rt.offsetMin.y;
+            }
         }
     }
 }
-

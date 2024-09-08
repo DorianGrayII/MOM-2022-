@@ -1,23 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Math), HutongGames.PlayMaker.Tooltip("Clamp the value of an Integer Variable to a Min/Max range.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Math)]
+    [Tooltip("Clamp the value of an Integer Variable to a Min/Max range.")]
     public class IntClamp : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmInt intVariable;
+
         [RequiredField]
         public FsmInt minValue;
+
         [RequiredField]
         public FsmInt maxValue;
+
         public bool everyFrame;
 
-        private void DoClamp()
+        public override void Reset()
         {
-            this.intVariable.Value = Mathf.Clamp(this.intVariable.Value, this.minValue.Value, this.maxValue.Value);
+            this.intVariable = null;
+            this.minValue = null;
+            this.maxValue = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -34,13 +40,9 @@
             this.DoClamp();
         }
 
-        public override void Reset()
+        private void DoClamp()
         {
-            this.intVariable = null;
-            this.minValue = null;
-            this.maxValue = null;
-            this.everyFrame = false;
+            this.intVariable.Value = Mathf.Clamp(this.intVariable.Value, this.minValue.Value, this.maxValue.Value);
         }
     }
 }
-

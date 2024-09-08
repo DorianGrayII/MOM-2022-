@@ -1,10 +1,10 @@
-﻿using System;
-
 public interface IVisibilityChange
 {
-    void DestroyMarkers();
     bool IsMarkerVisible();
-    bool IsModelVisible();
-    void UpdateMarkers();
-}
 
+    bool IsModelVisible();
+
+    void UpdateMarkers();
+
+    void DestroyMarkers();
+}

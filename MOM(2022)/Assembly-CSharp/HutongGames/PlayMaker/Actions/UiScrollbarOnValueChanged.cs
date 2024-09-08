@@ -1,29 +1,35 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.Events;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Catches UI Scrollbar onValueChanged event. Store the new value and/or send events. Event float data will contain the new Scrollbar value")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Catches UI Scrollbar onValueChanged event. Store the new value and/or send events. Event float data will contain the new Scrollbar value")]
     public class UiScrollbarOnValueChanged : ComponentAction<Scrollbar>
     {
-        [RequiredField, CheckForComponent(typeof(Scrollbar)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Scrollbar component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Scrollbar))]
+        [Tooltip("The GameObject with the UI Scrollbar component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Where to send the event.")]
+
+        [Tooltip("Where to send the event.")]
         public FsmEventTarget eventTarget;
-        [HutongGames.PlayMaker.Tooltip("Send this event when the UI Scrollbar value changes.")]
+
+        [Tooltip("Send this event when the UI Scrollbar value changes.")]
         public FsmEvent sendEvent;
-        [HutongGames.PlayMaker.Tooltip("Store new value in float variable."), UIHint(UIHint.Variable)]
+
+        [Tooltip("Store new value in float variable.")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat value;
+
         private Scrollbar scrollbar;
 
-        public void DoOnValueChanged(float _value)
+        public override void Reset()
         {
-            this.value.Value = _value;
-            Fsm.EventData.FloatData = _value;
-            base.SendEvent(this.eventTarget, this.sendEvent);
+            this.gameObject = null;
+            this.eventTarget = FsmEventTarget.Self;
+            this.sendEvent = null;
+            this.value = null;
         }
 
         public override void OnEnter()
@@ -34,7 +40,7 @@
                 this.scrollbar = base.cachedComponent;
                 if (this.scrollbar != null)
                 {
-                    this.scrollbar.onValueChanged.AddListener(new UnityAction<float>(this.DoOnValueChanged));
+                    this.scrollbar.onValueChanged.AddListener(DoOnValueChanged);
                 }
             }
         }
@@ -43,17 +49,15 @@
         {
             if (this.scrollbar != null)
             {
-                this.scrollbar.onValueChanged.RemoveListener(new UnityAction<float>(this.DoOnValueChanged));
+                this.scrollbar.onValueChanged.RemoveListener(DoOnValueChanged);
             }
         }
 
-        public override void Reset()
+        public void DoOnValueChanged(float _value)
         {
-            this.gameObject = null;
-            this.eventTarget = FsmEventTarget.Self;
-            this.sendEvent = null;
-            this.value = null;
+            this.value.Value = _value;
+            Fsm.EventData.FloatData = _value;
+            base.SendEvent(this.eventTarget, this.sendEvent);
         }
     }
 }
-

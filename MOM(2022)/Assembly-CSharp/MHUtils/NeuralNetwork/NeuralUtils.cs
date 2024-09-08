@@ -1,18 +1,31 @@
-﻿namespace MHUtils.NeuralNetwork
+namespace MHUtils.NeuralNetwork
 {
-    using System;
-
     public class NeuralUtils
     {
         public static double Clamp(double val)
         {
-            return ((val >= -1.0) ? ((val <= 1.0) ? val : 1.0) : -1.0);
+            if (val < -1.0)
+            {
+                return -1.0;
+            }
+            if (val > 1.0)
+            {
+                return 1.0;
+            }
+            return val;
         }
 
         public static double Clamp(double val, double scale)
         {
-            return ((val >= (-1.0 * scale)) ? ((val <= (1.0 * scale)) ? val : (1.0 * scale)) : (-1.0 * scale));
+            if (val < -1.0 * scale)
+            {
+                return -1.0 * scale;
+            }
+            if (val > 1.0 * scale)
+            {
+                return 1.0 * scale;
+            }
+            return val;
         }
     }
 }
-

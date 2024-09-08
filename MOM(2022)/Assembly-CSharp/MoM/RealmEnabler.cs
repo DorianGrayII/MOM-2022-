@@ -1,9 +1,8 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using System;
-    using UnityEngine;
+using DBDef;
+using UnityEngine;
 
+namespace MOM
+{
     public class RealmEnabler : MonoBehaviour
     {
         [SerializeField]
@@ -15,4 +14,3 @@
         }
     }
 }
-

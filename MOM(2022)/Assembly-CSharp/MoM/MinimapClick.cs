@@ -1,11 +1,10 @@
-﻿namespace MOM
-{
-    using MHUtils;
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
-    using WorldCode;
+using MHUtils;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using WorldCode;
 
+namespace MOM
+{
     public class MinimapClick : MonoBehaviour, IDragHandler, IEventSystemHandler, IPointerDownHandler
     {
         public void OnDrag(PointerEventData eventData)
@@ -18,36 +17,34 @@
             this.UpdateOnPress(eventData);
         }
 
-        private unsafe Vector3 ScaleUsingMinimapSettings(Vector2 click, RectTransform t)
+        private Vector3 ScaleUsingMinimapSettings(Vector2 click, RectTransform t)
         {
-            WorldCode.Plane arcanus = World.GetArcanus();
+            global::WorldCode.Plane arcanus = World.GetArcanus();
             if (arcanus == null)
             {
                 return Vector3.zero;
             }
-            Vector3 vector = new Vector3(click.x / t.rect.width, 0f, click.y / t.rect.height);
-            vector /= 0.9f;
-            Vector2 vector2 = HexCoordinates.HexToWorld(arcanus.area.A00);
-            Vector2 vector3 = HexCoordinates.HexToWorld(arcanus.area.A11);
-            float* singlePtr1 = &vector.x;
-            singlePtr1[0] *= vector3.x - vector2.x;
-            float* singlePtr2 = &vector.z;
-            singlePtr2[0] *= vector3.y - vector2.y;
-            return vector;
+            float x = click.x / t.rect.width;
+            float z = click.y / t.rect.height;
+            Vector3 result = new Vector3(x, 0f, z);
+            result /= 0.9f;
+            Vector2 vector = HexCoordinates.HexToWorld(arcanus.area.A00);
+            Vector2 vector2 = HexCoordinates.HexToWorld(arcanus.area.A11);
+            result.x *= vector2.x - vector.x;
+            result.z *= vector2.y - vector.y;
+            return result;
         }
 
         private void UpdateOnPress(PointerEventData eventData)
         {
             if (MinimapManager.Get().MapInZoomoutMode())
             {
-                Vector2 vector;
                 RectTransform component = base.GetComponent<RectTransform>();
-                if (RectTransformUtility.ScreenPointToLocalPointInRectangle(component, eventData.position, eventData.pressEventCamera, out vector))
+                if (RectTransformUtility.ScreenPointToLocalPointInRectangle(component, eventData.position, eventData.pressEventCamera, out var localPoint))
                 {
-                    CameraController.CenterAt(this.ScaleUsingMinimapSettings(vector, component), 0f);
+                    CameraController.CenterAt(this.ScaleUsingMinimapSettings(localPoint, component));
                 }
             }
         }
     }
 }
-

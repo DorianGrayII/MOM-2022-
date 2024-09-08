@@ -1,33 +1,49 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using MHUtils;
-    using MHUtils.UI;
-    using System;
-    using UnityEngine;
+using HutongGames.PlayMaker;
+using MHUtils;
+using MHUtils.UI;
+using UnityEngine;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMOpenScreen : FSMStateBase
     {
         public ScreenBase screen;
+
         public bool surviveExit;
+
         public string screenKillExitOverride;
+
         private ScreenBase instance;
+
         private string navigationPath;
 
-        public override string GetStageName()
+        public override void OnEnter()
         {
-            string name;
-            if (this.screen != null)
+            if (this.screen == null)
             {
-                name = this.screen.GetType().Name;
+                Debug.LogError("Missing screen instance at " + base.DisplayName);
             }
-            else
+            this.instance = UIManager.GetOrOpen<ScreenBase>(this.screen.gameObject, UIManager.Layer.Standard);
+            MHEventSystem.RegisterListener(this.screen, Navigation, this);
+            base.OnEnter();
+        }
+
+        public override void OnExit()
+        {
+            if (!this.surviveExit || this.screenKillExitOverride == this.navigationPath)
             {
-                ScreenBase screen = this.screen;
-                name = null;
+                if (this.instance != null)
+                {
+                    UIManager.Close(this.instance);
+                }
+                this.instance = null;
             }
-            return ("FSM->" + name);
+            if (this.instance != null)
+            {
+                MHEventSystem.UnRegisterListener(Navigation);
+            }
+            base.OnExit();
         }
 
         private void Navigation(object sender, object e)
@@ -39,33 +55,9 @@
             }
         }
 
-        public override void OnEnter()
+        public override string GetStageName()
         {
-            if (this.screen == null)
-            {
-                Debug.LogError("Missing screen instance at " + base.DisplayName);
-            }
-            this.instance = UIManager.GetOrOpen<ScreenBase>(this.screen.gameObject, UIManager.Layer.Standard, null);
-            MHEventSystem.RegisterListener(this.screen, new EventFunction(this.Navigation), this);
-            base.OnEnter();
-        }
-
-        public override void OnExit()
-        {
-            if (!this.surviveExit || (this.screenKillExitOverride == this.navigationPath))
-            {
-                if (this.instance != null)
-                {
-                    UIManager.Close(this.instance);
-                }
-                this.instance = null;
-            }
-            if (this.instance != null)
-            {
-                MHEventSystem.UnRegisterListener(new EventFunction(this.Navigation));
-            }
-            base.OnExit();
+            return "FSM->" + this.screen?.GetType().Name;
         }
     }
 }
-

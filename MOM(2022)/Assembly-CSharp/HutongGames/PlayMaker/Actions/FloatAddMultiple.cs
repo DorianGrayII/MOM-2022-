@@ -1,24 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Math), Tooltip("Adds multiple float variables to float variable.")]
+    [ActionCategory(ActionCategory.Math)]
+    [Tooltip("Adds multiple float variables to float variable.")]
     public class FloatAddMultiple : FsmStateAction
     {
-        [UIHint(UIHint.Variable), Tooltip("The float variables to add.")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The float variables to add.")]
         public FsmFloat[] floatVariables;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("Add to this variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Add to this variable.")]
         public FsmFloat addTo;
+
         [Tooltip("Repeat every frame while the state is active.")]
         public bool everyFrame;
 
-        private void DoFloatAdd()
+        public override void Reset()
         {
-            for (int i = 0; i < this.floatVariables.Length; i++)
-            {
-                this.addTo.Value += this.floatVariables[i].Value;
-            }
+            this.floatVariables = null;
+            this.addTo = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -35,12 +37,12 @@
             this.DoFloatAdd();
         }
 
-        public override void Reset()
+        private void DoFloatAdd()
         {
-            this.floatVariables = null;
-            this.addTo = null;
-            this.everyFrame = false;
+            for (int i = 0; i < this.floatVariables.Length; i++)
+            {
+                this.addTo.Value += this.floatVariables[i].Value;
+            }
         }
     }
 }
-

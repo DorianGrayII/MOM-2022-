@@ -1,30 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the maximum number of characters that the user can type into a UI InputField component. Optionally reset on exit")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the maximum number of characters that the user can type into a UI InputField component. Optionally reset on exit")]
     public class UiInputFieldSetCharacterLimit : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The maximum number of characters that the user can type into the UI InputField component. 0 = infinite")]
+
+        [RequiredField]
+        [Tooltip("The maximum number of characters that the user can type into the UI InputField component. 0 = infinite")]
         public FsmInt characterLimit;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private InputField inputField;
+
         private int originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.inputField.characterLimit = this.characterLimit.Value;
-            }
+            this.gameObject = null;
+            this.characterLimit = null;
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,26 +49,25 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.inputField != null) && this.resetOnExit.Value)
-            {
-                this.inputField.characterLimit = this.originalValue;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetValue();
         }
 
-        public override void Reset()
+        private void DoSetValue()
         {
-            this.gameObject = null;
-            this.characterLimit = null;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (this.inputField != null)
+            {
+                this.inputField.characterLimit = this.characterLimit.Value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.inputField == null) && this.resetOnExit.Value)
+            {
+                this.inputField.characterLimit = this.originalValue;
+            }
         }
     }
 }
-

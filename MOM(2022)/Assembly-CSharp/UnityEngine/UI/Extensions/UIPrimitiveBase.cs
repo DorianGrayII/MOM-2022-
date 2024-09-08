@@ -1,204 +1,31 @@
-﻿namespace UnityEngine.UI.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
 
+namespace UnityEngine.UI.Extensions
+{
     [RequireComponent(typeof(CanvasRenderer))]
     public class UIPrimitiveBase : MaskableGraphic, ILayoutElement, ICanvasRaycastFilter
     {
         protected static Material s_ETC1DefaultUI;
+
         private List<Vector2> outputList = new List<Vector2>();
+
         [SerializeField]
         private Sprite m_Sprite;
+
         [NonSerialized]
         private Sprite m_OverrideSprite;
+
         internal float m_EventAlphaThreshold = 1f;
+
         [SerializeField]
-        private UnityEngine.UI.Extensions.ResolutionMode m_improveResolution;
+        private ResolutionMode m_improveResolution;
+
         [SerializeField]
         protected float m_Resolution;
+
         [SerializeField]
         private bool m_useNativeSize;
-
-        protected UIPrimitiveBase()
-        {
-            base.useLegacyMeshGeneration = false;
-        }
-
-        public virtual void CalculateLayoutInputHorizontal()
-        {
-        }
-
-        public virtual void CalculateLayoutInputVertical()
-        {
-        }
-
-        protected virtual void GeneratedUVs()
-        {
-        }
-
-        private Vector4 GetAdjustedBorders(Vector4 border, Rect rect)
-        {
-            for (int i = 0; i <= 1; i++)
-            {
-                float num2 = border[i] + border[i + 2];
-                if ((rect.size[i] < num2) && (num2 != 0f))
-                {
-                    Vector2 size = rect.size;
-                    float num3 = size[i] / num2;
-                    ref Vector4 vectorRef = ref border;
-                    int num4 = i;
-                    vectorRef[num4] *= num3;
-                    vectorRef = ref border;
-                    num4 = i + 2;
-                    vectorRef[num4] *= num3;
-                }
-            }
-            return border;
-        }
-
-        protected List<Vector2> IncreaseResolution(List<Vector2> input)
-        {
-            float num2;
-            this.outputList.Clear();
-            UnityEngine.UI.Extensions.ResolutionMode improveResolution = this.ImproveResolution;
-            if (improveResolution == UnityEngine.UI.Extensions.ResolutionMode.PerSegment)
-            {
-                int num9 = 0;
-                while (num9 < (input.Count - 1))
-                {
-                    Vector2 item = input[num9];
-                    this.outputList.Add(item);
-                    Vector2 b = input[num9 + 1];
-                    this.ResolutionToNativeSize(Vector2.Distance(item, b));
-                    num2 = 1f / this.m_Resolution;
-                    float num10 = 1f;
-                    while (true)
-                    {
-                        if (num10 >= this.m_Resolution)
-                        {
-                            this.outputList.Add(b);
-                            num9++;
-                            break;
-                        }
-                        this.outputList.Add(Vector2.Lerp(item, b, num2 * num10));
-                        num10++;
-                    }
-                }
-            }
-            else if (improveResolution == UnityEngine.UI.Extensions.ResolutionMode.PerLine)
-            {
-                float distance = 0f;
-                num2 = 0f;
-                int num4 = 0;
-                while (true)
-                {
-                    if (num4 >= (input.Count - 1))
-                    {
-                        this.ResolutionToNativeSize(distance);
-                        num2 = distance / this.m_Resolution;
-                        int num3 = 0;
-                        int num5 = 0;
-                        while (num5 < (input.Count - 1))
-                        {
-                            Vector2 item = input[num5];
-                            this.outputList.Add(item);
-                            Vector2 b = input[num5 + 1];
-                            float num6 = Vector2.Distance(item, b) / num2;
-                            float num7 = 1f / num6;
-                            int num8 = 0;
-                            while (true)
-                            {
-                                if (num8 >= num6)
-                                {
-                                    this.outputList.Add(b);
-                                    num5++;
-                                    break;
-                                }
-                                this.outputList.Add(Vector2.Lerp(item, b, num8 * num7));
-                                num3++;
-                                num8++;
-                            }
-                        }
-                        break;
-                    }
-                    distance += Vector2.Distance(input[num4], input[num4 + 1]);
-                    num4++;
-                }
-            }
-            return this.outputList;
-        }
-
-        protected Vector2[] IncreaseResolution(Vector2[] input)
-        {
-            return this.IncreaseResolution(new List<Vector2>(input)).ToArray();
-        }
-
-        public virtual unsafe bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
-        {
-            Vector2 vector;
-            if (this.m_EventAlphaThreshold >= 1f)
-            {
-                return true;
-            }
-            Sprite overrideSprite = this.overrideSprite;
-            if (overrideSprite == null)
-            {
-                return true;
-            }
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector);
-            Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
-            float* singlePtr1 = &vector.x;
-            singlePtr1[0] += base.rectTransform.pivot.x * pixelAdjustedRect.width;
-            float* singlePtr2 = &vector.y;
-            singlePtr2[0] += base.rectTransform.pivot.y * pixelAdjustedRect.height;
-            vector = this.MapCoordinate(vector, pixelAdjustedRect);
-            Rect textureRect = overrideSprite.textureRect;
-            Vector2 vector2 = new Vector2(vector.x / textureRect.width, vector.y / textureRect.height);
-            float u = Mathf.Lerp(textureRect.x, textureRect.xMax, vector2.x) / ((float) overrideSprite.texture.width);
-            float v = Mathf.Lerp(textureRect.y, textureRect.yMax, vector2.y) / ((float) overrideSprite.texture.height);
-            try
-            {
-                return (overrideSprite.texture.GetPixelBilinear(u, v).a >= this.m_EventAlphaThreshold);
-            }
-            catch (UnityException exception)
-            {
-                Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + exception.Message + " Also make sure to disable sprite packing for this sprite.", this);
-                return true;
-            }
-        }
-
-        private Vector2 MapCoordinate(Vector2 local, Rect rect)
-        {
-            Rect rect1 = this.sprite.rect;
-            return new Vector2(local.x * rect.width, local.y * rect.height);
-        }
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-            this.SetAllDirty();
-        }
-
-        protected virtual void ResolutionToNativeSize(float distance)
-        {
-        }
-
-        protected UIVertex[] SetVbo(Vector2[] vertices, Vector2[] uvs)
-        {
-            UIVertex[] vertexArray = new UIVertex[4];
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                UIVertex simpleVert = UIVertex.simpleVert;
-                simpleVert.color = this.color;
-                simpleVert.position = (Vector3) vertices[i];
-                simpleVert.uv0 = uvs[i];
-                vertexArray[i] = simpleVert;
-            }
-            return vertexArray;
-        }
 
         public Sprite sprite
         {
@@ -208,7 +35,7 @@
             }
             set
             {
-                if (UnityEngine.UI.Extensions.SetPropertyUtility.SetClass<Sprite>(ref this.m_Sprite, value))
+                if (SetPropertyUtility.SetClass(ref this.m_Sprite, value))
                 {
                     this.GeneratedUVs();
                 }
@@ -224,7 +51,7 @@
             }
             set
             {
-                if (UnityEngine.UI.Extensions.SetPropertyUtility.SetClass<Sprite>(ref this.m_OverrideSprite, value))
+                if (SetPropertyUtility.SetClass(ref this.m_OverrideSprite, value))
                 {
                     this.GeneratedUVs();
                 }
@@ -236,7 +63,11 @@
         {
             get
             {
-                return ((this.m_OverrideSprite != null) ? this.m_OverrideSprite : this.sprite);
+                if (!(this.m_OverrideSprite != null))
+                {
+                    return this.sprite;
+                }
+                return this.m_OverrideSprite;
             }
         }
 
@@ -252,7 +83,7 @@
             }
         }
 
-        public UnityEngine.UI.Extensions.ResolutionMode ImproveResolution
+        public ResolutionMode ImproveResolution
         {
             get
             {
@@ -295,11 +126,11 @@
         {
             get
             {
-                if (s_ETC1DefaultUI == null)
+                if (UIPrimitiveBase.s_ETC1DefaultUI == null)
                 {
-                    s_ETC1DefaultUI = Canvas.GetETC1SupportedCanvasMaterial();
+                    UIPrimitiveBase.s_ETC1DefaultUI = Canvas.GetETC1SupportedCanvasMaterial();
                 }
-                return s_ETC1DefaultUI;
+                return UIPrimitiveBase.s_ETC1DefaultUI;
             }
         }
 
@@ -307,7 +138,15 @@
         {
             get
             {
-                return ((this.activeSprite != null) ? this.activeSprite.texture : (((this.material == null) || (this.material.mainTexture == null)) ? Graphic.s_WhiteTexture : this.material.mainTexture));
+                if (this.activeSprite == null)
+                {
+                    if (this.material != null && this.material.mainTexture != null)
+                    {
+                        return this.material.mainTexture;
+                    }
+                    return Graphic.s_WhiteTexture;
+                }
+                return this.activeSprite.texture;
             }
         }
 
@@ -315,7 +154,11 @@
         {
             get
             {
-                return ((this.activeSprite != null) && (this.activeSprite.border.sqrMagnitude > 0f));
+                if (this.activeSprite != null)
+                {
+                    return this.activeSprite.border.sqrMagnitude > 0f;
+                }
+                return false;
             }
         }
 
@@ -323,17 +166,17 @@
         {
             get
             {
-                float pixelsPerUnit = 100f;
-                if (this.activeSprite)
+                float num = 100f;
+                if ((bool)this.activeSprite)
                 {
-                    pixelsPerUnit = this.activeSprite.pixelsPerUnit;
+                    num = this.activeSprite.pixelsPerUnit;
                 }
-                float referencePixelsPerUnit = 100f;
-                if (base.canvas)
+                float num2 = 100f;
+                if ((bool)base.canvas)
                 {
-                    referencePixelsPerUnit = base.canvas.referencePixelsPerUnit;
+                    num2 = base.canvas.referencePixelsPerUnit;
                 }
-                return (pixelsPerUnit / referencePixelsPerUnit);
+                return num / num2;
             }
         }
 
@@ -341,7 +184,15 @@
         {
             get
             {
-                return ((base.m_Material == null) ? ((!this.activeSprite || (this.activeSprite.associatedAlphaSplitTexture == null)) ? this.defaultMaterial : defaultETC1GraphicMaterial) : base.m_Material);
+                if (base.m_Material != null)
+                {
+                    return base.m_Material;
+                }
+                if ((bool)this.activeSprite && this.activeSprite.associatedAlphaSplitTexture != null)
+                {
+                    return UIPrimitiveBase.defaultETC1GraphicMaterial;
+                }
+                return this.defaultMaterial;
             }
             set
             {
@@ -349,61 +200,189 @@
             }
         }
 
-        public virtual float minWidth
-        {
-            get
-            {
-                return 0f;
-            }
-        }
+        public virtual float minWidth => 0f;
 
         public virtual float preferredWidth
         {
             get
             {
-                return ((this.overrideSprite != null) ? (this.overrideSprite.rect.size.x / this.pixelsPerUnit) : 0f);
+                if (this.overrideSprite == null)
+                {
+                    return 0f;
+                }
+                return this.overrideSprite.rect.size.x / this.pixelsPerUnit;
             }
         }
 
-        public virtual float flexibleWidth
-        {
-            get
-            {
-                return -1f;
-            }
-        }
+        public virtual float flexibleWidth => -1f;
 
-        public virtual float minHeight
-        {
-            get
-            {
-                return 0f;
-            }
-        }
+        public virtual float minHeight => 0f;
 
         public virtual float preferredHeight
         {
             get
             {
-                return ((this.overrideSprite != null) ? (this.overrideSprite.rect.size.y / this.pixelsPerUnit) : 0f);
+                if (this.overrideSprite == null)
+                {
+                    return 0f;
+                }
+                return this.overrideSprite.rect.size.y / this.pixelsPerUnit;
             }
         }
 
-        public virtual float flexibleHeight
+        public virtual float flexibleHeight => -1f;
+
+        public virtual int layoutPriority => 0;
+
+        protected UIPrimitiveBase()
         {
-            get
+            base.useLegacyMeshGeneration = false;
+        }
+
+        protected UIVertex[] SetVbo(Vector2[] vertices, Vector2[] uvs)
+        {
+            UIVertex[] array = new UIVertex[4];
+            for (int i = 0; i < vertices.Length; i++)
             {
-                return -1f;
+                UIVertex simpleVert = UIVertex.simpleVert;
+                simpleVert.color = this.color;
+                simpleVert.position = vertices[i];
+                simpleVert.uv0 = uvs[i];
+                array[i] = simpleVert;
+            }
+            return array;
+        }
+
+        protected Vector2[] IncreaseResolution(Vector2[] input)
+        {
+            return this.IncreaseResolution(new List<Vector2>(input)).ToArray();
+        }
+
+        protected List<Vector2> IncreaseResolution(List<Vector2> input)
+        {
+            this.outputList.Clear();
+            switch (this.ImproveResolution)
+            {
+            case ResolutionMode.PerLine:
+            {
+                float num3 = 0f;
+                float num = 0f;
+                for (int j = 0; j < input.Count - 1; j++)
+                {
+                    num3 += Vector2.Distance(input[j], input[j + 1]);
+                }
+                this.ResolutionToNativeSize(num3);
+                num = num3 / this.m_Resolution;
+                int num4 = 0;
+                for (int k = 0; k < input.Count - 1; k++)
+                {
+                    Vector2 vector3 = input[k];
+                    this.outputList.Add(vector3);
+                    Vector2 vector4 = input[k + 1];
+                    float num5 = Vector2.Distance(vector3, vector4) / num;
+                    float num6 = 1f / num5;
+                    for (int l = 0; (float)l < num5; l++)
+                    {
+                        this.outputList.Add(Vector2.Lerp(vector3, vector4, (float)l * num6));
+                        num4++;
+                    }
+                    this.outputList.Add(vector4);
+                }
+                break;
+            }
+            case ResolutionMode.PerSegment:
+            {
+                for (int i = 0; i < input.Count - 1; i++)
+                {
+                    Vector2 vector = input[i];
+                    this.outputList.Add(vector);
+                    Vector2 vector2 = input[i + 1];
+                    this.ResolutionToNativeSize(Vector2.Distance(vector, vector2));
+                    float num = 1f / this.m_Resolution;
+                    for (float num2 = 1f; num2 < this.m_Resolution; num2 += 1f)
+                    {
+                        this.outputList.Add(Vector2.Lerp(vector, vector2, num * num2));
+                    }
+                    this.outputList.Add(vector2);
+                }
+                break;
+            }
+            }
+            return this.outputList;
+        }
+
+        protected virtual void GeneratedUVs()
+        {
+        }
+
+        protected virtual void ResolutionToNativeSize(float distance)
+        {
+        }
+
+        public virtual void CalculateLayoutInputHorizontal()
+        {
+        }
+
+        public virtual void CalculateLayoutInputVertical()
+        {
+        }
+
+        public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
+        {
+            if (this.m_EventAlphaThreshold >= 1f)
+            {
+                return true;
+            }
+            Sprite sprite = this.overrideSprite;
+            if (sprite == null)
+            {
+                return true;
+            }
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out var localPoint);
+            Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+            localPoint.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
+            localPoint.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
+            localPoint = this.MapCoordinate(localPoint, pixelAdjustedRect);
+            Rect textureRect = sprite.textureRect;
+            Vector2 vector = new Vector2(localPoint.x / textureRect.width, localPoint.y / textureRect.height);
+            float u = Mathf.Lerp(textureRect.x, textureRect.xMax, vector.x) / (float)sprite.texture.width;
+            float v = Mathf.Lerp(textureRect.y, textureRect.yMax, vector.y) / (float)sprite.texture.height;
+            try
+            {
+                return sprite.texture.GetPixelBilinear(u, v).a >= this.m_EventAlphaThreshold;
+            }
+            catch (UnityException ex)
+            {
+                Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
+                return true;
             }
         }
 
-        public virtual int layoutPriority
+        private Vector2 MapCoordinate(Vector2 local, Rect rect)
         {
-            get
+            _ = this.sprite.rect;
+            return new Vector2(local.x * rect.width, local.y * rect.height);
+        }
+
+        private Vector4 GetAdjustedBorders(Vector4 border, Rect rect)
+        {
+            for (int i = 0; i <= 1; i++)
             {
-                return 0;
+                float num = border[i] + border[i + 2];
+                if (rect.size[i] < num && num != 0f)
+                {
+                    float num2 = rect.size[i] / num;
+                    border[i] *= num2;
+                    border[i + 2] *= num2;
+                }
             }
+            return border;
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            this.SetAllDirty();
         }
     }
 }
-

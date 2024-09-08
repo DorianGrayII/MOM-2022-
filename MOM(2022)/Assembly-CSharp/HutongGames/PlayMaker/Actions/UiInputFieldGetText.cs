@@ -1,26 +1,30 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the text value of a UI InputField component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the text value of a UI InputField component.")]
     public class UiInputFieldGetText : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The text value of the UI InputField component.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The text value of the UI InputField component.")]
         public FsmString text;
+
         public bool everyFrame;
+
         private InputField inputField;
 
-        private void DoGetTextValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.text.Value = this.inputField.text;
-            }
+            this.text = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,11 +46,12 @@
             this.DoGetTextValue();
         }
 
-        public override void Reset()
+        private void DoGetTextValue()
         {
-            this.text = null;
-            this.everyFrame = false;
+            if (this.inputField != null)
+            {
+                this.text.Value = this.inputField.text;
+            }
         }
     }
 }
-

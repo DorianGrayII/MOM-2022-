@@ -1,124 +1,128 @@
-﻿namespace WorldCode
-{
-    using MHUtils;
-    using ProtoBuf;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using MHUtils;
+using ProtoBuf;
+using UnityEngine;
 
+namespace WorldCode
+{
     [ProtoContract]
     public class ForegroundMeshPlanSerializer
     {
         [ProtoMember(1)]
         public List<MHVector3> vertices;
+
         [ProtoMember(2)]
         public List<MHVector2> uv;
+
         [ProtoMember(3)]
         public List<MHVector2> uv2;
+
         [ProtoMember(4)]
         public List<int> indices;
+
         [ProtoMember(5)]
         public List<MHVector4> colors;
 
         public void Add(ForegroundMeshPlan f)
         {
-            int capacity = (f.vertices != null) ? f.vertices.Count : 0;
-            this.vertices = new List<MHVector3>(capacity);
-            if (capacity > 0)
+            int num = ((f.vertices != null) ? f.vertices.Count : 0);
+            this.vertices = new List<MHVector3>(num);
+            if (num > 0)
             {
-                foreach (Vector3 vector in f.vertices)
+                foreach (Vector3 vertex in f.vertices)
                 {
-                    this.vertices.Add(vector);
+                    this.vertices.Add(vertex);
                 }
             }
-            capacity = (f.uv != null) ? f.uv.Count : 0;
-            this.uv = new List<MHVector2>(capacity);
-            if (capacity > 0)
+            num = ((f.uv != null) ? f.uv.Count : 0);
+            this.uv = new List<MHVector2>(num);
+            if (num > 0)
             {
-                foreach (Vector2 vector2 in f.uv)
+                foreach (Vector2 item2 in f.uv)
                 {
-                    this.uv.Add(vector2);
+                    this.uv.Add(item2);
                 }
             }
-            capacity = (f.uv2 != null) ? f.uv2.Count : 0;
-            this.uv2 = new List<MHVector2>(capacity);
-            if (capacity > 0)
+            num = ((f.uv2 != null) ? f.uv2.Count : 0);
+            this.uv2 = new List<MHVector2>(num);
+            if (num > 0)
             {
-                foreach (Vector2 vector3 in f.uv2)
+                foreach (Vector2 item3 in f.uv2)
                 {
-                    this.uv2.Add(vector3);
+                    this.uv2.Add(item3);
                 }
             }
-            capacity = (f.indices != null) ? f.indices.Count : 0;
-            this.indices = new List<int>(capacity);
-            if (capacity > 0)
+            num = ((f.indices != null) ? f.indices.Count : 0);
+            this.indices = new List<int>(num);
+            if (num > 0)
             {
-                foreach (int num2 in f.indices)
+                foreach (int index in f.indices)
                 {
-                    this.indices.Add(num2);
+                    this.indices.Add(index);
                 }
             }
-            capacity = (f.colors != null) ? f.colors.Count : 0;
-            this.colors = new List<MHVector4>(capacity);
-            if (capacity > 0)
+            num = ((f.colors != null) ? f.colors.Count : 0);
+            this.colors = new List<MHVector4>(num);
+            if (num <= 0)
             {
-                foreach (Color color in f.colors)
-                {
-                    MHVector4 item = new MHVector4(color.r, color.g, color.b, color.a);
-                    this.colors.Add(item);
-                }
+                return;
+            }
+            foreach (Color color in f.colors)
+            {
+                MHVector4 item = new MHVector4(color.r, color.g, color.b, color.a);
+                this.colors.Add(item);
             }
         }
 
         public void ReadTo(ForegroundMeshPlan f)
         {
-            int capacity = (this.vertices != null) ? this.vertices.Count : 0;
-            f.vertices = new List<Vector3>(capacity);
-            if (capacity > 0)
+            int num = ((this.vertices != null) ? this.vertices.Count : 0);
+            f.vertices = new List<Vector3>(num);
+            if (num > 0)
             {
-                foreach (MHVector3 vector in this.vertices)
+                foreach (MHVector3 vertex in this.vertices)
                 {
-                    f.vertices.Add((Vector3) vector);
+                    f.vertices.Add(vertex);
                 }
             }
-            capacity = (this.uv != null) ? this.uv.Count : 0;
-            f.uv = new List<Vector2>(capacity);
-            if (capacity > 0)
+            num = ((this.uv != null) ? this.uv.Count : 0);
+            f.uv = new List<Vector2>(num);
+            if (num > 0)
             {
-                foreach (MHVector2 vector2 in this.uv)
+                foreach (MHVector2 item2 in this.uv)
                 {
-                    f.uv.Add((Vector2) vector2);
+                    f.uv.Add(item2);
                 }
             }
-            capacity = (this.uv2 != null) ? this.uv2.Count : 0;
-            f.uv2 = new List<Vector2>(capacity);
-            if (capacity > 0)
+            num = ((this.uv2 != null) ? this.uv2.Count : 0);
+            f.uv2 = new List<Vector2>(num);
+            if (num > 0)
             {
-                foreach (MHVector2 vector3 in this.uv2)
+                foreach (MHVector2 item3 in this.uv2)
                 {
-                    f.uv2.Add((Vector2) vector3);
+                    f.uv2.Add(item3);
                 }
             }
-            capacity = (this.indices != null) ? this.indices.Count : 0;
-            f.indices = new List<int>(capacity);
-            if (capacity > 0)
+            num = ((this.indices != null) ? this.indices.Count : 0);
+            f.indices = new List<int>(num);
+            if (num > 0)
             {
-                foreach (int num2 in this.indices)
+                foreach (int index in this.indices)
                 {
-                    f.indices.Add(num2);
+                    f.indices.Add(index);
                 }
             }
-            capacity = (this.colors != null) ? this.colors.Count : 0;
-            f.colors = new List<Color>(capacity);
-            if (capacity > 0)
+            num = ((this.colors != null) ? this.colors.Count : 0);
+            f.colors = new List<Color>(num);
+            if (num <= 0)
             {
-                foreach (MHVector4 vector4 in this.colors)
-                {
-                    Color item = new Color(vector4.x, vector4.y, vector4.z, vector4.w);
-                    f.colors.Add(item);
-                }
+                return;
+            }
+            foreach (MHVector4 color in this.colors)
+            {
+                Color item = new Color(color.x, color.y, color.z, color.w);
+                f.colors.Add(item);
             }
         }
     }
 }
-

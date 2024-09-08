@@ -1,57 +1,57 @@
-﻿using MHUtils;
+using MHUtils;
 using MHUtils.UI;
-using System;
-using System.Runtime.InteropServices;
+using TMPro;
 using UnityEngine;
 
 public class MouseTooltip : MonoBehaviour
 {
     private static MouseTooltip instance;
+
     private static GameObject cursorAttachment;
+
     private static string tempMessage;
 
-    public static void Close()
+    public static void Open(object source, string message = null)
     {
-        if (cursorAttachment != null)
-        {
-            Destroy(cursorAttachment.gameObject);
-        }
-        if (instance != null)
-        {
-            Destroy(instance.gameObject);
-        }
-    }
-
-    public static void Open(object source, string message)
-    {
-        if (instance == null)
+        if (MouseTooltip.instance == null)
         {
             GameObject layer = UIManager.GetLayer(UIManager.Layer.TopLayer);
             if (source is GameObject)
             {
-                cursorAttachment = GameObjectUtils.Instantiate(source as GameObject, layer.transform);
-                cursorAttachment.transform.position = Vector3.zero;
+                MouseTooltip.cursorAttachment = GameObjectUtils.Instantiate(source as GameObject, layer.transform);
+                MouseTooltip.cursorAttachment.transform.position = Vector3.zero;
                 if (message != null)
                 {
-                    cursorAttachment.GetComponentInChildren<TextMeshProUGUI>().text = message + "%";
-                    tempMessage = message;
+                    MouseTooltip.cursorAttachment.GetComponentInChildren<TextMeshProUGUI>().text = message + "%";
+                    MouseTooltip.tempMessage = message;
                 }
             }
-            instance = GameObjectUtils.GetOrAddComponent<MouseTooltip>(cursorAttachment);
+            MouseTooltip.instance = MouseTooltip.cursorAttachment.GetOrAddComponent<MouseTooltip>();
         }
-        if (tempMessage != message)
+        if (MouseTooltip.tempMessage != message)
         {
-            cursorAttachment.GetComponentInChildren<TextMeshProUGUI>().text = message + "%";
-            tempMessage = message;
+            MouseTooltip.cursorAttachment.GetComponentInChildren<TextMeshProUGUI>().text = message + "%";
+            MouseTooltip.tempMessage = message;
         }
     }
 
     private void Update()
     {
-        if ((instance != null) && ((instance == this) && (cursorAttachment != null)))
+        if (MouseTooltip.instance != null && MouseTooltip.instance == this && MouseTooltip.cursorAttachment != null)
         {
-            cursorAttachment.transform.position = Input.mousePosition;
+            MouseTooltip.cursorAttachment.transform.position = Input.mousePosition;
+        }
+    }
+
+    public static void Close()
+    {
+        if (MouseTooltip.cursorAttachment != null)
+        {
+            Object.Destroy(MouseTooltip.cursorAttachment.gameObject);
+        }
+        if (MouseTooltip.instance != null)
+        {
+            Object.Destroy(MouseTooltip.instance.gameObject);
         }
     }
 }
-

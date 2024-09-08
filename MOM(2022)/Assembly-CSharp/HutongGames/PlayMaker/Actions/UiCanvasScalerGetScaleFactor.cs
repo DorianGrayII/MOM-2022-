@@ -1,27 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Get the ScaleFactor of a CanvasScaler.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Get the ScaleFactor of a CanvasScaler.")]
     public class UiCanvasScalerGetScaleFactor : ComponentAction<CanvasScaler>
     {
-        [RequiredField, CheckForComponent(typeof(CanvasScaler)), HutongGames.PlayMaker.Tooltip("The GameObject with a UI CanvasScaler component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(CanvasScaler))]
+        [Tooltip("The GameObject with a UI CanvasScaler component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The scaleFactor of the CanvasScaler component.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The scaleFactor of the CanvasScaler component.")]
         public FsmFloat scaleFactor;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame, useful for animation")]
+
+        [Tooltip("Repeats every frame, useful for animation")]
         public bool everyFrame;
+
         private CanvasScaler component;
 
-        private void DoGetValue()
+        public override void Reset()
         {
-            if (this.component != null)
-            {
-                this.scaleFactor.Value = this.component.scaleFactor;
-            }
+            this.gameObject = null;
+            this.scaleFactor = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,12 +48,12 @@
             this.DoGetValue();
         }
 
-        public override void Reset()
+        private void DoGetValue()
         {
-            this.gameObject = null;
-            this.scaleFactor = null;
-            this.everyFrame = false;
+            if (this.component != null)
+            {
+                this.scaleFactor.Value = this.component.scaleFactor;
+            }
         }
     }
 }
-

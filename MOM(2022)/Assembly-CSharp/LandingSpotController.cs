@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// LandingSpotController
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

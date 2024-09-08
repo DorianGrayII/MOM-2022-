@@ -1,20 +1,29 @@
-﻿namespace UnityEngine.PostProcessing
+namespace UnityEngine.PostProcessing
 {
-    using System;
-    using UnityEngine;
-
     public sealed class DitheringComponent : PostProcessingComponentRenderTexture<DitheringModel>
     {
-        private Texture2D[] noiseTextures;
-        private int textureIndex;
-        private const int k_TextureCount = 0x40;
-
-        private void LoadNoiseTextures()
+        private static class Uniforms
         {
-            this.noiseTextures = new Texture2D[0x40];
-            for (int i = 0; i < 0x40; i++)
+            internal static readonly int _DitheringTex = Shader.PropertyToID("_DitheringTex");
+
+            internal static readonly int _DitheringCoords = Shader.PropertyToID("_DitheringCoords");
+        }
+
+        private Texture2D[] noiseTextures;
+
+        private int textureIndex;
+
+        private const int k_TextureCount = 64;
+
+        public override bool active
+        {
+            get
             {
-                this.noiseTextures[i] = Resources.Load<Texture2D>("Bluenoise64/LDR_LLL1_" + i.ToString());
+                if (base.model.enabled)
+                {
+                    return !base.context.interrupted;
+                }
+                return false;
             }
         }
 
@@ -23,39 +32,31 @@
             this.noiseTextures = null;
         }
 
+        private void LoadNoiseTextures()
+        {
+            this.noiseTextures = new Texture2D[64];
+            for (int i = 0; i < 64; i++)
+            {
+                this.noiseTextures[i] = Resources.Load<Texture2D>("Bluenoise64/LDR_LLL1_" + i);
+            }
+        }
+
         public override void Prepare(Material uberMaterial)
         {
-            int num3 = this.textureIndex + 1;
-            this.textureIndex = num3;
-            if (num3 >= 0x40)
+            if (++this.textureIndex >= 64)
             {
                 this.textureIndex = 0;
             }
-            float z = UnityEngine.Random.value;
-            float w = UnityEngine.Random.value;
+            float value = Random.value;
+            float value2 = Random.value;
             if (this.noiseTextures == null)
             {
                 this.LoadNoiseTextures();
             }
-            Texture2D textured = this.noiseTextures[this.textureIndex];
+            Texture2D texture2D = this.noiseTextures[this.textureIndex];
             uberMaterial.EnableKeyword("DITHERING");
-            uberMaterial.SetTexture(Uniforms._DitheringTex, textured);
-            uberMaterial.SetVector(Uniforms._DitheringCoords, new Vector4(((float) base.context.width) / ((float) textured.width), ((float) base.context.height) / ((float) textured.height), z, w));
-        }
-
-        public override bool active
-        {
-            get
-            {
-                return (base.model.enabled && !base.context.interrupted);
-            }
-        }
-
-        private static class Uniforms
-        {
-            internal static readonly int _DitheringTex = Shader.PropertyToID("_DitheringTex");
-            internal static readonly int _DitheringCoords = Shader.PropertyToID("_DitheringCoords");
+            uberMaterial.SetTexture(Uniforms._DitheringTex, texture2D);
+            uberMaterial.SetVector(Uniforms._DitheringCoords, new Vector4((float)base.context.width / (float)texture2D.width, (float)base.context.height / (float)texture2D.height, value, value2));
         }
     }
 }
-

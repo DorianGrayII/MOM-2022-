@@ -1,71 +1,71 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DBDef.ArtefactGraphic
 using System;
 using System.Collections.Generic;
-using DBDef;
 using MHUtils;
 using UnityEngine;
 
-[ClassPrototype("ARTEFACT_GRAPHIC", "")]
-public class ArtefactGraphic : DBClass, IDescriptionInfoType
+namespace DBDef
 {
-    public static string abbreviation = "";
-
-    [Prototype("DescriptionInfo", true)]
-    public DescriptionInfo descriptionInfo;
-
-    [Prototype("RequiredPower", false)]
-    public ArtefactPower[] requiredPower;
-
-    [Prototype("RequiredPowerSet", false)]
-    public ArtefactPowerSet[] requiredPowerSet;
-
-    public DescriptionInfo GetDescriptionInfo()
+    [ClassPrototype("ARTEFACT_GRAPHIC", "")]
+    public class ArtefactGraphic : DBClass, IDescriptionInfoType
     {
-        return this.descriptionInfo;
-    }
+        public static string abbreviation = "";
 
-    public static explicit operator ArtefactGraphic(Enum e)
-    {
-        return DataBase.Get<ArtefactGraphic>(e);
-    }
+        [Prototype("DescriptionInfo", true)]
+        public DescriptionInfo descriptionInfo;
 
-    public static explicit operator ArtefactGraphic(string e)
-    {
-        return DataBase.Get<ArtefactGraphic>(e, reportMissing: true);
-    }
+        [Prototype("RequiredPower", false)]
+        public ArtefactPower[] requiredPower;
 
-    public void Set_requiredPower(List<object> list)
-    {
-        if (list == null || list.Count == 0)
+        [Prototype("RequiredPowerSet", false)]
+        public ArtefactPowerSet[] requiredPowerSet;
+
+        public DescriptionInfo GetDescriptionInfo()
         {
-            return;
+            return this.descriptionInfo;
         }
-        this.requiredPower = new ArtefactPower[list.Count];
-        for (int i = 0; i < list.Count; i++)
+
+        public static explicit operator ArtefactGraphic(Enum e)
         {
-            if (!(list[i] is ArtefactPower))
+            return DataBase.Get<ArtefactGraphic>(e);
+        }
+
+        public static explicit operator ArtefactGraphic(string e)
+        {
+            return DataBase.Get<ArtefactGraphic>(e, reportMissing: true);
+        }
+
+        public void Set_requiredPower(List<object> list)
+        {
+            if (list == null || list.Count == 0)
             {
-                Debug.LogError("requiredPower of type ArtefactPower received invalid type from array! " + list[i]);
+                return;
             }
-            this.requiredPower[i] = list[i] as ArtefactPower;
-        }
-    }
-
-    public void Set_requiredPowerSet(List<object> list)
-    {
-        if (list == null || list.Count == 0)
-        {
-            return;
-        }
-        this.requiredPowerSet = new ArtefactPowerSet[list.Count];
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (!(list[i] is ArtefactPowerSet))
+            this.requiredPower = new ArtefactPower[list.Count];
+            for (int i = 0; i < list.Count; i++)
             {
-                Debug.LogError("requiredPowerSet of type ArtefactPowerSet received invalid type from array! " + list[i]);
+                if (!(list[i] is ArtefactPower))
+                {
+                    Debug.LogError("requiredPower of type ArtefactPower received invalid type from array! " + list[i]);
+                }
+                this.requiredPower[i] = list[i] as ArtefactPower;
             }
-            this.requiredPowerSet[i] = list[i] as ArtefactPowerSet;
+        }
+
+        public void Set_requiredPowerSet(List<object> list)
+        {
+            if (list == null || list.Count == 0)
+            {
+                return;
+            }
+            this.requiredPowerSet = new ArtefactPowerSet[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!(list[i] is ArtefactPowerSet))
+                {
+                    Debug.LogError("requiredPowerSet of type ArtefactPowerSet received invalid type from array! " + list[i]);
+                }
+                this.requiredPowerSet[i] = list[i] as ArtefactPowerSet;
+            }
         }
     }
 }

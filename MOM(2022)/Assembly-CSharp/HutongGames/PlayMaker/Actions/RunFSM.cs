@@ -1,32 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.StateMachine), HutongGames.PlayMaker.Tooltip("Creates an FSM from a saved FSM Template.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.StateMachine)]
+    [Tooltip("Creates an FSM from a saved FSM Template.")]
     public class RunFSM : RunFSMAction
     {
         public FsmTemplateControl fsmTemplateControl = new FsmTemplateControl();
+
         [UIHint(UIHint.Variable)]
         public FsmInt storeID;
-        [HutongGames.PlayMaker.Tooltip("Event to send when the FSM has finished (usually because it ran a Finish FSM action).")]
+
+        [Tooltip("Event to send when the FSM has finished (usually because it ran a Finish FSM action).")]
         public FsmEvent finishEvent;
+
+        public override void Reset()
+        {
+            this.fsmTemplateControl = new FsmTemplateControl();
+            this.storeID = null;
+            base.runFsm = null;
+        }
 
         public override void Awake()
         {
-            if ((this.fsmTemplateControl.fsmTemplate != null) && Application.isPlaying)
+            if (this.fsmTemplateControl.fsmTemplate != null && Application.isPlaying)
             {
                 base.runFsm = base.Fsm.CreateSubFsm(this.fsmTemplateControl);
-            }
-        }
-
-        protected override void CheckIfFinished()
-        {
-            if ((base.runFsm == null) || base.runFsm.Finished)
-            {
-                base.Finish();
-                base.Fsm.Event(this.finishEvent);
             }
         }
 
@@ -35,27 +34,26 @@
             if (base.runFsm == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this.fsmTemplateControl.UpdateValues();
+            this.fsmTemplateControl.ApplyOverrides(base.runFsm);
+            base.runFsm.OnEnable();
+            if (!base.runFsm.Started)
             {
-                this.fsmTemplateControl.UpdateValues();
-                this.fsmTemplateControl.ApplyOverrides(base.runFsm);
-                base.runFsm.OnEnable();
-                if (!base.runFsm.Started)
-                {
-                    base.runFsm.Start();
-                }
-                this.storeID.Value = this.fsmTemplateControl.ID;
-                this.CheckIfFinished();
+                base.runFsm.Start();
             }
+            this.storeID.Value = this.fsmTemplateControl.ID;
+            this.CheckIfFinished();
         }
 
-        public override void Reset()
+        protected override void CheckIfFinished()
         {
-            this.fsmTemplateControl = new FsmTemplateControl();
-            this.storeID = null;
-            base.runFsm = null;
+            if (base.runFsm == null || base.runFsm.Finished)
+            {
+                base.Finish();
+                base.Fsm.Event(this.finishEvent);
+            }
         }
     }
 }
-

@@ -1,34 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("GUILayout Text Field to edit a Float Variable. Optionally send an event if the text has been edited.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("GUILayout Text Field to edit a Float Variable. Optionally send an event if the text has been edited.")]
     public class GUILayoutFloatField : GUILayoutAction
     {
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Float Variable to show in the edit field.")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Float Variable to show in the edit field.")]
         public FsmFloat floatVariable;
-        [HutongGames.PlayMaker.Tooltip("Optional GUIStyle in the active GUISKin.")]
-        public FsmString style;
-        [HutongGames.PlayMaker.Tooltip("Optional event to send when the value changes.")]
-        public FsmEvent changedEvent;
 
-        public override void OnGUI()
-        {
-            bool changed = GUI.changed;
-            GUI.changed = false;
-            this.floatVariable.Value = string.IsNullOrEmpty(this.style.Value) ? float.Parse(GUILayout.TextField(this.floatVariable.Value.ToString(), base.LayoutOptions)) : float.Parse(GUILayout.TextField(this.floatVariable.Value.ToString(), this.style.Value, base.LayoutOptions));
-            if (!GUI.changed)
-            {
-                GUI.changed = changed;
-            }
-            else
-            {
-                base.Fsm.Event(this.changedEvent);
-                GUIUtility.ExitGUI();
-            }
-        }
+        [Tooltip("Optional GUIStyle in the active GUISKin.")]
+        public FsmString style;
+
+        [Tooltip("Optional event to send when the value changes.")]
+        public FsmEvent changedEvent;
 
         public override void Reset()
         {
@@ -37,6 +23,28 @@
             this.style = "";
             this.changedEvent = null;
         }
+
+        public override void OnGUI()
+        {
+            bool changed = GUI.changed;
+            GUI.changed = false;
+            if (!string.IsNullOrEmpty(this.style.Value))
+            {
+                this.floatVariable.Value = float.Parse(GUILayout.TextField(this.floatVariable.Value.ToString(), this.style.Value, base.LayoutOptions));
+            }
+            else
+            {
+                this.floatVariable.Value = float.Parse(GUILayout.TextField(this.floatVariable.Value.ToString(), base.LayoutOptions));
+            }
+            if (GUI.changed)
+            {
+                base.Fsm.Event(this.changedEvent);
+                GUIUtility.ExitGUI();
+            }
+            else
+            {
+                GUI.changed = changed;
+            }
+        }
     }
 }
-

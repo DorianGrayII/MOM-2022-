@@ -1,28 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the source image sprite of a UI Image component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the source image sprite of a UI Image component.")]
     public class UiImageSetSprite : ComponentAction<Image>
     {
-        [RequiredField, CheckForComponent(typeof(Image)), HutongGames.PlayMaker.Tooltip("The GameObject with the Image UI component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Image))]
+        [Tooltip("The GameObject with the Image UI component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The source sprite of the UI Image component."), ObjectType(typeof(Sprite))]
+
+        [RequiredField]
+        [Tooltip("The source sprite of the UI Image component.")]
+        [ObjectType(typeof(Sprite))]
         public FsmObject sprite;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private Image image;
+
         private Sprite originalSprite;
 
-        private void DoSetImageSourceValue()
+        public override void Reset()
         {
-            if (this.image != null)
-            {
-                this.image.sprite = this.sprite.get_Value() as Sprite;
-            }
+            this.gameObject = null;
+            this.resetOnExit = false;
         }
 
         public override void OnEnter()
@@ -37,19 +42,20 @@
             base.Finish();
         }
 
+        private void DoSetImageSourceValue()
+        {
+            if (!(this.image == null))
+            {
+                this.image.sprite = this.sprite.Value as Sprite;
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.image != null) && this.resetOnExit.Value)
+            if (!(this.image == null) && this.resetOnExit.Value)
             {
                 this.image.sprite = this.originalSprite;
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.resetOnExit = false;
-        }
     }
 }
-

@@ -1,18 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Input), HutongGames.PlayMaker.Tooltip("Sends an Event when a Button is pressed.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Input)]
+    [Tooltip("Sends an Event when a Button is pressed.")]
     public class GetButtonDown : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The name of the button. Set in the Unity Input Manager.")]
+        [RequiredField]
+        [Tooltip("The name of the button. Set in the Unity Input Manager.")]
         public FsmString buttonName;
-        [HutongGames.PlayMaker.Tooltip("Event to send if the button is pressed.")]
+
+        [Tooltip("Event to send if the button is pressed.")]
         public FsmEvent sendEvent;
-        [HutongGames.PlayMaker.Tooltip("Set to True if the button is pressed."), UIHint(UIHint.Variable)]
+
+        [Tooltip("Set to True if the button is pressed.")]
+        [UIHint(UIHint.Variable)]
         public FsmBool storeResult;
+
+        public override void Reset()
+        {
+            this.buttonName = "Fire1";
+            this.sendEvent = null;
+            this.storeResult = null;
+        }
 
         public override void OnUpdate()
         {
@@ -23,13 +33,5 @@
             }
             this.storeResult.Value = buttonDown;
         }
-
-        public override void Reset()
-        {
-            this.buttonName = "Fire1";
-            this.sendEvent = null;
-            this.storeResult = null;
-        }
     }
 }
-

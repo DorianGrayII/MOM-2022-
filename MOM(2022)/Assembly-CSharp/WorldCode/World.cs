@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// WorldCode.World
 using System.Collections.Generic;
 using DBDef;
 using DBEnum;
@@ -7,234 +5,236 @@ using MHUtils;
 using MHUtils.UI;
 using MOM;
 using UnityEngine;
-using WorldCode;
 
-public class World : MonoBehaviour
+namespace WorldCode
 {
-    public static World instance;
-
-    private List<global::WorldCode.Plane> planes = new List<global::WorldCode.Plane>();
-
-    private global::WorldCode.Plane activePlane;
-
-    private global::WorldCode.Plane previouslyActive;
-
-    public int seed;
-
-    public int gameID;
-
-    public int worldSizeSetting;
-
-    public GameObject waterMyrror;
-
-    public GameObject waterArcanus;
-
-    public bool DEBUG_MODE;
-
-    public Vector3i debugVector;
-
-    public int debugIndex;
-
-    public bool GetDebugMode()
+    public class World : MonoBehaviour
     {
-        return false;
-    }
+        public static World instance;
 
-    private void Start()
-    {
-        World.instance = this;
-    }
+        private List<Plane> planes = new List<Plane>();
 
-    public static World Get()
-    {
-        return World.instance;
-    }
+        private Plane activePlane;
 
-    public static void AddPlane(global::WorldCode.Plane p)
-    {
-        World.Get().planes.Add(p);
-    }
+        private Plane previouslyActive;
 
-    public static void RemovePlane(global::WorldCode.Plane p)
-    {
-        if (World.Get().planes.Contains(p))
+        public int seed;
+
+        public int gameID;
+
+        public int worldSizeSetting;
+
+        public GameObject waterMyrror;
+
+        public GameObject waterArcanus;
+
+        public bool DEBUG_MODE;
+
+        public Vector3i debugVector;
+
+        public int debugIndex;
+
+        public bool GetDebugMode()
         {
-            World.Get().planes.Remove(p);
+            return false;
         }
-    }
 
-    public static void ActivatePlane(global::WorldCode.Plane p, bool forceUpdate = false)
-    {
-        if (!forceUpdate && World.Get().activePlane == p)
+        private void Start()
         {
-            return;
+            World.instance = this;
         }
-        IPlanePosition planePosition = FSMSelectionManager.Get()?.GetSelectedGroup();
-        if (planePosition != null && planePosition.GetPlane() != p)
+
+        public static World Get()
         {
-            FSMSelectionManager.Get().Select(null, focus: false);
+            return World.instance;
         }
-        CameraController.MakeNextCenterInstant();
-        VerticalMarkerManager.Get().Clearmarkers();
-        global::WorldCode.Plane plane = World.Get().activePlane;
-        World.Get().activePlane = p;
-        if (plane?.battlePlane != p.battlePlane)
+
+        public static void AddPlane(Plane p)
         {
-            Settings.GetData().UpdateAnimationSpeed();
+            World.Get().planes.Add(p);
         }
-        if (plane == null || plane.battlePlane)
+
+        public static void RemovePlane(Plane p)
         {
-            Material material = World.GetWater(plane?.arcanusType ?? true)?.GetComponent<MeshRenderer>()?.material;
-            if (material != null)
+            if (World.Get().planes.Contains(p))
             {
-                material.SetFloat("_UseBorderWave", 1f);
-            }
-            LightController.SetInstensity();
-        }
-        VerticalMarkerManager.Get().InitializeMarkers(p);
-        if (p.planeSource.Get() == (global::DBDef.Plane)PLANE.ARCANUS)
-        {
-            PosProcessingLibrary.SetArcanusMode();
-            World.Get().waterArcanus.SetActive(value: true);
-            World.Get().waterMyrror.SetActive(value: false);
-            if (p.battlePlane)
-            {
-                List<SoundList> list = DataBase.GetType<SoundList>().FindAll((SoundList o) => o.identifier == "Battle");
-                PlayMusic.Play(list[Random.Range(0, list.Count)].dbName, Battle.GetBattle());
-            }
-            else
-            {
-                PlayMusic.Play("SOUND_LIST-MAP_ARCANUS", GameManager.Get());
+                World.Get().planes.Remove(p);
             }
         }
-        else
+
+        public static void ActivatePlane(Plane p, bool forceUpdate = false)
         {
-            PosProcessingLibrary.SetMyrrorMode();
-            World.Get().waterArcanus.SetActive(value: false);
-            World.Get().waterMyrror.SetActive(value: true);
-            if (p.battlePlane)
+            if (!forceUpdate && World.Get().activePlane == p)
             {
-                List<SoundList> list2 = DataBase.GetType<SoundList>().FindAll((SoundList o) => o.identifier == "Battle");
-                PlayMusic.Play(list2[Random.Range(0, list2.Count)].dbName, Battle.GetBattle());
+                return;
+            }
+            IPlanePosition planePosition = FSMSelectionManager.Get()?.GetSelectedGroup();
+            if (planePosition != null && planePosition.GetPlane() != p)
+            {
+                FSMSelectionManager.Get().Select(null, focus: false);
+            }
+            CameraController.MakeNextCenterInstant();
+            VerticalMarkerManager.Get().Clearmarkers();
+            Plane plane = World.Get().activePlane;
+            World.Get().activePlane = p;
+            if (plane?.battlePlane != p.battlePlane)
+            {
+                Settings.GetData().UpdateAnimationSpeed();
+            }
+            if (plane == null || plane.battlePlane)
+            {
+                Material material = World.GetWater(plane?.arcanusType ?? true)?.GetComponent<MeshRenderer>()?.material;
+                if (material != null)
+                {
+                    material.SetFloat("_UseBorderWave", 1f);
+                }
+                LightController.SetInstensity();
+            }
+            VerticalMarkerManager.Get().InitializeMarkers(p);
+            if (p.planeSource.Get() == (global::DBDef.Plane)PLANE.ARCANUS)
+            {
+                PosProcessingLibrary.SetArcanusMode();
+                World.Get().waterArcanus.SetActive(value: true);
+                World.Get().waterMyrror.SetActive(value: false);
+                if (p.battlePlane)
+                {
+                    List<SoundList> list = DataBase.GetType<SoundList>().FindAll((SoundList o) => o.identifier == "Battle");
+                    PlayMusic.Play(list[Random.Range(0, list.Count)].dbName, Battle.GetBattle());
+                }
+                else
+                {
+                    PlayMusic.Play("SOUND_LIST-MAP_ARCANUS", GameManager.Get());
+                }
             }
             else
             {
-                PlayMusic.Play("SOUND_LIST-MAP_MYRROR", GameManager.Get());
+                PosProcessingLibrary.SetMyrrorMode();
+                World.Get().waterArcanus.SetActive(value: false);
+                World.Get().waterMyrror.SetActive(value: true);
+                if (p.battlePlane)
+                {
+                    List<SoundList> list2 = DataBase.GetType<SoundList>().FindAll((SoundList o) => o.identifier == "Battle");
+                    PlayMusic.Play(list2[Random.Range(0, list2.Count)].dbName, Battle.GetBattle());
+                }
+                else
+                {
+                    PlayMusic.Play("SOUND_LIST-MAP_MYRROR", GameManager.Get());
+                }
             }
-        }
-        MHEventSystem.TriggerEvent<World>(World.Get(), p);
-        List<global::MOM.Group> groupsOfPlane = GameManager.GetGroupsOfPlane(p);
-        for (int i = 0; i < groupsOfPlane.Count; i++)
-        {
-            global::MOM.Group group = groupsOfPlane[i];
-            if (group.IsModelVisible())
+            MHEventSystem.TriggerEvent<World>(World.Get(), p);
+            List<global::MOM.Group> groupsOfPlane = GameManager.GetGroupsOfPlane(p);
+            for (int i = 0; i < groupsOfPlane.Count; i++)
             {
-                group.GetMapFormation();
+                global::MOM.Group group = groupsOfPlane[i];
+                if (group.IsModelVisible())
+                {
+                    group.GetMapFormation();
+                }
+                else
+                {
+                    _ = group.GetMapFormation(createIfMissing: false) != null;
+                }
             }
-            else
+            List<global::MOM.Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(p);
+            if (locationsOfThePlane == null)
             {
-                _ = group.GetMapFormation(createIfMissing: false) != null;
+                return;
             }
-        }
-        List<global::MOM.Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(p);
-        if (locationsOfThePlane == null)
-        {
-            return;
-        }
-        foreach (global::MOM.Location item in locationsOfThePlane)
-        {
-            if (item.IsModelVisible() && item.model == null)
+            foreach (global::MOM.Location item in locationsOfThePlane)
             {
-                item.InitializeModel();
+                if (item.IsModelVisible() && item.model == null)
+                {
+                    item.InitializeModel();
+                }
             }
         }
-    }
 
-    public static List<global::WorldCode.Plane> GetPlanes()
-    {
-        return World.Get().planes;
-    }
-
-    public static global::WorldCode.Plane GetActivePlane()
-    {
-        return World.Get().activePlane;
-    }
-
-    public static GameObject GetArcanusWater()
-    {
-        return World.Get().waterArcanus;
-    }
-
-    public static GameObject GetMyrrorWater()
-    {
-        return World.Get().waterMyrror;
-    }
-
-    public static GameObject GetWater(bool arcanus)
-    {
-        if (!arcanus)
+        public static List<Plane> GetPlanes()
         {
-            return World.GetMyrrorWater();
+            return World.Get().planes;
         }
-        return World.GetArcanusWater();
-    }
 
-    public static global::WorldCode.Plane GetMyrror()
-    {
-        global::DBDef.Plane p = (global::DBDef.Plane)PLANE.MYRROR;
-        return World.Get().planes.Find((global::WorldCode.Plane o) => !o.battlePlane && o.planeSource.Get() == p);
-    }
-
-    public static global::WorldCode.Plane GetArcanus()
-    {
-        global::DBDef.Plane p = (global::DBDef.Plane)PLANE.ARCANUS;
-        return World.Get().planes.Find((global::WorldCode.Plane o) => !o.battlePlane && o.planeSource.Get() == p);
-    }
-
-    public static global::WorldCode.Plane GetOtherPlane(global::WorldCode.Plane p)
-    {
-        return World.Get().planes.Find((global::WorldCode.Plane o) => !o.battlePlane && o.planeSource.Get() != p.planeSource.Get());
-    }
-
-    public void Update()
-    {
-        if (this.activePlane == null)
+        public static Plane GetActivePlane()
         {
-            return;
+            return World.Get().activePlane;
         }
-        foreach (global::WorldCode.Plane plane in this.planes)
+
+        public static GameObject GetArcanusWater()
         {
-            if (this.previouslyActive != this.activePlane)
+            return World.Get().waterArcanus;
+        }
+
+        public static GameObject GetMyrrorWater()
+        {
+            return World.Get().waterMyrror;
+        }
+
+        public static GameObject GetWater(bool arcanus)
+        {
+            if (!arcanus)
             {
-                plane.UpdateVisibility(plane == this.activePlane);
+                return World.GetMyrrorWater();
             }
-            plane.UpdatePlane(plane == this.activePlane);
+            return World.GetArcanusWater();
         }
-        this.previouslyActive = this.activePlane;
-    }
 
-    public static void CleanupSequence()
-    {
-        foreach (global::WorldCode.Plane item in new List<global::WorldCode.Plane>(World.GetPlanes()))
+        public static Plane GetMyrror()
         {
-            item.Destroy();
+            global::DBDef.Plane p = (global::DBDef.Plane)PLANE.MYRROR;
+            return World.Get().planes.Find((Plane o) => !o.battlePlane && o.planeSource.Get() == p);
         }
-        World.Get().planes.Clear();
-        World.Get().activePlane = null;
-        World.Get().previouslyActive = null;
-    }
 
-    public static void PartialCleanup()
-    {
-        foreach (global::WorldCode.Plane item in new List<global::WorldCode.Plane>(World.GetPlanes()))
+        public static Plane GetArcanus()
         {
-            if (item.battlePlane)
+            global::DBDef.Plane p = (global::DBDef.Plane)PLANE.ARCANUS;
+            return World.Get().planes.Find((Plane o) => !o.battlePlane && o.planeSource.Get() == p);
+        }
+
+        public static Plane GetOtherPlane(Plane p)
+        {
+            return World.Get().planes.Find((Plane o) => !o.battlePlane && o.planeSource.Get() != p.planeSource.Get());
+        }
+
+        public void Update()
+        {
+            if (this.activePlane == null)
+            {
+                return;
+            }
+            foreach (Plane plane in this.planes)
+            {
+                if (this.previouslyActive != this.activePlane)
+                {
+                    plane.UpdateVisibility(plane == this.activePlane);
+                }
+                plane.UpdatePlane(plane == this.activePlane);
+            }
+            this.previouslyActive = this.activePlane;
+        }
+
+        public static void CleanupSequence()
+        {
+            foreach (Plane item in new List<Plane>(World.GetPlanes()))
             {
                 item.Destroy();
             }
-            else
+            World.Get().planes.Clear();
+            World.Get().activePlane = null;
+            World.Get().previouslyActive = null;
+        }
+
+        public static void PartialCleanup()
+        {
+            foreach (Plane item in new List<Plane>(World.GetPlanes()))
             {
-                item.Cleanup();
+                if (item.battlePlane)
+                {
+                    item.Destroy();
+                }
+                else
+                {
+                    item.Cleanup();
+                }
             }
         }
     }

@@ -1,19 +1,16 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Device), Tooltip("Causes the device to vibrate for half a second.")]
+    [ActionCategory(ActionCategory.Device)]
+    [Tooltip("Causes the device to vibrate for half a second.")]
     public class DeviceVibrate : FsmStateAction
     {
+        public override void Reset()
+        {
+        }
+
         public override void OnEnter()
         {
             base.Finish();
         }
-
-        public override void Reset()
-        {
-        }
     }
 }
-

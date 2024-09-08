@@ -1,41 +1,36 @@
-﻿namespace DBDef
-{
-    using DBEnum;
-    using MHUtils;
-    using System;
-    using System.Runtime.CompilerServices;
+using DBEnum;
+using MHUtils;
 
-    [Extension]
+namespace DBDef
+{
     public static class SubraceExtension
     {
-        [Extension]
-        public static FInt GetTag(Subrace obj, Tag t)
+        public static FInt GetTag(this Subrace obj, Tag t)
         {
-            if (obj.tags != null)
+            if (obj.tags == null)
             {
-                foreach (CountedTag tag in obj.tags)
+                return FInt.ZERO;
+            }
+            CountedTag[] tags = obj.tags;
+            foreach (CountedTag countedTag in tags)
+            {
+                if (countedTag.tag == t)
                 {
-                    if (ReferenceEquals(tag.tag, t))
-                    {
-                        return tag.amount;
-                    }
+                    return countedTag.amount;
                 }
             }
             return FInt.ZERO;
         }
 
-        [Extension]
-        public static FInt GetTag(Subrace obj, TAG t)
+        public static FInt GetTag(this Subrace obj, TAG t)
         {
-            Tag tag = (Tag) t;
-            return GetTag(obj, tag);
+            Tag t2 = (Tag)t;
+            return obj.GetTag(t2);
         }
 
-        [Extension]
-        public static string GetTagSTR(Subrace obj, TAG t)
+        public static string GetTagSTR(this Subrace obj, TAG t)
         {
-            return GetTag(obj, t).ToInt().ToString();
+            return obj.GetTag(t).ToInt().ToString();
         }
     }
 }
-

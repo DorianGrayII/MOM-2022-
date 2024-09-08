@@ -1,20 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Math), HutongGames.PlayMaker.Tooltip("Sets a Float variable to its absolute value.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Math)]
+    [Tooltip("Sets a Float variable to its absolute value.")]
     public class FloatAbs : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Float variable.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Float variable.")]
         public FsmFloat floatVariable;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful if the Float variable is changing.")]
+
+        [Tooltip("Repeat every frame. Useful if the Float variable is changing.")]
         public bool everyFrame;
 
-        private void DoFloatAbs()
+        public override void Reset()
         {
-            this.floatVariable.Value = Mathf.Abs(this.floatVariable.Value);
+            this.floatVariable = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -31,11 +34,9 @@
             this.DoFloatAbs();
         }
 
-        public override void Reset()
+        private void DoFloatAbs()
         {
-            this.floatVariable = null;
-            this.everyFrame = false;
+            this.floatVariable.Value = Mathf.Abs(this.floatVariable.Value);
         }
     }
 }
-

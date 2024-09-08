@@ -1,10 +1,8 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.Events;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace HutongGames.PlayMaker
+{
     [AddComponentMenu("PlayMaker/UI/UI Vector2 Value Changed Event")]
     public class PlayMakerUiVector2ValueChangedEvent : PlayMakerUiEventBase
     {
@@ -21,7 +19,7 @@
                 }
                 if (this.scrollRect != null)
                 {
-                    this.scrollRect.onValueChanged.AddListener(new UnityAction<Vector2>(this.OnValueChanged));
+                    this.scrollRect.onValueChanged.AddListener(OnValueChanged);
                 }
             }
         }
@@ -31,7 +29,7 @@
             base.initialized = false;
             if (this.scrollRect != null)
             {
-                this.scrollRect.onValueChanged.RemoveListener(new UnityAction<Vector2>(this.OnValueChanged));
+                this.scrollRect.onValueChanged.RemoveListener(OnValueChanged);
             }
         }
 
@@ -42,4 +40,3 @@
         }
     }
 }
-

@@ -1,31 +1,73 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics2D), HutongGames.PlayMaker.Tooltip("Sets the various properties of a WheelJoint2d component")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics2D)]
+    [Tooltip("Sets the various properties of a WheelJoint2d component")]
     public class SetWheelJoint2dProperties : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The WheelJoint2d target"), CheckForComponent(typeof(WheelJoint2D))]
+        [RequiredField]
+        [Tooltip("The WheelJoint2d target")]
+        [CheckForComponent(typeof(WheelJoint2D))]
         public FsmOwnerDefault gameObject;
-        [ActionSection("Motor"), HutongGames.PlayMaker.Tooltip("Should a motor force be applied automatically to the Rigidbody2D?")]
+
+        [ActionSection("Motor")]
+        [Tooltip("Should a motor force be applied automatically to the Rigidbody2D?")]
         public FsmBool useMotor;
-        [HutongGames.PlayMaker.Tooltip("The desired speed for the Rigidbody2D to reach as it moves with the joint.")]
+
+        [Tooltip("The desired speed for the Rigidbody2D to reach as it moves with the joint.")]
         public FsmFloat motorSpeed;
-        [HutongGames.PlayMaker.Tooltip("The maximum force that can be applied to the Rigidbody2D at the joint to attain the target speed.")]
+
+        [Tooltip("The maximum force that can be applied to the Rigidbody2D at the joint to attain the target speed.")]
         public FsmFloat maxMotorTorque;
-        [ActionSection("Suspension"), HutongGames.PlayMaker.Tooltip("The world angle along which the suspension will move. This provides 2D constrained motion similar to a SliderJoint2D. This is typically how suspension works in the real world.")]
+
+        [ActionSection("Suspension")]
+        [Tooltip("The world angle along which the suspension will move. This provides 2D constrained motion similar to a SliderJoint2D. This is typically how suspension works in the real world.")]
         public FsmFloat angle;
-        [HutongGames.PlayMaker.Tooltip("The amount by which the suspension spring force is reduced in proportion to the movement speed.")]
+
+        [Tooltip("The amount by which the suspension spring force is reduced in proportion to the movement speed.")]
         public FsmFloat dampingRatio;
-        [HutongGames.PlayMaker.Tooltip("The frequency at which the suspension spring oscillates.")]
+
+        [Tooltip("The frequency at which the suspension spring oscillates.")]
         public FsmFloat frequency;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame while the state is active.")]
+
+        [Tooltip("Repeat every frame while the state is active.")]
         public bool everyFrame;
+
         private WheelJoint2D _wj2d;
+
         private JointMotor2D _motor;
+
         private JointSuspension2D _suspension;
+
+        public override void Reset()
+        {
+            this.useMotor = new FsmBool
+            {
+                UseVariable = true
+            };
+            this.motorSpeed = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.maxMotorTorque = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.angle = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.dampingRatio = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.frequency = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
@@ -51,32 +93,9 @@
             this.SetProperties();
         }
 
-        public override void Reset()
-        {
-            FsmBool bool1 = new FsmBool();
-            bool1.UseVariable = true;
-            this.useMotor = bool1;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.motorSpeed = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.maxMotorTorque = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.angle = num3;
-            FsmFloat num4 = new FsmFloat();
-            num4.UseVariable = true;
-            this.dampingRatio = num4;
-            FsmFloat num5 = new FsmFloat();
-            num5.UseVariable = true;
-            this.frequency = num5;
-            this.everyFrame = false;
-        }
-
         private void SetProperties()
         {
-            if (this._wj2d != null)
+            if (!(this._wj2d == null))
             {
                 if (!this.useMotor.IsNone)
                 {
@@ -111,4 +130,3 @@
         }
     }
 }
-

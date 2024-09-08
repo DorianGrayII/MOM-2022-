@@ -1,59 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets the layer's current weight")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets the layer's current weight")]
     public class SetAnimatorLayerWeight : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The layer's index")]
+
+        [RequiredField]
+        [Tooltip("The layer's index")]
         public FsmInt layerIndex;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Sets the layer's current weight")]
+
+        [RequiredField]
+        [Tooltip("Sets the layer's current weight")]
         public FsmFloat layerWeight;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful for changing over time.")]
+
+        [Tooltip("Repeat every frame. Useful for changing over time.")]
         public bool everyFrame;
+
         private Animator _animator;
-
-        private void DoLayerWeight()
-        {
-            if (this._animator != null)
-            {
-                this._animator.SetLayerWeight(this.layerIndex.Value, this.layerWeight.Value);
-            }
-        }
-
-        public override void OnEnter()
-        {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget == null)
-            {
-                base.Finish();
-            }
-            else
-            {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoLayerWeight();
-                    if (!this.everyFrame)
-                    {
-                        base.Finish();
-                    }
-                }
-            }
-        }
-
-        public override void OnUpdate()
-        {
-            this.DoLayerWeight();
-        }
 
         public override void Reset()
         {
@@ -62,6 +31,39 @@
             this.layerWeight = null;
             this.everyFrame = false;
         }
+
+        public override void OnEnter()
+        {
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (ownerDefaultTarget == null)
+            {
+                base.Finish();
+                return;
+            }
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
+            {
+                base.Finish();
+                return;
+            }
+            this.DoLayerWeight();
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            this.DoLayerWeight();
+        }
+
+        private void DoLayerWeight()
+        {
+            if (!(this._animator == null))
+            {
+                this._animator.SetLayerWeight(this.layerIndex.Value, this.layerWeight.Value);
+            }
+        }
     }
 }
-

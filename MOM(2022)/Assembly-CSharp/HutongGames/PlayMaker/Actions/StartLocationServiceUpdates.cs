@@ -1,28 +1,21 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Device), Tooltip("Starts location service updates. Last location coordinates can be retrieved with GetLocationInfo.")]
+    [ActionCategory(ActionCategory.Device)]
+    [Tooltip("Starts location service updates. Last location coordinates can be retrieved with GetLocationInfo.")]
     public class StartLocationServiceUpdates : FsmStateAction
     {
         [Tooltip("Maximum time to wait in seconds before failing.")]
         public FsmFloat maxWait;
+
         public FsmFloat desiredAccuracy;
+
         public FsmFloat updateDistance;
+
         [Tooltip("Event to send when the location services have started.")]
         public FsmEvent successEvent;
+
         [Tooltip("Event to send if the location services fail to start.")]
         public FsmEvent failedEvent;
-
-        public override void OnEnter()
-        {
-            base.Finish();
-        }
-
-        public override void OnUpdate()
-        {
-        }
 
         public override void Reset()
         {
@@ -32,6 +25,14 @@
             this.successEvent = null;
             this.failedEvent = null;
         }
+
+        public override void OnEnter()
+        {
+            base.Finish();
+        }
+
+        public override void OnUpdate()
+        {
+        }
     }
 }
-

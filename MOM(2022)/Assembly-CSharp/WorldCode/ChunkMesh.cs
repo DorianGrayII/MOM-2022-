@@ -1,8 +1,7 @@
-﻿namespace WorldCode
-{
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
+namespace WorldCode
+{
     public class ChunkMesh : MonoBehaviour
     {
         private void OnDestroy()
@@ -10,23 +9,22 @@
             MeshRenderer component = base.gameObject.GetComponent<MeshRenderer>();
             if (component != null)
             {
-                Destroy(component.material);
+                Object.Destroy(component.material);
             }
-            MeshFilter filter = base.gameObject.GetComponent<MeshFilter>();
-            if ((filter != null) && (filter.mesh != null))
+            MeshFilter component2 = base.gameObject.GetComponent<MeshFilter>();
+            if (component2 != null && component2.mesh != null)
             {
-                Destroy(filter.mesh);
+                Object.Destroy(component2.mesh);
             }
-            MeshCollider collider = base.gameObject.GetComponent<MeshCollider>();
-            if ((collider != null) && (collider.material != null))
+            MeshCollider component3 = base.gameObject.GetComponent<MeshCollider>();
+            if (component3 != null && component3.material != null)
             {
-                Destroy(collider.material);
+                Object.Destroy(component3.material);
             }
-            if ((collider != null) && (collider.sharedMesh != null))
+            if (component3 != null && component3.sharedMesh != null)
             {
-                Destroy(collider.sharedMesh);
+                Object.Destroy(component3.sharedMesh);
             }
         }
     }
 }
-

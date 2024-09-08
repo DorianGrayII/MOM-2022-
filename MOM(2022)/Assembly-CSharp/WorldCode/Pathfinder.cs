@@ -1,162 +1,125 @@
-﻿namespace WorldCode
-{
-    using MHUtils;
-    using System;
-    using System.Collections.Generic;
+using System.Collections.Generic;
+using MHUtils;
 
+namespace WorldCode
+{
     public class Pathfinder
     {
-        private static void AddNodeArea(SearcherData data, Vector3i from, Vector3i current)
+        public static List<Vector3i> FindPath(SearcherData data)
         {
-            int num = data.MovementCost(from, current);
-            if ((num > 0) && (current != data.start))
+            if (!Pathfinder.SearchPreparation(data))
             {
-                int num2 = data.area.GetTotalValue(from) + num;
-                int totalValue = data.area.GetTotalValue(current);
-                if ((totalValue <= 0) || (totalValue > num2))
-                {
-                    data.area.SetTotalValue(current, num2);
-                    if (data.ValidLocation(current))
-                    {
-                        data.qPotentials.Enqueue(current);
-                    }
-                    if (totalValue == 0)
-                    {
-                        data.areaAnswer.Add(current);
-                    }
-                }
+                return null;
             }
-        }
-
-        private static void AtoBSearch(SearcherData data)
-        {
-            PotentNeightbours(data, data.start);
-            while (true)
+            switch (data.rectArea.HexDistance(data.start, data.destination))
             {
-                if (data.lPotentials.Count > 0)
-                {
-                    Vector3i bestNext = GetBestNext(data);
-                    data.lPotentials.Remove(bestNext);
-                    PotentNeightbours(data, bestNext);
-                    if (data.lPotentials.Count <= 300)
-                    {
-                        continue;
-                    }
-                }
-                return;
+            case 0:
+                return new List<Vector3i> { data.start };
+            case 1:
+                return new List<Vector3i> { data.start, data.destination };
+            default:
+                Pathfinder.AtoBSearch(data);
+                return Pathfinder.RecreatePath(data);
             }
-        }
-
-        private static bool CalculateCosts(SearcherData data, Vector3i from, Vector3i to)
-        {
-            int num = data.MovementCost(from, to);
-            if ((num == 0) || (to == data.start))
-            {
-                return false;
-            }
-            int num2 = data.area.GetTotalValue(from) + num;
-            int totalValue = data.area.GetTotalValue(to);
-            if ((totalValue > 0) && (totalValue <= num2))
-            {
-                return false;
-            }
-            int num4 = num2 + data.rectArea.HexDistance(to, data.destination);
-            data.area.SetTotalValue(to, num2);
-            data.area.SetHeuristicValue(to, num4);
-            return true;
         }
 
         public static List<Vector3i> FindArea(SearcherData data)
         {
             if (data.areaAnswer == null)
+            {
                 data.areaAnswer = new List<Vector3i>();
+            }
             data.areaAnswer.Add(data.start);
-            PotentNeightboursArea(data, data.start);
+            Pathfinder.PotentNeightboursArea(data, data.start);
             while (data.qPotentials.Count > 0)
             {
                 Vector3i from = data.qPotentials.Dequeue();
-                PotentNeightboursArea(data, from);
+                Pathfinder.PotentNeightboursArea(data, from);
             }
             return data.areaAnswer;
         }
 
-        public static List<Vector3i> FindPath(SearcherData data)
+        private static bool SearchPreparation(SearcherData data)
         {
-            if (!SearchPreparation(data))
+            if (data.worldHexes.ContainsKey(data.start))
             {
-                return null;
+                return data.worldHexes.ContainsKey(data.destination);
             }
-            int num = data.rectArea.HexDistance(data.start, data.destination);
-            if (num == 0)
-            {
-                List<Vector3i> list1 = new List<Vector3i>();
-                list1.Add(data.start);
-                return list1;
-            }
-            if (num != 1)
-            {
-                AtoBSearch(data);
-                return RecreatePath(data);
-            }
-            List<Vector3i> list2 = new List<Vector3i>();
-            list2.Add(data.start);
-            list2.Add(data.destination);
-            return list2;
+            return false;
         }
 
-        private static Vector3i GetBestNext(SearcherData data)
+        private static void AtoBSearch(SearcherData data)
         {
-            Vector3i v = data.lPotentials[0];
-            PathfinderNode node = data.area.GetNode(v);
-            for (int i = 1; i < data.lPotentials.Count; i++)
+            Pathfinder.PotentNeightbours(data, data.start);
+            while (data.lPotentials.Count > 0)
             {
-                Vector3i vectori2 = data.lPotentials[i];
-                PathfinderNode node2 = data.area.GetNode(vectori2);
-                if (node.heuristicCost > node2.heuristicCost)
+                Vector3i bestNext = Pathfinder.GetBestNext(data);
+                data.lPotentials.Remove(bestNext);
+                Pathfinder.PotentNeightbours(data, bestNext);
+                if (data.lPotentials.Count > 300)
                 {
-                    v = vectori2;
-                    node = node2;
-                }
-                else if ((node.heuristicCost == node2.heuristicCost) && (node.curentCost < node2.curentCost))
-                {
-                    v = vectori2;
-                    node = node2;
+                    break;
                 }
             }
-            return v;
         }
 
         private static void PotentNeightbours(SearcherData data, Vector3i from)
         {
             for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
             {
-                Vector3i worldPosition = data.rectArea.KeepHorizontalInside(from + HexNeighbors.neighbours[i]);
-                if (data.rectArea.IsInside(worldPosition, false) && (data.ValidLocation(worldPosition) && CalculateCosts(data, from, worldPosition)))
+                Vector3i vector3i = data.rectArea.KeepHorizontalInside(from + HexNeighbors.neighbours[i]);
+                if (data.rectArea.IsInside(vector3i) && data.ValidLocation(vector3i) && Pathfinder.CalculateCosts(data, from, vector3i))
                 {
-                    data.lPotentials.Add(worldPosition);
+                    data.lPotentials.Add(vector3i);
                 }
             }
         }
 
-        private static void PotentNeightboursArea(SearcherData data, Vector3i from)
+        private static bool CalculateCosts(SearcherData data, Vector3i from, Vector3i to)
         {
-            if ((data.maxCost < 0) || (data.area.GetTotalValue(from) < data.maxCost))
+            int num = data.MovementCost(from, to);
+            if (num == 0 || to == data.start)
             {
-                for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
+                return false;
+            }
+            int num2 = data.area.GetTotalValue(from) + num;
+            int totalValue = data.area.GetTotalValue(to);
+            if (totalValue > 0 && totalValue <= num2)
+            {
+                return false;
+            }
+            int value = num2 + data.rectArea.HexDistance(to, data.destination);
+            data.area.SetTotalValue(to, num2);
+            data.area.SetHeuristicValue(to, value);
+            return true;
+        }
+
+        private static Vector3i GetBestNext(SearcherData data)
+        {
+            Vector3i vector3i = data.lPotentials[0];
+            PathfinderNode pathfinderNode = data.area.GetNode(vector3i);
+            for (int i = 1; i < data.lPotentials.Count; i++)
+            {
+                Vector3i vector3i2 = data.lPotentials[i];
+                PathfinderNode node = data.area.GetNode(vector3i2);
+                if (pathfinderNode.heuristicCost > node.heuristicCost)
                 {
-                    Vector3i key = data.rectArea.KeepHorizontalInside(from + HexNeighbors.neighbours[i]);
-                    if (data.worldHexes.ContainsKey(key))
-                    {
-                        AddNodeArea(data, from, key);
-                    }
+                    vector3i = vector3i2;
+                    pathfinderNode = node;
+                }
+                else if (pathfinderNode.heuristicCost == node.heuristicCost && pathfinderNode.curentCost < node.curentCost)
+                {
+                    vector3i = vector3i2;
+                    pathfinderNode = node;
                 }
             }
+            return vector3i;
         }
 
         private static List<Vector3i> RecreatePath(SearcherData data)
         {
             List<Vector3i> path = new List<Vector3i>();
-            RecreatePath(data, ref path);
+            Pathfinder.RecreatePath(data, ref path);
             return path;
         }
 
@@ -165,47 +128,72 @@
             if (data.area.GetTotalValue(data.destination) <= 0)
             {
                 path.Clear();
+                return;
             }
-            else
+            Vector3i vector3i = data.destination;
+            int num = data.area.GetTotalValue(vector3i);
+            path.Add(vector3i);
+            Vector3i vector3i2 = vector3i;
+            while (vector3i != data.start)
             {
-                Vector3i destination = data.destination;
-                int totalValue = data.area.GetTotalValue(destination);
-                path.Add(destination);
-                Vector3i vectori2 = destination;
-                while (destination != data.start)
+                for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
                 {
-                    int index = 0;
-                    while (true)
+                    Vector3i vector3i3 = data.rectArea.KeepHorizontalInside(vector3i + HexNeighbors.neighbours[i]);
+                    int curentCost = data.area.GetNode(vector3i3).curentCost;
+                    if ((curentCost != 0 || !(vector3i3 != data.start)) && curentCost < num)
                     {
-                        if (index >= HexNeighbors.neighbours.Length)
-                        {
-                            if (destination == vectori2)
-                            {
-                                path = null;
-                                return;
-                            }
-                            destination = vectori2;
-                            path.Add(destination);
-                            break;
-                        }
-                        Vector3i v = data.rectArea.KeepHorizontalInside(destination + HexNeighbors.neighbours[index]);
-                        int curentCost = data.area.GetNode(v).curentCost;
-                        if (((curentCost != 0) || (v == data.start)) && (curentCost < totalValue))
-                        {
-                            vectori2 = v;
-                            totalValue = curentCost;
-                        }
-                        index++;
+                        vector3i2 = vector3i3;
+                        num = curentCost;
                     }
                 }
-                path.Reverse();
+                if (vector3i == vector3i2)
+                {
+                    path = null;
+                    return;
+                }
+                vector3i = vector3i2;
+                path.Add(vector3i);
+            }
+            path.Reverse();
+        }
+
+        private static void PotentNeightboursArea(SearcherData data, Vector3i from)
+        {
+            if (data.maxCost >= 0 && data.area.GetTotalValue(from) >= data.maxCost)
+            {
+                return;
+            }
+            for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
+            {
+                Vector3i vector3i = data.rectArea.KeepHorizontalInside(from + HexNeighbors.neighbours[i]);
+                if (data.worldHexes.ContainsKey(vector3i))
+                {
+                    Pathfinder.AddNodeArea(data, from, vector3i);
+                }
             }
         }
 
-        private static bool SearchPreparation(SearcherData data)
+        private static void AddNodeArea(SearcherData data, Vector3i from, Vector3i current)
         {
-            return (data.worldHexes.ContainsKey(data.start) && data.worldHexes.ContainsKey(data.destination));
+            int num = data.MovementCost(from, current);
+            if (num <= 0 || current == data.start)
+            {
+                return;
+            }
+            int num2 = data.area.GetTotalValue(from) + num;
+            int totalValue = data.area.GetTotalValue(current);
+            if (totalValue <= 0 || totalValue > num2)
+            {
+                data.area.SetTotalValue(current, num2);
+                if (data.ValidLocation(current))
+                {
+                    data.qPotentials.Enqueue(current);
+                }
+                if (totalValue == 0)
+                {
+                    data.areaAnswer.Add(current);
+                }
+            }
         }
     }
 }
-

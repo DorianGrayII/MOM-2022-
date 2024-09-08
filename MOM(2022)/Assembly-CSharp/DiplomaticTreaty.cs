@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DiplomaticTreaty
 using DBDef;
 using MOM;
 using ProtoBuf;

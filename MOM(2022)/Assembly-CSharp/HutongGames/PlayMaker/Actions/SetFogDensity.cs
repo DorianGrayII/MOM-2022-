@@ -1,19 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.RenderSettings), HutongGames.PlayMaker.Tooltip("Sets the density of the Fog in the scene.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.RenderSettings)]
+    [Tooltip("Sets the density of the Fog in the scene.")]
     public class SetFogDensity : FsmStateAction
     {
         [RequiredField]
         public FsmFloat fogDensity;
+
         public bool everyFrame;
 
-        private void DoSetFogDensity()
+        public override void Reset()
         {
-            RenderSettings.fogDensity = this.fogDensity.Value;
+            this.fogDensity = 0.5f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -30,11 +31,9 @@
             this.DoSetFogDensity();
         }
 
-        public override void Reset()
+        private void DoSetFogDensity()
         {
-            this.fogDensity = 0.5f;
-            this.everyFrame = false;
+            RenderSettings.fogDensity = this.fogDensity.Value;
         }
     }
 }
-

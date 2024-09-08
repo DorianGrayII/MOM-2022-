@@ -1,21 +1,19 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Application), HutongGames.PlayMaker.Tooltip("Quits the player application.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Application)]
+    [Tooltip("Quits the player application.")]
     public class ApplicationQuit : FsmStateAction
     {
+        public override void Reset()
+        {
+        }
+
         public override void OnEnter()
         {
             Application.Quit();
             base.Finish();
         }
-
-        public override void Reset()
-        {
-        }
     }
 }
-

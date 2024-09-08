@@ -1,14 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Forces a Game Object's Rigid Body to Sleep at least one frame.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Forces a Game Object's Rigid Body to Sleep at least one frame.")]
     public class Sleep : ComponentAction<Rigidbody>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody))]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody))]
         public FsmOwnerDefault gameObject;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoSleep();
+            base.Finish();
+        }
 
         private void DoSleep()
         {
@@ -18,17 +29,5 @@
                 base.rigidbody.Sleep();
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoSleep();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-        }
     }
 }
-

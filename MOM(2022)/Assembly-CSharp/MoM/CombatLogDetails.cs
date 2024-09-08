@@ -1,39 +1,40 @@
-﻿namespace MOM
-{
-    using DBUtils;
-    using MHUtils.UI;
-    using System;
-    using TMPro;
+using DBUtils;
+using MHUtils.UI;
+using TMPro;
 
+namespace MOM
+{
     public class CombatLogDetails : TooltipBase
     {
         public TextMeshProUGUI labelAttacker;
+
         public TextMeshProUGUI labelDefender;
+
         public TextMeshProUGUI labelCenter;
+
         public GridItemManager gridAttacks;
 
         public override void Populate(object o)
         {
-            BattleHUD.CombatSummary summary = o as BattleHUD.CombatSummary;
-            BattleHUD.CombatLogDetail detail = summary.details[0];
-            if (detail.right == null)
+            BattleHUD.CombatSummary combatSummary = o as BattleHUD.CombatSummary;
+            BattleHUD.CombatLogDetail combatLogDetail = combatSummary.details[0];
+            if (combatLogDetail.right == null)
             {
-                this.labelCenter.text = detail.left;
-                WizardColors.GetColor((PlayerWizard.Color) detail.initiative);
+                this.labelCenter.text = combatLogDetail.left;
+                WizardColors.GetColor((PlayerWizard.Color)combatLogDetail.initiative);
                 this.labelAttacker.text = "";
                 this.labelDefender.text = "";
             }
             else
             {
-                this.labelAttacker.text = detail.right;
-                this.labelDefender.text = detail.left;
-                this.labelCenter.text = Localization.Get("UI_VS", true, Array.Empty<object>());
+                this.labelAttacker.text = combatLogDetail.right;
+                this.labelDefender.text = combatLogDetail.left;
+                this.labelCenter.text = Localization.Get("UI_VS", true);
                 Battle battle = Battle.GetBattle();
                 this.labelAttacker.color = WizardColors.GetColor(battle.attacker.wizard);
                 this.labelDefender.color = WizardColors.GetColor(battle.defender.wizard);
             }
-            this.gridAttacks.SetListItems<BattleHUD.CombatLogDetail>(summary.details.GetRange(1, summary.details.Count - 1), null, null);
+            this.gridAttacks.SetListItems(combatSummary.details.GetRange(1, combatSummary.details.Count - 1));
         }
     }
 }
-

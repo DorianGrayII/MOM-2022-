@@ -1,12 +1,11 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using MHUtils;
-    using MHUtils.UI;
-    using System;
-    using UnityEngine;
-    using UnityEngine.SceneManagement;
+using HutongGames.PlayMaker;
+using MHUtils;
+using MHUtils.UI;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMOpenScenes : FSMStateBase
     {
@@ -18,12 +17,6 @@
             SceneManager.LoadScene("UIRoot", LoadSceneMode.Additive);
         }
 
-        public override void OnExit()
-        {
-            CursorsLibrary.SetMode(CursorsLibrary.Mode.Default);
-            base.OnExit();
-        }
-
         public override void OnUpdate()
         {
             base.OnUpdate();
@@ -32,6 +25,11 @@
                 base.Finish();
             }
         }
+
+        public override void OnExit()
+        {
+            CursorsLibrary.SetMode(CursorsLibrary.Mode.Default);
+            base.OnExit();
+        }
     }
 }
-

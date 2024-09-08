@@ -1,22 +1,51 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Material), HutongGames.PlayMaker.Tooltip("Sets the Scale of a named texture in a Game Object's Material. Useful for special effects.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Material)]
+    [Tooltip("Sets the Scale of a named texture in a Game Object's Material. Useful for special effects.")]
     public class SetTextureScale : ComponentAction<Renderer>
     {
-        [RequiredField, CheckForComponent(typeof(Renderer))]
+        [RequiredField]
+        [CheckForComponent(typeof(Renderer))]
         public FsmOwnerDefault gameObject;
+
         public FsmInt materialIndex;
+
         [UIHint(UIHint.NamedColor)]
         public FsmString namedTexture;
+
         [RequiredField]
         public FsmFloat scaleX;
+
         [RequiredField]
         public FsmFloat scaleY;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.materialIndex = 0;
+            this.namedTexture = "_MainTex";
+            this.scaleX = 1f;
+            this.scaleY = 1f;
+            this.everyFrame = false;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoSetTextureScale();
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            this.DoSetTextureScale();
+        }
 
         private void DoSetTextureScale()
         {
@@ -39,30 +68,5 @@
                 }
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoSetTextureScale();
-            if (!this.everyFrame)
-            {
-                base.Finish();
-            }
-        }
-
-        public override void OnUpdate()
-        {
-            this.DoSetTextureScale();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.materialIndex = 0;
-            this.namedTexture = "_MainTex";
-            this.scaleX = 1f;
-            this.scaleY = 1f;
-            this.everyFrame = false;
-        }
     }
 }
-

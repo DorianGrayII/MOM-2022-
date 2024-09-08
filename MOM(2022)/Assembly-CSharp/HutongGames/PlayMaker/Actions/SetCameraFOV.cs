@@ -1,25 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Camera), HutongGames.PlayMaker.Tooltip("Sets Field of View used by the Camera.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Camera)]
+    [Tooltip("Sets Field of View used by the Camera.")]
     public class SetCameraFOV : ComponentAction<Camera>
     {
-        [RequiredField, CheckForComponent(typeof(Camera))]
+        [RequiredField]
+        [CheckForComponent(typeof(Camera))]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmFloat fieldOfView;
+
         public bool everyFrame;
 
-        private void DoSetCameraFOV()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.camera.fieldOfView = this.fieldOfView.Value;
-            }
+            this.gameObject = null;
+            this.fieldOfView = 50f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,12 +36,13 @@
             this.DoSetCameraFOV();
         }
 
-        public override void Reset()
+        private void DoSetCameraFOV()
         {
-            this.gameObject = null;
-            this.fieldOfView = 50f;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.camera.fieldOfView = this.fieldOfView.Value;
+            }
         }
     }
 }
-

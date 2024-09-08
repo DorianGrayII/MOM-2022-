@@ -1,16 +1,30 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Sets the Mass of a Game Object's Rigid Body.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Sets the Mass of a Game Object's Rigid Body.")]
     public class SetMass : ComponentAction<Rigidbody>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody))]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody))]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HasFloatSlider(0.1f, 10f)]
+
+        [RequiredField]
+        [HasFloatSlider(0.1f, 10f)]
         public FsmFloat mass;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.mass = 1f;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoSetMass();
+            base.Finish();
+        }
 
         private void DoSetMass()
         {
@@ -20,18 +34,5 @@
                 base.rigidbody.mass = this.mass.Value;
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoSetMass();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.mass = 1f;
-        }
     }
 }
-

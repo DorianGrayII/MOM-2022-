@@ -1,9 +1,6 @@
-﻿namespace UnityEngine.PostProcessing
+namespace UnityEngine.PostProcessing
 {
-    using UnityEngine;
-
     public sealed class TrackballGroupAttribute : PropertyAttribute
     {
     }
 }
-

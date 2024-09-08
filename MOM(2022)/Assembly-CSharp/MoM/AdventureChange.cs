@@ -1,19 +1,17 @@
-﻿namespace MOM
+namespace MOM
 {
-    using System;
-
     public class AdventureChange
     {
-        public string image;
-        public int value;
-
         public enum Change
         {
-            MoneyGain,
-            MoneyLost,
-            MoneyGainTurn,
-            MoneyLostTurn
+            MoneyGain = 0,
+            MoneyLost = 1,
+            MoneyGainTurn = 2,
+            MoneyLostTurn = 3
         }
+
+        public string image;
+
+        public int value;
     }
 }
-

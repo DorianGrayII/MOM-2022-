@@ -1,100 +1,42 @@
-﻿namespace AllIn1SpriteShader
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace AllIn1SpriteShader
+{
     [ExecuteInEditMode]
     public class SetAtlasUvs : MonoBehaviour
     {
         [SerializeField]
         private bool updateEveryFrame;
+
         private Renderer render;
+
         private SpriteRenderer spriteRender;
+
         private Image uiImage;
+
         private bool isUI;
 
-        public unsafe void GetAndSetUVs()
+        private void Start()
+        {
+            this.Setup();
+        }
+
+        private void Reset()
+        {
+            this.Setup();
+        }
+
+        private void Setup()
         {
             if (this.GetRendererReferencesIfNeeded())
             {
-                if (!this.isUI)
-                {
-                    Rect textureRect = this.spriteRender.sprite.textureRect;
-                    Rect* rectPtr1 = &textureRect;
-                    rectPtr1.x /= (float) this.spriteRender.sprite.texture.width;
-                    Rect* rectPtr2 = &textureRect;
-                    rectPtr2.width /= (float) this.spriteRender.sprite.texture.width;
-                    Rect* rectPtr3 = &textureRect;
-                    rectPtr3.y /= (float) this.spriteRender.sprite.texture.height;
-                    Rect* rectPtr4 = &textureRect;
-                    rectPtr4.height /= (float) this.spriteRender.sprite.texture.height;
-                    this.render.sharedMaterial.SetFloat("_MinXUV", textureRect.xMin);
-                    this.render.sharedMaterial.SetFloat("_MaxXUV", textureRect.xMax);
-                    this.render.sharedMaterial.SetFloat("_MinYUV", textureRect.yMin);
-                    this.render.sharedMaterial.SetFloat("_MaxYUV", textureRect.yMax);
-                }
-                else
-                {
-                    Rect textureRect = this.uiImage.sprite.textureRect;
-                    Rect* rectPtr5 = &textureRect;
-                    rectPtr5.x /= (float) this.uiImage.sprite.texture.width;
-                    Rect* rectPtr6 = &textureRect;
-                    rectPtr6.width /= (float) this.uiImage.sprite.texture.width;
-                    Rect* rectPtr7 = &textureRect;
-                    rectPtr7.y /= (float) this.uiImage.sprite.texture.height;
-                    Rect* rectPtr8 = &textureRect;
-                    rectPtr8.height /= (float) this.uiImage.sprite.texture.height;
-                    this.uiImage.material.SetFloat("_MinXUV", textureRect.xMin);
-                    this.uiImage.material.SetFloat("_MaxXUV", textureRect.xMax);
-                    this.uiImage.material.SetFloat("_MinYUV", textureRect.yMin);
-                    this.uiImage.material.SetFloat("_MaxYUV", textureRect.yMax);
-                }
+                this.GetAndSetUVs();
             }
-        }
-
-        private bool GetRendererReferencesIfNeeded()
-        {
-            if (this.spriteRender == null)
+            if (!this.updateEveryFrame && Application.isPlaying && this != null)
             {
-                this.spriteRender = base.GetComponent<SpriteRenderer>();
+                base.enabled = false;
             }
-            if (this.spriteRender != null)
-            {
-                if (this.spriteRender.sprite == null)
-                {
-                    DestroyImmediate(this);
-                    return false;
-                }
-                if (this.render == null)
-                {
-                    this.render = base.GetComponent<Renderer>();
-                }
-                this.isUI = false;
-            }
-            else
-            {
-                if (this.uiImage == null)
-                {
-                    this.uiImage = base.GetComponent<Image>();
-                    if (this.uiImage == null)
-                    {
-                        DestroyImmediate(this);
-                        return false;
-                    }
-                }
-                if (this.render == null)
-                {
-                    this.render = base.GetComponent<Renderer>();
-                }
-                this.isUI = true;
-            }
-            if ((this.spriteRender != null) || (this.uiImage != null))
-            {
-                return true;
-            }
-            DestroyImmediate(this);
-            return false;
         }
 
         private void OnWillRenderObject()
@@ -105,9 +47,35 @@
             }
         }
 
-        private void Reset()
+        public void GetAndSetUVs()
         {
-            this.Setup();
+            if (this.GetRendererReferencesIfNeeded())
+            {
+                if (!this.isUI)
+                {
+                    Rect textureRect = this.spriteRender.sprite.textureRect;
+                    textureRect.x /= this.spriteRender.sprite.texture.width;
+                    textureRect.width /= this.spriteRender.sprite.texture.width;
+                    textureRect.y /= this.spriteRender.sprite.texture.height;
+                    textureRect.height /= this.spriteRender.sprite.texture.height;
+                    this.render.sharedMaterial.SetFloat("_MinXUV", textureRect.xMin);
+                    this.render.sharedMaterial.SetFloat("_MaxXUV", textureRect.xMax);
+                    this.render.sharedMaterial.SetFloat("_MinYUV", textureRect.yMin);
+                    this.render.sharedMaterial.SetFloat("_MaxYUV", textureRect.yMax);
+                }
+                else
+                {
+                    Rect textureRect2 = this.uiImage.sprite.textureRect;
+                    textureRect2.x /= this.uiImage.sprite.texture.width;
+                    textureRect2.width /= this.uiImage.sprite.texture.width;
+                    textureRect2.y /= this.uiImage.sprite.texture.height;
+                    textureRect2.height /= this.uiImage.sprite.texture.height;
+                    this.uiImage.material.SetFloat("_MinXUV", textureRect2.xMin);
+                    this.uiImage.material.SetFloat("_MaxXUV", textureRect2.xMax);
+                    this.uiImage.material.SetFloat("_MinYUV", textureRect2.yMin);
+                    this.uiImage.material.SetFloat("_MaxYUV", textureRect2.yMax);
+                }
+            }
         }
 
         public void ResetAtlasUvs()
@@ -131,27 +99,53 @@
             }
         }
 
-        private void Setup()
-        {
-            if (this.GetRendererReferencesIfNeeded())
-            {
-                this.GetAndSetUVs();
-            }
-            if (!this.updateEveryFrame && (Application.isPlaying && (this != null)))
-            {
-                base.enabled = false;
-            }
-        }
-
-        private void Start()
-        {
-            this.Setup();
-        }
-
         public void UpdateEveryFrame(bool everyFrame)
         {
             this.updateEveryFrame = everyFrame;
         }
+
+        private bool GetRendererReferencesIfNeeded()
+        {
+            if (this.spriteRender == null)
+            {
+                this.spriteRender = base.GetComponent<SpriteRenderer>();
+            }
+            if (this.spriteRender != null)
+            {
+                if (this.spriteRender.sprite == null)
+                {
+                    Object.DestroyImmediate(this);
+                    return false;
+                }
+                if (this.render == null)
+                {
+                    this.render = base.GetComponent<Renderer>();
+                }
+                this.isUI = false;
+            }
+            else
+            {
+                if (this.uiImage == null)
+                {
+                    this.uiImage = base.GetComponent<Image>();
+                    if (!(this.uiImage != null))
+                    {
+                        Object.DestroyImmediate(this);
+                        return false;
+                    }
+                }
+                if (this.render == null)
+                {
+                    this.render = base.GetComponent<Renderer>();
+                }
+                this.isUI = true;
+            }
+            if (this.spriteRender == null && this.uiImage == null)
+            {
+                Object.DestroyImmediate(this);
+                return false;
+            }
+            return true;
+        }
     }
 }
-

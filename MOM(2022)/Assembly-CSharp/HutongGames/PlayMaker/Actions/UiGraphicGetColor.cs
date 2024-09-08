@@ -1,27 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the color of a UI Graphic component. (E.g. UI Sprite)")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the color of a UI Graphic component. (E.g. UI Sprite)")]
     public class UiGraphicGetColor : ComponentAction<Graphic>
     {
-        [RequiredField, CheckForComponent(typeof(Graphic)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Graphic))]
+        [Tooltip("The GameObject with the UI component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Color of the UI component")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Color of the UI component")]
         public FsmColor color;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Graphic uiComponent;
 
-        private void DoGetColorValue()
+        public override void Reset()
         {
-            if (this.uiComponent != null)
-            {
-                this.color.set_Value(this.uiComponent.color);
-            }
+            this.gameObject = null;
+            this.color = null;
         }
 
         public override void OnEnter()
@@ -43,11 +47,12 @@
             this.DoGetColorValue();
         }
 
-        public override void Reset()
+        private void DoGetColorValue()
         {
-            this.gameObject = null;
-            this.color = null;
+            if (this.uiComponent != null)
+            {
+                this.color.Value = this.uiComponent.color;
+            }
         }
     }
 }
-

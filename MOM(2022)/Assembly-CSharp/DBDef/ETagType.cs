@@ -1,13 +1,10 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum ETagType
     {
-        None,
-        Wizard,
-        Item,
-        Unit
+        None = 0,
+        Wizard = 1,
+        Item = 2,
+        Unit = 3
     }
 }
-

@@ -1,66 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.StateMachine), ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false), HutongGames.PlayMaker.Tooltip("Enables/Disables an FSM component on a GameObject.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.StateMachine)]
+    [ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false)]
+    [Tooltip("Enables/Disables an FSM component on a GameObject.")]
     public class EnableFSM : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The GameObject that owns the FSM component.")]
+        [RequiredField]
+        [Tooltip("The GameObject that owns the FSM component.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.FsmName), HutongGames.PlayMaker.Tooltip("Optional name of FSM on GameObject. Useful if you have more than one FSM on a GameObject.")]
+
+        [UIHint(UIHint.FsmName)]
+        [Tooltip("Optional name of FSM on GameObject. Useful if you have more than one FSM on a GameObject.")]
         public FsmString fsmName;
-        [HutongGames.PlayMaker.Tooltip("Set to True to enable, False to disable.")]
+
+        [Tooltip("Set to True to enable, False to disable.")]
         public FsmBool enable;
-        [HutongGames.PlayMaker.Tooltip("Reset the initial enabled state when exiting the state.")]
+
+        [Tooltip("Reset the initial enabled state when exiting the state.")]
         public FsmBool resetOnExit;
+
         private PlayMakerFSM fsmComponent;
-
-        private void DoEnableFSM()
-        {
-            GameObject obj2 = (this.gameObject.OwnerOption == OwnerDefaultOption.UseOwner) ? base.get_Owner() : this.gameObject.GameObject.get_Value();
-            if (obj2 != null)
-            {
-                if (string.IsNullOrEmpty(this.fsmName.Value))
-                {
-                    this.fsmComponent = obj2.GetComponent<PlayMakerFSM>();
-                }
-                else
-                {
-                    foreach (PlayMakerFSM rfsm in obj2.GetComponents<PlayMakerFSM>())
-                    {
-                        if (rfsm.FsmName == this.fsmName.Value)
-                        {
-                            this.fsmComponent = rfsm;
-                            break;
-                        }
-                    }
-                }
-                if (this.fsmComponent == null)
-                {
-                    base.LogError("Missing FsmComponent!");
-                }
-                else
-                {
-                    this.fsmComponent.enabled = this.enable.Value;
-                }
-            }
-        }
-
-        public override void OnEnter()
-        {
-            this.DoEnableFSM();
-            base.Finish();
-        }
-
-        public override void OnExit()
-        {
-            if ((this.fsmComponent != null) && this.resetOnExit.Value)
-            {
-                this.fsmComponent.enabled = !this.enable.Value;
-            }
-        }
 
         public override void Reset()
         {
@@ -69,6 +30,52 @@
             this.enable = true;
             this.resetOnExit = true;
         }
+
+        public override void OnEnter()
+        {
+            this.DoEnableFSM();
+            base.Finish();
+        }
+
+        private void DoEnableFSM()
+        {
+            GameObject gameObject = ((this.gameObject.OwnerOption == OwnerDefaultOption.UseOwner) ? base.Owner : this.gameObject.GameObject.Value);
+            if (gameObject == null)
+            {
+                return;
+            }
+            if (!string.IsNullOrEmpty(this.fsmName.Value))
+            {
+                PlayMakerFSM[] components = gameObject.GetComponents<PlayMakerFSM>();
+                foreach (PlayMakerFSM playMakerFSM in components)
+                {
+                    if (playMakerFSM.FsmName == this.fsmName.Value)
+                    {
+                        this.fsmComponent = playMakerFSM;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                this.fsmComponent = gameObject.GetComponent<PlayMakerFSM>();
+            }
+            if (this.fsmComponent == null)
+            {
+                base.LogError("Missing FsmComponent!");
+            }
+            else
+            {
+                this.fsmComponent.enabled = this.enable.Value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.fsmComponent == null) && this.resetOnExit.Value)
+            {
+                this.fsmComponent.enabled = !this.enable.Value;
+            }
+        }
     }
 }
-

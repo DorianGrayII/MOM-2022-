@@ -1,6 +1,5 @@
-﻿using DBDef;
+using DBDef;
 using MOM;
-using System;
 
 public class AdventureOutcomeSpell : AdventureOutcome
 {
@@ -10,4 +9,3 @@ public class AdventureOutcomeSpell : AdventureOutcome
         base.GetComponent<SpellItem>().Set(o.thing as Spell);
     }
 }
-

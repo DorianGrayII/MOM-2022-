@@ -1,107 +1,37 @@
-﻿namespace CSharpCompiler
-{
-    using Mono.CSharp;
-    using System;
-    using System.CodeDom;
-    using System.CodeDom.Compiler;
-    using System.IO;
-    using System.Reflection.Emit;
-    using System.Text;
+using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
+using System.Collections.Specialized;
+using System.IO;
+using System.Reflection.Emit;
+using System.Text;
+using Mono.CSharp;
 
+namespace CSharpCompiler
+{
     public class CodeCompiler : ICodeCompiler
     {
         private static long assemblyCounter;
 
         public CompilerResults CompileAssemblyFromDom(CompilerParameters options, CodeCompileUnit compilationUnit)
         {
-            CodeCompileUnit[] ea = new CodeCompileUnit[] { compilationUnit };
-            return this.CompileAssemblyFromDomBatch(options, ea);
+            return this.CompileAssemblyFromDomBatch(options, new CodeCompileUnit[1] { compilationUnit });
         }
 
         public CompilerResults CompileAssemblyFromDomBatch(CompilerParameters options, CodeCompileUnit[] ea)
         {
-            CompilerResults results;
             if (options == null)
             {
                 throw new ArgumentNullException("options");
             }
             try
             {
-                results = this.CompileFromDomBatch(options, ea);
+                return this.CompileFromDomBatch(options, ea);
             }
             finally
             {
                 options.TempFiles.Delete();
             }
-            return results;
-        }
-
-        public CompilerResults CompileAssemblyFromFile(CompilerParameters options, string fileName)
-        {
-            string[] fileNames = new string[] { fileName };
-            return this.CompileAssemblyFromFileBatch(options, fileNames);
-        }
-
-        public CompilerResults CompileAssemblyFromFileBatch(CompilerParameters options, string[] fileNames)
-        {
-            CompilerSettings settings = this.ParamsToSettings(options);
-            string[] strArray = fileNames;
-            for (int i = 0; i < strArray.Length; i++)
-            {
-                string path = strArray[i];
-                string fullPath = Path.GetFullPath(path);
-                SourceFile item = new SourceFile(path, fullPath, settings.SourceFiles.Count + 1, null);
-                settings.SourceFiles.Add(item);
-            }
-            return this.CompileFromCompilerSettings(settings, options.GenerateInMemory);
-        }
-
-        public CompilerResults CompileAssemblyFromSource(CompilerParameters options, string source)
-        {
-            string[] sources = new string[] { source };
-            return this.CompileAssemblyFromSourceBatch(options, sources);
-        }
-
-        public CompilerResults CompileAssemblyFromSourceBatch(CompilerParameters options, string[] sources)
-        {
-            CompilerSettings settings = this.ParamsToSettings(options);
-            int num = 0;
-            foreach (string str in sources)
-            {
-                Func<Stream> func = delegate {
-                    string s = str;
-                    if (str == null)
-                    {
-                        string local1 = str;
-                        s = "";
-                    }
-                    return new MemoryStream(Encoding.UTF8.GetBytes(s));
-                };
-                SourceFile item = new SourceFile(num.ToString(), num.ToString(), settings.SourceFiles.Count + 1, func);
-                settings.SourceFiles.Add(item);
-                num++;
-            }
-            return this.CompileFromCompilerSettings(settings, options.GenerateInMemory);
-        }
-
-        private CompilerResults CompileFromCompilerSettings(CompilerSettings settings, bool generateInMemory)
-        {
-            CompilerResults compilerResults = new CompilerResults(new TempFileCollection(Path.GetTempPath()));
-            CustomDynamicDriver driver = new CustomDynamicDriver(new CompilerContext(settings, new CustomReportPrinter(compilerResults)));
-            AssemblyBuilder outAssembly = null;
-            try
-            {
-                driver.Compile(out outAssembly, AppDomain.CurrentDomain, generateInMemory);
-            }
-            catch (Exception exception)
-            {
-                CompilerError error1 = new CompilerError();
-                error1.IsWarning = false;
-                error1.ErrorText = exception.Message;
-                compilerResults.Errors.Add(error1);
-            }
-            compilerResults.CompiledAssembly = outAssembly;
-            return compilerResults;
         }
 
         private CompilerResults CompileFromDomBatch(CompilerParameters options, CodeCompileUnit[] ea)
@@ -109,43 +39,113 @@
             throw new NotImplementedException("sorry ICodeGenerator is not implemented, feel free to fix it and request merge");
         }
 
+        public CompilerResults CompileAssemblyFromFile(CompilerParameters options, string fileName)
+        {
+            return this.CompileAssemblyFromFileBatch(options, new string[1] { fileName });
+        }
+
+        public CompilerResults CompileAssemblyFromFileBatch(CompilerParameters options, string[] fileNames)
+        {
+            CompilerSettings compilerSettings = this.ParamsToSettings(options);
+            foreach (string obj in fileNames)
+            {
+                string fullPath = Path.GetFullPath(obj);
+                SourceFile item = new SourceFile(obj, fullPath, compilerSettings.SourceFiles.Count + 1);
+                compilerSettings.SourceFiles.Add(item);
+            }
+            return this.CompileFromCompilerSettings(compilerSettings, options.GenerateInMemory);
+        }
+
+        public CompilerResults CompileAssemblyFromSource(CompilerParameters options, string source)
+        {
+            return this.CompileAssemblyFromSourceBatch(options, new string[1] { source });
+        }
+
+        public CompilerResults CompileAssemblyFromSourceBatch(CompilerParameters options, string[] sources)
+        {
+            CompilerSettings compilerSettings = this.ParamsToSettings(options);
+            int num = 0;
+            foreach (string text in sources)
+            {
+                string source = text;
+                Func<Stream> streamIfDynamicFile = () => new MemoryStream(Encoding.UTF8.GetBytes(source ?? ""));
+                string text2 = num.ToString();
+                SourceFile item = new SourceFile(text2, text2, compilerSettings.SourceFiles.Count + 1, streamIfDynamicFile);
+                compilerSettings.SourceFiles.Add(item);
+                num++;
+            }
+            return this.CompileFromCompilerSettings(compilerSettings, options.GenerateInMemory);
+        }
+
+        private CompilerResults CompileFromCompilerSettings(CompilerSettings settings, bool generateInMemory)
+        {
+            CompilerResults compilerResults = new CompilerResults(new TempFileCollection(Path.GetTempPath()));
+            CustomDynamicDriver customDynamicDriver = new CustomDynamicDriver(new CompilerContext(settings, new CustomReportPrinter(compilerResults)));
+            AssemblyBuilder outAssembly = null;
+            try
+            {
+                customDynamicDriver.Compile(out outAssembly, AppDomain.CurrentDomain, generateInMemory);
+            }
+            catch (Exception ex)
+            {
+                compilerResults.Errors.Add(new CompilerError
+                {
+                    IsWarning = false,
+                    ErrorText = ex.Message
+                });
+            }
+            compilerResults.CompiledAssembly = outAssembly;
+            return compilerResults;
+        }
+
         private CompilerSettings ParamsToSettings(CompilerParameters parameters)
         {
-            CompilerSettings settings = new CompilerSettings();
-            foreach (string str in parameters.ReferencedAssemblies)
+            CompilerSettings compilerSettings = new CompilerSettings();
+            StringEnumerator enumerator = parameters.ReferencedAssemblies.GetEnumerator();
+            try
             {
-                settings.AssemblyReferences.Add(str);
+                while (enumerator.MoveNext())
+                {
+                    string current = enumerator.Current;
+                    compilerSettings.AssemblyReferences.Add(current);
+                }
             }
-            settings.Encoding = Encoding.UTF8;
-            settings.GenerateDebugInfo = parameters.IncludeDebugInformation;
-            settings.MainClass = parameters.MainClass;
-            settings.Platform = Platform.AnyCPU;
-            settings.StdLibRuntimeVersion = RuntimeVersion.v4;
+            finally
+            {
+                if (enumerator is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+            compilerSettings.Encoding = Encoding.UTF8;
+            compilerSettings.GenerateDebugInfo = parameters.IncludeDebugInformation;
+            compilerSettings.MainClass = parameters.MainClass;
+            compilerSettings.Platform = Platform.AnyCPU;
+            compilerSettings.StdLibRuntimeVersion = RuntimeVersion.v4;
             if (parameters.GenerateExecutable)
             {
-                settings.Target = Target.Exe;
-                settings.TargetExt = ".exe";
+                compilerSettings.Target = Target.Exe;
+                compilerSettings.TargetExt = ".exe";
             }
             else
             {
-                settings.Target = Target.Library;
-                settings.TargetExt = ".dll";
+                compilerSettings.Target = Target.Library;
+                compilerSettings.TargetExt = ".dll";
             }
             if (parameters.GenerateInMemory)
             {
-                settings.Target = Target.Library;
+                compilerSettings.Target = Target.Library;
             }
             if (string.IsNullOrEmpty(parameters.OutputAssembly))
             {
-                parameters.OutputAssembly = settings.OutputFile = "DynamicAssembly_" + assemblyCounter.ToString() + settings.TargetExt;
-                assemblyCounter += 1L;
+                parameters.OutputAssembly = (compilerSettings.OutputFile = "DynamicAssembly_" + CodeCompiler.assemblyCounter + compilerSettings.TargetExt);
+                CodeCompiler.assemblyCounter++;
             }
-            settings.OutputFile = parameters.OutputAssembly;
-            settings.Version = LanguageVersion.V_6;
-            settings.WarningLevel = parameters.WarningLevel;
-            settings.WarningsAreErrors = parameters.TreatWarningsAsErrors;
-            return settings;
+            compilerSettings.OutputFile = parameters.OutputAssembly;
+            compilerSettings.Version = LanguageVersion.V_6;
+            compilerSettings.WarningLevel = parameters.WarningLevel;
+            compilerSettings.WarningsAreErrors = parameters.TreatWarningsAsErrors;
+            return compilerSettings;
         }
     }
 }
-

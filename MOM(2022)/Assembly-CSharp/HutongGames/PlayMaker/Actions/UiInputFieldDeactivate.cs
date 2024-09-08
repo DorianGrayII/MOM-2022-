@@ -1,25 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Deactivate a UI InputField to stop the processing of Events and send OnSubmit if not canceled. Optionally Activate on state exit")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Deactivate a UI InputField to stop the processing of Events and send OnSubmit if not canceled. Optionally Activate on state exit")]
     public class UiInputFieldDeactivate : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Activate when exiting this state.")]
+
+        [Tooltip("Activate when exiting this state.")]
         public FsmBool activateOnExit;
+
         private InputField inputField;
 
-        private void DoAction()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.inputField.DeactivateInputField();
-            }
+            this.gameObject = null;
+            this.activateOnExit = null;
         }
 
         public override void OnEnter()
@@ -33,19 +34,20 @@
             base.Finish();
         }
 
+        private void DoAction()
+        {
+            if (this.inputField != null)
+            {
+                this.inputField.DeactivateInputField();
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.inputField != null) && this.activateOnExit.Value)
+            if (!(this.inputField == null) && this.activateOnExit.Value)
             {
                 this.inputField.ActivateInputField();
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.activateOnExit = null;
-        }
     }
 }
-

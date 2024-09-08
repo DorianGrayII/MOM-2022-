@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.PopupCreateArtefact
 using System.Collections;
 using System.Collections.Generic;
 using DBDef;
@@ -7,508 +5,510 @@ using DBEnum;
 using DBUtils;
 using MHUtils;
 using MHUtils.UI;
-using MOM;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PopupCreateArtefact : ScreenBase
+namespace MOM
 {
-    private class ItemGraphic
+    public class PopupCreateArtefact : ScreenBase
     {
-        public EEquipmentType etype;
-
-        public string graphic;
-    }
-
-    private class PowerEntry
-    {
-        public ArtefactPower power;
-
-        public ArtefactPowerSet set;
-
-        public bool showDivider;
-
-        public PowerEntry(ArtefactPower power = null)
+        private class ItemGraphic
         {
-            this.power = power;
-            if (power != null)
+            public EEquipmentType etype;
+
+            public string graphic;
+        }
+
+        private class PowerEntry
+        {
+            public ArtefactPower power;
+
+            public ArtefactPowerSet set;
+
+            public bool showDivider;
+
+            public PowerEntry(ArtefactPower power = null)
             {
-                this.set = global::MOM.Artefact.GetSet(power);
+                this.power = power;
+                if (power != null)
+                {
+                    this.set = Artefact.GetSet(power);
+                }
             }
         }
-    }
 
-    public Toggle btSword;
+        public Toggle btSword;
 
-    public Toggle btShield;
+        public Toggle btShield;
 
-    public Toggle btWand;
+        public Toggle btWand;
 
-    public Toggle btBow;
+        public Toggle btBow;
 
-    public Toggle btMace;
+        public Toggle btMace;
 
-    public Toggle btChain;
+        public Toggle btChain;
 
-    public Toggle btMisc;
+        public Toggle btMisc;
 
-    public Toggle btStaff;
+        public Toggle btStaff;
 
-    public Toggle btAxe;
+        public Toggle btAxe;
 
-    public Toggle btPlate;
+        public Toggle btPlate;
 
-    public Button btCancel;
+        public Button btCancel;
 
-    public Button btConfirm;
+        public Button btConfirm;
 
-    public Button btNextImage;
+        public Button btNextImage;
 
-    public Button btPrevImage;
+        public Button btPrevImage;
 
-    public RawImage riItem;
+        public RawImage riItem;
 
-    public TextMeshProUGUI labelCost;
+        public TextMeshProUGUI labelCost;
 
-    public TMP_InputField inputItemName;
+        public TMP_InputField inputItemName;
 
-    public GridItemManager gridBonuses;
+        public GridItemManager gridBonuses;
 
-    public GridItemManager gridSpells;
+        public GridItemManager gridSpells;
 
-    public GridItemManager gridEnchantments;
+        public GridItemManager gridEnchantments;
 
-    public GameObject goHeadingCreate;
+        public GameObject goHeadingCreate;
 
-    public GameObject goHeadingEnchant;
+        public GameObject goHeadingEnchant;
 
-    public GameObject goMaxEnchantments;
+        public GameObject goMaxEnchantments;
 
-    private readonly Dictionary<Toggle, int> btEquipmentTypes = new Dictionary<Toggle, int>();
+        private readonly Dictionary<Toggle, int> btEquipmentTypes = new Dictionary<Toggle, int>();
 
-    private List<PowerEntry> bonuses = new List<PowerEntry>();
+        private List<PowerEntry> bonuses = new List<PowerEntry>();
 
-    private List<PowerEntry> spells = new List<PowerEntry>();
+        private List<PowerEntry> spells = new List<PowerEntry>();
 
-    private readonly PowerEntry blankPowerEntry = new PowerEntry();
+        private readonly PowerEntry blankPowerEntry = new PowerEntry();
 
-    private readonly List<ArtefactPower> selectedPowers = new List<ArtefactPower>();
+        private readonly List<ArtefactPower> selectedPowers = new List<ArtefactPower>();
 
-    private List<ItemGraphic> graphics;
+        private List<ItemGraphic> graphics;
 
-    private int graphicIndex;
+        private int graphicIndex;
 
-    private string lastDefaultItemName;
+        private string lastDefaultItemName;
 
-    private EEquipmentType lastDefaultType;
+        private EEquipmentType lastDefaultType;
 
-    private Dictionary<int, List<ItemGraphic>> graphicsByType;
+        private Dictionary<int, List<ItemGraphic>> graphicsByType;
 
-    private int cost;
+        private int cost;
 
-    private static Spell spell;
+        private static Spell spell;
 
-    private static Toggle selectedTypeToggle;
+        private static Toggle selectedTypeToggle;
 
-    private new static CastSpells parent;
+        private new static CastSpells parent;
 
-    public static void Popup(Spell spell, CastSpells parent)
-    {
-        PopupCreateArtefact.parent = parent;
-        PopupCreateArtefact.spell = spell;
-        if (UIManager.GetScreen<PopupCreateArtefact>(UIManager.Layer.Popup) == null)
+        public static void Popup(Spell spell, CastSpells parent)
         {
-            UIManager.Open<PopupCreateArtefact>(UIManager.Layer.Popup, parent);
-        }
-    }
-
-    public override IEnumerator PreStart()
-    {
-        this.btEquipmentTypes[this.btSword] = 1;
-        this.btEquipmentTypes[this.btShield] = 256;
-        this.btEquipmentTypes[this.btWand] = 32;
-        this.btEquipmentTypes[this.btBow] = 8;
-        this.btEquipmentTypes[this.btMace] = 2;
-        this.btEquipmentTypes[this.btStaff] = 16;
-        this.btEquipmentTypes[this.btAxe] = 4;
-        this.btEquipmentTypes[this.btChain] = 128;
-        this.btEquipmentTypes[this.btPlate] = 64;
-        this.btEquipmentTypes[this.btMisc] = 15872;
-        PopupCreateArtefact.selectedTypeToggle = this.btSword;
-        PopupCreateArtefact.selectedTypeToggle.isOn = true;
-        this.inputItemName.text = "";
-        foreach (Toggle toggle in this.btEquipmentTypes.Keys)
-        {
-            toggle.onValueChanged.AddListener(delegate
+            PopupCreateArtefact.parent = parent;
+            PopupCreateArtefact.spell = spell;
+            if (UIManager.GetScreen<PopupCreateArtefact>(UIManager.Layer.Popup) == null)
             {
-                if (toggle.isOn)
-                {
-                    this.TypeSelected(toggle);
-                }
-            });
+                UIManager.Open<PopupCreateArtefact>(UIManager.Layer.Popup, parent);
+            }
         }
-        this.gridSpells.CustomDynamicItem(PowerItem, delegate
-        {
-            this.gridSpells.UpdateGrid(this.spells);
-        });
-        this.gridBonuses.CustomDynamicItem(PowerItem, delegate
-        {
-            this.gridBonuses.UpdateGrid(this.bonuses);
-        });
-        this.gridEnchantments.CustomDynamicItem(EnchantmentsItem, delegate
-        {
-            this.gridEnchantments.UpdateGrid(this.selectedPowers);
-        });
-        this.btConfirm.onClick.AddListener(Cast);
-        this.btNextImage.onClick.AddListener(delegate
-        {
-            this.CycleImage(1);
-        });
-        this.btPrevImage.onClick.AddListener(delegate
-        {
-            this.CycleImage(-1);
-        });
-        this.UpdateTypeDependencies();
-        yield return base.PreStart();
-    }
 
-    protected override void ButtonClick(Selectable s)
-    {
-        base.ButtonClick(s);
-        if (s == this.btCancel)
+        public override IEnumerator PreStart()
         {
-            UIManager.Close(this);
-        }
-    }
-
-    private void TypeSelected(Toggle toggle)
-    {
-        if (toggle != PopupCreateArtefact.selectedTypeToggle)
-        {
-            PopupCreateArtefact.selectedTypeToggle = toggle;
-            this.UpdateTypeDependencies();
-        }
-    }
-
-    protected void EnchantmentsItem(GameObject itemSource, object source, object data, int index)
-    {
-        ArtefactPower artefactPower = source as ArtefactPower;
-        TextMeshProUGUI componentInChildren = itemSource.GetComponentInChildren<TextMeshProUGUI>();
-        componentInChildren.text = this.GetPowerName(artefactPower);
-        if (componentInChildren.text == "DES_PLACEHOLDER")
-        {
-            componentInChildren.text = artefactPower.skill.dbName;
-        }
-        GameObjectUtils.FindByNameGetComponent<RolloverSimpleTooltip>(base.gameObject, itemSource.name).sourceAsDbName = artefactPower.skill.dbName;
-    }
-
-    protected void PowerItem(GameObject itemSource, object source, object data, int index)
-    {
-        PowerEntry powerEntry = source as PowerEntry;
-        if (powerEntry.power == null)
-        {
-            itemSource.SetActive(value: false);
-            return;
-        }
-        PowerListItem field = itemSource.GetComponent<PowerListItem>();
-        int curPage = field.owner.GetPageNr();
-        field.toggle.onValueChanged.RemoveAllListeners();
-        if ((bool)field.divider)
-        {
-            field.divider.SetActive(powerEntry.showDivider);
-        }
-        field.toggle.isOn = this.selectedPowers.Contains(powerEntry.power);
-        field.text.text = this.GetPowerName(powerEntry.power);
-        field.power = powerEntry.power;
-        field.tooltip.sourceAsDbName = powerEntry.power.skill.dbName;
-        if (field.text.text == "DES_PLACEHOLDER")
-        {
-            field.text.text = powerEntry.power.skill.dbName;
-        }
-        field.toggle.onValueChanged.AddListener(delegate(bool selected)
-        {
-            if (curPage == field.owner.GetPageNr())
+            this.btEquipmentTypes[this.btSword] = 1;
+            this.btEquipmentTypes[this.btShield] = 256;
+            this.btEquipmentTypes[this.btWand] = 32;
+            this.btEquipmentTypes[this.btBow] = 8;
+            this.btEquipmentTypes[this.btMace] = 2;
+            this.btEquipmentTypes[this.btStaff] = 16;
+            this.btEquipmentTypes[this.btAxe] = 4;
+            this.btEquipmentTypes[this.btChain] = 128;
+            this.btEquipmentTypes[this.btPlate] = 64;
+            this.btEquipmentTypes[this.btMisc] = 15872;
+            PopupCreateArtefact.selectedTypeToggle = this.btSword;
+            PopupCreateArtefact.selectedTypeToggle.isOn = true;
+            this.inputItemName.text = "";
+            foreach (Toggle toggle in this.btEquipmentTypes.Keys)
             {
-                if (selected)
+                toggle.onValueChanged.AddListener(delegate
                 {
-                    if (!this.selectedPowers.Contains(powerEntry.power))
+                    if (toggle.isOn)
                     {
-                        ArtefactPower[] power = global::MOM.Artefact.GetSet(powerEntry.power).power;
-                        foreach (ArtefactPower artefactPower in power)
+                        this.TypeSelected(toggle);
+                    }
+                });
+            }
+            this.gridSpells.CustomDynamicItem(PowerItem, delegate
+            {
+                this.gridSpells.UpdateGrid(this.spells);
+            });
+            this.gridBonuses.CustomDynamicItem(PowerItem, delegate
+            {
+                this.gridBonuses.UpdateGrid(this.bonuses);
+            });
+            this.gridEnchantments.CustomDynamicItem(EnchantmentsItem, delegate
+            {
+                this.gridEnchantments.UpdateGrid(this.selectedPowers);
+            });
+            this.btConfirm.onClick.AddListener(Cast);
+            this.btNextImage.onClick.AddListener(delegate
+            {
+                this.CycleImage(1);
+            });
+            this.btPrevImage.onClick.AddListener(delegate
+            {
+                this.CycleImage(-1);
+            });
+            this.UpdateTypeDependencies();
+            yield return base.PreStart();
+        }
+
+        protected override void ButtonClick(Selectable s)
+        {
+            base.ButtonClick(s);
+            if (s == this.btCancel)
+            {
+                UIManager.Close(this);
+            }
+        }
+
+        private void TypeSelected(Toggle toggle)
+        {
+            if (toggle != PopupCreateArtefact.selectedTypeToggle)
+            {
+                PopupCreateArtefact.selectedTypeToggle = toggle;
+                this.UpdateTypeDependencies();
+            }
+        }
+
+        protected void EnchantmentsItem(GameObject itemSource, object source, object data, int index)
+        {
+            ArtefactPower artefactPower = source as ArtefactPower;
+            TextMeshProUGUI componentInChildren = itemSource.GetComponentInChildren<TextMeshProUGUI>();
+            componentInChildren.text = this.GetPowerName(artefactPower);
+            if (componentInChildren.text == "DES_PLACEHOLDER")
+            {
+                componentInChildren.text = artefactPower.skill.dbName;
+            }
+            GameObjectUtils.FindByNameGetComponent<RolloverSimpleTooltip>(base.gameObject, itemSource.name).sourceAsDbName = artefactPower.skill.dbName;
+        }
+
+        protected void PowerItem(GameObject itemSource, object source, object data, int index)
+        {
+            PowerEntry powerEntry = source as PowerEntry;
+            if (powerEntry.power == null)
+            {
+                itemSource.SetActive(value: false);
+                return;
+            }
+            PowerListItem field = itemSource.GetComponent<PowerListItem>();
+            int curPage = field.owner.GetPageNr();
+            field.toggle.onValueChanged.RemoveAllListeners();
+            if ((bool)field.divider)
+            {
+                field.divider.SetActive(powerEntry.showDivider);
+            }
+            field.toggle.isOn = this.selectedPowers.Contains(powerEntry.power);
+            field.text.text = this.GetPowerName(powerEntry.power);
+            field.power = powerEntry.power;
+            field.tooltip.sourceAsDbName = powerEntry.power.skill.dbName;
+            if (field.text.text == "DES_PLACEHOLDER")
+            {
+                field.text.text = powerEntry.power.skill.dbName;
+            }
+            field.toggle.onValueChanged.AddListener(delegate(bool selected)
+            {
+                if (curPage == field.owner.GetPageNr())
+                {
+                    if (selected)
+                    {
+                        if (!this.selectedPowers.Contains(powerEntry.power))
                         {
-                            if (artefactPower != powerEntry.power && this.selectedPowers.Contains(artefactPower))
+                            ArtefactPower[] power = Artefact.GetSet(powerEntry.power).power;
+                            foreach (ArtefactPower artefactPower in power)
                             {
-                                this.selectedPowers.Remove(artefactPower);
-                                PowerListItem[] componentsInChildren = this.gridBonuses.GetComponentsInChildren<PowerListItem>();
-                                foreach (PowerListItem powerListItem in componentsInChildren)
+                                if (artefactPower != powerEntry.power && this.selectedPowers.Contains(artefactPower))
                                 {
-                                    if (powerListItem.power == artefactPower)
+                                    this.selectedPowers.Remove(artefactPower);
+                                    PowerListItem[] componentsInChildren = this.gridBonuses.GetComponentsInChildren<PowerListItem>();
+                                    foreach (PowerListItem powerListItem in componentsInChildren)
                                     {
-                                        powerListItem.toggle.isOn = false;
+                                        if (powerListItem.power == artefactPower)
+                                        {
+                                            powerListItem.toggle.isOn = false;
+                                        }
                                     }
                                 }
                             }
+                            if (this.selectedPowers.FindAll((ArtefactPower o) => o.cost != -1).Count < 4)
+                            {
+                                this.selectedPowers.Add(powerEntry.power);
+                            }
+                            else
+                            {
+                                this.goMaxEnchantments.SetActive(value: true);
+                                field.toggle.isOn = false;
+                            }
                         }
+                    }
+                    else
+                    {
+                        this.selectedPowers.Remove(powerEntry.power);
                         if (this.selectedPowers.FindAll((ArtefactPower o) => o.cost != -1).Count < 4)
                         {
-                            this.selectedPowers.Add(powerEntry.power);
-                        }
-                        else
-                        {
-                            this.goMaxEnchantments.SetActive(value: true);
-                            field.toggle.isOn = false;
+                            this.goMaxEnchantments.SetActive(value: false);
                         }
                     }
+                    this.UpdateEnchantments();
                 }
-                else
+            });
+        }
+
+        private void UpdateEnchantments()
+        {
+            this.gridEnchantments.UpdateGrid(this.selectedPowers);
+            this.UpdateCost();
+        }
+
+        private void InitGraphicsByType()
+        {
+            this.graphicsByType = new Dictionary<int, List<ItemGraphic>>();
+            foreach (ArtefactPrefab item2 in DataBase.GetType<ArtefactPrefab>())
+            {
+                int key = ConvertType(item2.eType);
+                if (!this.graphicsByType.TryGetValue(key, out var value))
                 {
-                    this.selectedPowers.Remove(powerEntry.power);
-                    if (this.selectedPowers.FindAll((ArtefactPower o) => o.cost != -1).Count < 4)
+                    value = new List<ItemGraphic>();
+                    this.graphicsByType[key] = value;
+                }
+                AddGraphicIfUnique(value, item2.eType, item2.descriptionInfo.graphic);
+                ArtefactGraphic[] alternativeGraphic = item2.alternativeGraphic;
+                if (alternativeGraphic != null)
+                {
+                    ArtefactGraphic[] array = alternativeGraphic;
+                    foreach (ArtefactGraphic artefactGraphic in array)
                     {
-                        this.goMaxEnchantments.SetActive(value: false);
+                        AddGraphicIfUnique(value, item2.eType, artefactGraphic.descriptionInfo.graphic);
                     }
                 }
-                this.UpdateEnchantments();
             }
-        });
-    }
-
-    private void UpdateEnchantments()
-    {
-        this.gridEnchantments.UpdateGrid(this.selectedPowers);
-        this.UpdateCost();
-    }
-
-    private void InitGraphicsByType()
-    {
-        this.graphicsByType = new Dictionary<int, List<ItemGraphic>>();
-        foreach (ArtefactPrefab item2 in DataBase.GetType<ArtefactPrefab>())
-        {
-            int key = ConvertType(item2.eType);
-            if (!this.graphicsByType.TryGetValue(key, out var value))
+            foreach (global::DBDef.Artefact item3 in DataBase.GetType<global::DBDef.Artefact>())
             {
-                value = new List<ItemGraphic>();
-                this.graphicsByType[key] = value;
-            }
-            AddGraphicIfUnique(value, item2.eType, item2.descriptionInfo.graphic);
-            ArtefactGraphic[] alternativeGraphic = item2.alternativeGraphic;
-            if (alternativeGraphic != null)
-            {
-                ArtefactGraphic[] array = alternativeGraphic;
-                foreach (ArtefactGraphic artefactGraphic in array)
+                int key2 = ConvertType(item3.eType);
+                if (!this.graphicsByType.TryGetValue(key2, out var value2))
                 {
-                    AddGraphicIfUnique(value, item2.eType, artefactGraphic.descriptionInfo.graphic);
+                    value2 = new List<ItemGraphic>();
+                    this.graphicsByType[key2] = value2;
+                }
+                AddGraphicIfUnique(value2, item3.eType, item3.descriptionInfo.graphic);
+            }
+            void AddGraphicIfUnique(List<ItemGraphic> list, EEquipmentType type, string graphic)
+            {
+                if (!string.IsNullOrEmpty(graphic) && !(AssetManager.Get<Texture2D>(graphic) == null) && !list.Exists((ItemGraphic x) => x.graphic == graphic && x.etype == type))
+                {
+                    ItemGraphic item = new ItemGraphic
+                    {
+                        graphic = graphic,
+                        etype = type
+                    };
+                    list.Add(item);
                 }
             }
-        }
-        foreach (global::DBDef.Artefact item3 in DataBase.GetType<global::DBDef.Artefact>())
-        {
-            int key2 = ConvertType(item3.eType);
-            if (!this.graphicsByType.TryGetValue(key2, out var value2))
+            int ConvertType(EEquipmentType eType)
             {
-                value2 = new List<ItemGraphic>();
-                this.graphicsByType[key2] = value2;
-            }
-            AddGraphicIfUnique(value2, item3.eType, item3.descriptionInfo.graphic);
-        }
-        void AddGraphicIfUnique(List<ItemGraphic> list, EEquipmentType type, string graphic)
-        {
-            if (!string.IsNullOrEmpty(graphic) && !(AssetManager.Get<Texture2D>(graphic) == null) && !list.Exists((ItemGraphic x) => x.graphic == graphic && x.etype == type))
-            {
-                ItemGraphic item = new ItemGraphic
+                if ((eType & (EEquipmentType)15872) != 0)
                 {
-                    graphic = graphic,
-                    etype = type
-                };
-                list.Add(item);
+                    return 15872;
+                }
+                return (int)eType;
             }
         }
-        int ConvertType(EEquipmentType eType)
-        {
-            if ((eType & (EEquipmentType)15872) != 0)
-            {
-                return 15872;
-            }
-            return (int)eType;
-        }
-    }
 
-    private void CycleImage(int dir)
-    {
-        this.graphicIndex = (this.graphicIndex + dir + this.graphics.Count) % this.graphics.Count;
-        this.UpdateGraphicAndName();
-        this.UpdateCost();
-    }
-
-    private void UpdateGraphicAndName()
-    {
-        ItemGraphic itemGraphic = this.graphics[this.graphicIndex];
-        this.riItem.texture = AssetManager.Get<Texture2D>(itemGraphic.graphic);
-        if (this.lastDefaultType != itemGraphic.etype)
+        private void CycleImage(int dir)
         {
-            this.lastDefaultType = itemGraphic.etype;
-            string localizedName = DataBase.GetType<ArtefactPrefab>().Find((ArtefactPrefab o) => o.eType == this.lastDefaultType).descriptionInfo.GetLocalizedName();
-            string text = this.inputItemName.text;
-            if (text == null || text.Length == 0 || text == this.lastDefaultItemName)
-            {
-                this.inputItemName.text = localizedName;
-            }
-            this.lastDefaultItemName = localizedName;
+            this.graphicIndex = (this.graphicIndex + dir + this.graphics.Count) % this.graphics.Count;
+            this.UpdateGraphicAndName();
+            this.UpdateCost();
         }
-    }
 
-    private string GetPowerName(ArtefactPower power)
-    {
-        int num = 0;
-        if (power.skill.script != null && power.skill.script.Length != 0)
+        private void UpdateGraphicAndName()
         {
-            num = power.skill.script[0].fIntParam.ToInt();
-        }
-        return string.Format(power.skill.GetDescriptionInfo().GetLocalizedName(), num);
-    }
-
-    private void UpdateTypeDependencies()
-    {
-        int num = this.btEquipmentTypes[PopupCreateArtefact.selectedTypeToggle];
-        List<ArtefactPower> list = global::MOM.Artefact.GetBonuses(num);
-        List<ArtefactPower> list2 = global::MOM.Artefact.GetSpells(num);
-        PlayerWizard humanWizard = GameManager.GetHumanWizard();
-        this.spells.Clear();
-        foreach (ArtefactPower item in list2)
-        {
-            ArtefactPowerSet set = global::MOM.Artefact.GetSet(item);
-            bool flag = true;
-            CountedTag[] requiredTag = set.requiredTag;
-            foreach (CountedTag countedTag in requiredTag)
+            ItemGraphic itemGraphic = this.graphics[this.graphicIndex];
+            this.riItem.texture = AssetManager.Get<Texture2D>(itemGraphic.graphic);
+            if (this.lastDefaultType != itemGraphic.etype)
             {
-                flag = humanWizard.attributes.Contains(countedTag.tag, countedTag.amount);
-            }
-            if ((flag && item.cost <= 200 && PopupCreateArtefact.spell == (Spell)SPELL.ENCHANT_ITEM) || (flag && PopupCreateArtefact.spell == (Spell)SPELL.CREATE_ARTEFACT))
-            {
-                this.spells.Add(new PowerEntry(item));
-            }
-        }
-        this.goMaxEnchantments.SetActive(value: false);
-        this.bonuses.Clear();
-        int num2 = 10;
-        foreach (ArtefactPower item2 in list)
-        {
-            if ((item2.cost > 200 && PopupCreateArtefact.spell == (Spell)SPELL.ENCHANT_ITEM) || item2.cost <= -1)
-            {
-                continue;
-            }
-            PowerEntry powerEntry = new PowerEntry(item2);
-            int count = this.bonuses.Count;
-            if (count % num2 == 0)
-            {
-                if (count != 0)
+                this.lastDefaultType = itemGraphic.etype;
+                string localizedName = DataBase.GetType<ArtefactPrefab>().Find((ArtefactPrefab o) => o.eType == this.lastDefaultType).descriptionInfo.GetLocalizedName();
+                string text = this.inputItemName.text;
+                if (text == null || text.Length == 0 || text == this.lastDefaultItemName)
                 {
-                    int num3 = 0;
-                    count--;
-                    while (this.bonuses[count].set == powerEntry.set && num3 < num2)
+                    this.inputItemName.text = localizedName;
+                }
+                this.lastDefaultItemName = localizedName;
+            }
+        }
+
+        private string GetPowerName(ArtefactPower power)
+        {
+            int num = 0;
+            if (power.skill.script != null && power.skill.script.Length != 0)
+            {
+                num = power.skill.script[0].fIntParam.ToInt();
+            }
+            return string.Format(power.skill.GetDescriptionInfo().GetLocalizedName(), num);
+        }
+
+        private void UpdateTypeDependencies()
+        {
+            int num = this.btEquipmentTypes[PopupCreateArtefact.selectedTypeToggle];
+            List<ArtefactPower> list = Artefact.GetBonuses(num);
+            List<ArtefactPower> list2 = Artefact.GetSpells(num);
+            PlayerWizard humanWizard = GameManager.GetHumanWizard();
+            this.spells.Clear();
+            foreach (ArtefactPower item in list2)
+            {
+                ArtefactPowerSet set = Artefact.GetSet(item);
+                bool flag = true;
+                CountedTag[] requiredTag = set.requiredTag;
+                foreach (CountedTag countedTag in requiredTag)
+                {
+                    flag = humanWizard.attributes.Contains(countedTag.tag, countedTag.amount);
+                }
+                if ((flag && item.cost <= 200 && PopupCreateArtefact.spell == (Spell)SPELL.ENCHANT_ITEM) || (flag && PopupCreateArtefact.spell == (Spell)SPELL.CREATE_ARTEFACT))
+                {
+                    this.spells.Add(new PowerEntry(item));
+                }
+            }
+            this.goMaxEnchantments.SetActive(value: false);
+            this.bonuses.Clear();
+            int num2 = 10;
+            foreach (ArtefactPower item2 in list)
+            {
+                if ((item2.cost > 200 && PopupCreateArtefact.spell == (Spell)SPELL.ENCHANT_ITEM) || item2.cost <= -1)
+                {
+                    continue;
+                }
+                PowerEntry powerEntry = new PowerEntry(item2);
+                int count = this.bonuses.Count;
+                if (count % num2 == 0)
+                {
+                    if (count != 0)
                     {
-                        this.bonuses[count].showDivider = false;
-                        num3++;
+                        int num3 = 0;
                         count--;
-                    }
-                    count++;
-                    if (num3 < num2)
-                    {
-                        while (num3-- > 0)
+                        while (this.bonuses[count].set == powerEntry.set && num3 < num2)
                         {
-                            this.bonuses.Insert(count, this.blankPowerEntry);
+                            this.bonuses[count].showDivider = false;
+                            num3++;
+                            count--;
+                        }
+                        count++;
+                        if (num3 < num2)
+                        {
+                            while (num3-- > 0)
+                            {
+                                this.bonuses.Insert(count, this.blankPowerEntry);
+                            }
                         }
                     }
                 }
+                else if (this.bonuses[count - 1].set != powerEntry.set)
+                {
+                    powerEntry.showDivider = true;
+                }
+                this.bonuses.Add(powerEntry);
             }
-            else if (this.bonuses[count - 1].set != powerEntry.set)
+            if (this.graphicsByType == null)
             {
-                powerEntry.showDivider = true;
+                this.InitGraphicsByType();
             }
-            this.bonuses.Add(powerEntry);
+            this.graphics = this.graphicsByType[num];
+            this.graphicIndex = 0;
+            this.UpdateGraphicAndName();
+            this.ValidateSelected();
+            this.AddGuarantedPowers(this.selectedPowers, this.lastDefaultType);
+            this.gridSpells.UpdateGrid(this.spells);
+            this.gridBonuses.UpdateGrid(this.bonuses);
+            this.gridEnchantments.UpdateGrid(this.selectedPowers);
+            this.UpdateCost();
         }
-        if (this.graphicsByType == null)
-        {
-            this.InitGraphicsByType();
-        }
-        this.graphics = this.graphicsByType[num];
-        this.graphicIndex = 0;
-        this.UpdateGraphicAndName();
-        this.ValidateSelected();
-        this.AddGuarantedPowers(this.selectedPowers, this.lastDefaultType);
-        this.gridSpells.UpdateGrid(this.spells);
-        this.gridBonuses.UpdateGrid(this.bonuses);
-        this.gridEnchantments.UpdateGrid(this.selectedPowers);
-        this.UpdateCost();
-    }
 
-    private void ValidateSelected()
-    {
-        for (int num = this.selectedPowers.Count - 1; num >= 0; num--)
+        private void ValidateSelected()
         {
-            ArtefactPower sp = this.selectedPowers[num];
-            if (!this.spells.Exists((PowerEntry p) => p.power == sp) && !this.bonuses.Exists((PowerEntry p) => p.power == sp))
+            for (int num = this.selectedPowers.Count - 1; num >= 0; num--)
             {
-                this.selectedPowers.RemoveAt(num);
+                ArtefactPower sp = this.selectedPowers[num];
+                if (!this.spells.Exists((PowerEntry p) => p.power == sp) && !this.bonuses.Exists((PowerEntry p) => p.power == sp))
+                {
+                    this.selectedPowers.RemoveAt(num);
+                }
             }
         }
-    }
 
-    private void UpdateCost()
-    {
-        this.cost = 0;
-        if (this.selectedPowers.Count > 0)
+        private void UpdateCost()
         {
-            EEquipmentType type = this.graphics[this.graphicIndex].etype;
-            ArtefactPrefab artefactPrefab = DataBase.GetType<ArtefactPrefab>().Find((ArtefactPrefab o) => o.eType == type);
-            this.cost += artefactPrefab.cost;
+            this.cost = 0;
+            if (this.selectedPowers.Count > 0)
+            {
+                EEquipmentType type = this.graphics[this.graphicIndex].etype;
+                ArtefactPrefab artefactPrefab = DataBase.GetType<ArtefactPrefab>().Find((ArtefactPrefab o) => o.eType == type);
+                this.cost += artefactPrefab.cost;
+                foreach (ArtefactPower selectedPower in this.selectedPowers)
+                {
+                    this.cost += selectedPower.cost;
+                }
+            }
+            this.btConfirm.interactable = this.cost > 0;
+            float num = GameManager.GetHumanWizard().GetCastCostPercent(PopupCreateArtefact.spell).ToFloat();
+            this.cost = Mathf.RoundToInt((float)this.cost * (1f - num));
+            this.labelCost.text = global::DBUtils.Localization.Get("UI_COST", true) + this.cost;
+        }
+
+        private void Cast()
+        {
+            MagicAndResearch magicAndResearch = GameManager.GetHumanWizard().GetMagicAndResearch();
+            CraftItemSpell craftItemSpell = new CraftItemSpell
+            {
+                artefact = new Artefact
+                {
+                    name = this.inputItemName.text,
+                    graphic = this.graphics[this.graphicIndex].graphic,
+                    equipmentType = this.graphics[this.graphicIndex].etype,
+                    artefactPowers = new List<DBReference<ArtefactPower>>()
+                },
+                cost = this.cost
+            };
             foreach (ArtefactPower selectedPower in this.selectedPowers)
             {
-                this.cost += selectedPower.cost;
+                craftItemSpell.artefact.artefactPowers.Add(selectedPower);
             }
+            magicAndResearch.curentlyCastSpell = PopupCreateArtefact.spell;
+            magicAndResearch.craftItemSpell = craftItemSpell;
+            UIManager.Close(this);
+            PopupCreateArtefact.parent.btClose.onClick.Invoke();
+            HUD.Get().UpdateCastingButton();
         }
-        this.btConfirm.interactable = this.cost > 0;
-        float num = GameManager.GetHumanWizard().GetCastCostPercent(PopupCreateArtefact.spell).ToFloat();
-        this.cost = Mathf.RoundToInt((float)this.cost * (1f - num));
-        this.labelCost.text = global::DBUtils.Localization.Get("UI_COST", true) + this.cost;
-    }
 
-    private void Cast()
-    {
-        MagicAndResearch magicAndResearch = GameManager.GetHumanWizard().GetMagicAndResearch();
-        CraftItemSpell craftItemSpell = new CraftItemSpell
+        private void AddGuarantedPowers(List<ArtefactPower> a, EEquipmentType e)
         {
-            artefact = new global::MOM.Artefact
+            foreach (ArtefactPower item in DataBase.GetType<ArtefactPower>().FindAll((ArtefactPower o) => o.cost == -1))
             {
-                name = this.inputItemName.text,
-                graphic = this.graphics[this.graphicIndex].graphic,
-                equipmentType = this.graphics[this.graphicIndex].etype,
-                artefactPowers = new List<DBReference<ArtefactPower>>()
-            },
-            cost = this.cost
-        };
-        foreach (ArtefactPower selectedPower in this.selectedPowers)
-        {
-            craftItemSpell.artefact.artefactPowers.Add(selectedPower);
-        }
-        magicAndResearch.curentlyCastSpell = PopupCreateArtefact.spell;
-        magicAndResearch.craftItemSpell = craftItemSpell;
-        UIManager.Close(this);
-        PopupCreateArtefact.parent.btClose.onClick.Invoke();
-        HUD.Get().UpdateCastingButton();
-    }
-
-    private void AddGuarantedPowers(List<ArtefactPower> a, EEquipmentType e)
-    {
-        foreach (ArtefactPower item in DataBase.GetType<ArtefactPower>().FindAll((ArtefactPower o) => o.cost == -1))
-        {
-            EEquipmentType[] eTypes = item.eTypes;
-            for (int i = 0; i < eTypes.Length; i++)
-            {
-                if (eTypes[i] == e)
+                EEquipmentType[] eTypes = item.eTypes;
+                for (int i = 0; i < eTypes.Length; i++)
                 {
-                    a.Add(item);
+                    if (eTypes[i] == e)
+                    {
+                        a.Add(item);
+                    }
                 }
             }
         }

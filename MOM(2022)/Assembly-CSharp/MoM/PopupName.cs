@@ -1,19 +1,29 @@
-﻿namespace MOM
-{
-    using DBUtils;
-    using MHUtils.UI;
-    using System;
-    using System.Runtime.InteropServices;
-    using TMPro;
-    using UnityEngine.UI;
+using DBUtils;
+using MHUtils.UI;
+using TMPro;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class PopupName : ScreenBase
     {
         public TMP_InputField inputField;
+
         public Button buttonConfirm;
+
         public Button buttonCancel;
+
         private Callback confirm;
+
         private Callback cancel;
+
+        public static void OpenPopup(string defaultValue, Callback confirm, Callback cancel = null, ScreenBase parent = null)
+        {
+            PopupName popupName = UIManager.Open<PopupName>(UIManager.Layer.Popup, parent);
+            popupName.cancel = cancel;
+            popupName.confirm = confirm;
+            popupName.inputField.text = Localization.Get(defaultValue, true);
+        }
 
         protected override void ButtonClick(Selectable s)
         {
@@ -36,14 +46,5 @@
                 }
             }
         }
-
-        public static void OpenPopup(string defaultValue, Callback confirm, Callback cancel, ScreenBase parent)
-        {
-            PopupName local1 = UIManager.Open<PopupName>(UIManager.Layer.Popup, parent);
-            local1.cancel = cancel;
-            local1.confirm = confirm;
-            local1.inputField.text = Localization.Get(defaultValue, true, Array.Empty<object>());
-        }
     }
 }
-

@@ -1,16 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animation), HutongGames.PlayMaker.Tooltip("Rewinds the named animation.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animation)]
+    [Tooltip("Rewinds the named animation.")]
     public class RewindAnimation : BaseAnimationAction
     {
-        [RequiredField, CheckForComponent(typeof(Animation))]
+        [RequiredField]
+        [CheckForComponent(typeof(Animation))]
         public FsmOwnerDefault gameObject;
+
         [UIHint(UIHint.Animation)]
         public FsmString animName;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.animName = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoRewindAnimation();
+            base.Finish();
+        }
 
         private void DoRewindAnimation()
         {
@@ -23,18 +36,5 @@
                 }
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoRewindAnimation();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.animName = null;
-        }
     }
 }
-

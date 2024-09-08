@@ -1,27 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the direction of a UI Slider component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the direction of a UI Slider component.")]
     public class UiSliderGetDirection : ComponentAction<Slider>
     {
-        [RequiredField, CheckForComponent(typeof(Slider)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Slider component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Slider))]
+        [Tooltip("The GameObject with the UI Slider component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The direction of the UI Slider."), ObjectType(typeof(Slider.Direction))]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The direction of the UI Slider.")]
+        [ObjectType(typeof(Slider.Direction))]
         public FsmEnum direction;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Slider slider;
 
-        private void DoGetValue()
+        public override void Reset()
         {
-            if (this.slider != null)
-            {
-                this.direction.Value = this.slider.direction;
-            }
+            this.gameObject = null;
+            this.direction = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,12 +49,12 @@
             this.DoGetValue();
         }
 
-        public override void Reset()
+        private void DoGetValue()
         {
-            this.gameObject = null;
-            this.direction = null;
-            this.everyFrame = false;
+            if (this.slider != null)
+            {
+                this.direction.Value = this.slider.direction;
+            }
         }
     }
 }
-

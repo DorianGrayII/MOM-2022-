@@ -1,37 +1,41 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the direction of a UI Scrollbar component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the direction of a UI Scrollbar component.")]
     public class UiScrollbarSetDirection : ComponentAction<Scrollbar>
     {
-        [RequiredField, CheckForComponent(typeof(Scrollbar)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Scrollbar component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Scrollbar))]
+        [Tooltip("The GameObject with the UI Scrollbar component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The direction of the UI Scrollbar."), ObjectType(typeof(Scrollbar.Direction))]
+
+        [RequiredField]
+        [Tooltip("The direction of the UI Scrollbar.")]
+        [ObjectType(typeof(Scrollbar.Direction))]
         public FsmEnum direction;
-        [HutongGames.PlayMaker.Tooltip("Include the  RectLayouts. Leave to none for no effect")]
+
+        [Tooltip("Include the  RectLayouts. Leave to none for no effect")]
         public FsmBool includeRectLayouts;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private Scrollbar scrollbar;
+
         private Scrollbar.Direction originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.scrollbar != null)
+            this.gameObject = null;
+            this.direction = Scrollbar.Direction.LeftToRight;
+            this.includeRectLayouts = new FsmBool
             {
-                if (this.includeRectLayouts.IsNone)
-                {
-                    this.scrollbar.direction = (Scrollbar.Direction) this.direction.Value;
-                }
-                else
-                {
-                    this.scrollbar.SetDirection((Scrollbar.Direction) this.direction.Value, this.includeRectLayouts.Value);
-                }
-            }
+                UseVariable = true
+            };
+            this.resetOnExit = null;
         }
 
         public override void OnEnter()
@@ -49,9 +53,24 @@
             base.Finish();
         }
 
+        private void DoSetValue()
+        {
+            if (!(this.scrollbar == null))
+            {
+                if (this.includeRectLayouts.IsNone)
+                {
+                    this.scrollbar.direction = (Scrollbar.Direction)(object)this.direction.Value;
+                }
+                else
+                {
+                    this.scrollbar.SetDirection((Scrollbar.Direction)(object)this.direction.Value, this.includeRectLayouts.Value);
+                }
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.scrollbar != null) && this.resetOnExit.Value)
+            if (!(this.scrollbar == null) && this.resetOnExit.Value)
             {
                 if (this.includeRectLayouts.IsNone)
                 {
@@ -63,16 +82,5 @@
                 }
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.direction = Scrollbar.Direction.LeftToRight;
-            FsmBool bool1 = new FsmBool();
-            bool1.UseVariable = true;
-            this.includeRectLayouts = bool1;
-            this.resetOnExit = null;
-        }
     }
 }
-

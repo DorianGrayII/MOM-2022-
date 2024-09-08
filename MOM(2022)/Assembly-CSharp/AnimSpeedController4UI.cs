@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// AnimSpeedController4UI
 using UnityEngine;
 
 public class AnimSpeedController4UI : MonoBehaviour

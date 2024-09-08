@@ -1,30 +1,34 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the Hide Mobile Input value of a UI InputField component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the Hide Mobile Input value of a UI InputField component.")]
     public class UiInputFieldGetHideMobileInput : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the Hide Mobile flag value of the UI InputField component.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the Hide Mobile flag value of the UI InputField component.")]
         public FsmBool hideMobileInput;
-        [HutongGames.PlayMaker.Tooltip("Event sent if hide mobile input property is true")]
+
+        [Tooltip("Event sent if hide mobile input property is true")]
         public FsmEvent mobileInputHiddenEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if hide mobile input property is false")]
+
+        [Tooltip("Event sent if hide mobile input property is false")]
         public FsmEvent mobileInputShownEvent;
+
         private InputField inputField;
 
-        private void DoGetValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.hideMobileInput.Value = this.inputField.shouldHideMobileInput;
-                base.Fsm.Event(this.inputField.shouldHideMobileInput ? this.mobileInputHiddenEvent : this.mobileInputShownEvent);
-            }
+            this.hideMobileInput = null;
+            this.mobileInputHiddenEvent = null;
+            this.mobileInputShownEvent = null;
         }
 
         public override void OnEnter()
@@ -38,12 +42,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetValue()
         {
-            this.hideMobileInput = null;
-            this.mobileInputHiddenEvent = null;
-            this.mobileInputShownEvent = null;
+            if (!(this.inputField == null))
+            {
+                this.hideMobileInput.Value = this.inputField.shouldHideMobileInput;
+                base.Fsm.Event(this.inputField.shouldHideMobileInput ? this.mobileInputHiddenEvent : this.mobileInputShownEvent);
+            }
         }
     }
 }
-

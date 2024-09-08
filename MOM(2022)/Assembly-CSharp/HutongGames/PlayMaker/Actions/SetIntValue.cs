@@ -1,17 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Math), Tooltip("Sets the value of an Integer Variable.")]
+    [ActionCategory(ActionCategory.Math)]
+    [Tooltip("Sets the value of an Integer Variable.")]
     public class SetIntValue : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("Int Variable to Set")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Int Variable to Set")]
         public FsmInt intVariable;
-        [RequiredField, Tooltip("Int Value")]
+
+        [RequiredField]
+        [Tooltip("Int Value")]
         public FsmInt intValue;
+
         [Tooltip("Repeat every frame.")]
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.intVariable = null;
+            this.intValue = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
@@ -26,13 +36,5 @@
         {
             this.intVariable.Value = this.intValue.Value;
         }
-
-        public override void Reset()
-        {
-            this.intVariable = null;
-            this.intValue = null;
-            this.everyFrame = false;
-        }
     }
 }
-

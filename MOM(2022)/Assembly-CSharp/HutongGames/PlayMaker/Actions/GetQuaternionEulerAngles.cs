@@ -1,19 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Quaternion), Tooltip("Gets a quaternion as euler angles.")]
+    [ActionCategory(ActionCategory.Quaternion)]
+    [Tooltip("Gets a quaternion as euler angles.")]
     public class GetQuaternionEulerAngles : QuaternionBaseAction
     {
-        [RequiredField, Tooltip("The rotation")]
+        [RequiredField]
+        [Tooltip("The rotation")]
         public FsmQuaternion quaternion;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The euler angles of the quaternion.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The euler angles of the quaternion.")]
         public FsmVector3 eulerAngles;
 
-        private void GetQuatEuler()
+        public override void Reset()
         {
-            this.eulerAngles.set_Value(this.quaternion.get_Value().eulerAngles);
+            this.quaternion = null;
+            this.eulerAngles = null;
+            base.everyFrame = true;
+            base.everyFrameOption = everyFrameOptions.Update;
         }
 
         public override void OnEnter()
@@ -25,9 +30,9 @@
             }
         }
 
-        public override void OnFixedUpdate()
+        public override void OnUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.FixedUpdate)
+            if (base.everyFrameOption == everyFrameOptions.Update)
             {
                 this.GetQuatEuler();
             }
@@ -35,27 +40,23 @@
 
         public override void OnLateUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.LateUpdate)
+            if (base.everyFrameOption == everyFrameOptions.LateUpdate)
             {
                 this.GetQuatEuler();
             }
         }
 
-        public override void OnUpdate()
+        public override void OnFixedUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.Update)
+            if (base.everyFrameOption == everyFrameOptions.FixedUpdate)
             {
                 this.GetQuatEuler();
             }
         }
 
-        public override void Reset()
+        private void GetQuatEuler()
         {
-            this.quaternion = null;
-            this.eulerAngles = null;
-            base.everyFrame = true;
-            base.everyFrameOption = QuaternionBaseAction.everyFrameOptions.Update;
+            this.eulerAngles.Value = this.quaternion.Value.eulerAngles;
         }
     }
 }
-

@@ -1,25 +1,35 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Convert), Tooltip("Converts a Bool value to an Integer value.")]
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts a Bool value to an Integer value.")]
     public class ConvertBoolToInt : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Bool variable to test.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Bool variable to test.")]
         public FsmBool boolVariable;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Integer variable to set based on the Bool variable value.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Integer variable to set based on the Bool variable value.")]
         public FsmInt intVariable;
+
         [Tooltip("Integer value if Bool variable is false.")]
         public FsmInt falseValue;
+
         [Tooltip("Integer value if Bool variable is false.")]
         public FsmInt trueValue;
+
         [Tooltip("Repeat every frame. Useful if the Bool variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertBoolToInt()
+        public override void Reset()
         {
-            this.intVariable.Value = this.boolVariable.Value ? this.trueValue.Value : this.falseValue.Value;
+            this.boolVariable = null;
+            this.intVariable = null;
+            this.falseValue = 0;
+            this.trueValue = 1;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,14 +46,9 @@
             this.DoConvertBoolToInt();
         }
 
-        public override void Reset()
+        private void DoConvertBoolToInt()
         {
-            this.boolVariable = null;
-            this.intVariable = null;
-            this.falseValue = 0;
-            this.trueValue = 1;
-            this.everyFrame = false;
+            this.intVariable.Value = (this.boolVariable.Value ? this.trueValue.Value : this.falseValue.Value);
         }
     }
 }
-

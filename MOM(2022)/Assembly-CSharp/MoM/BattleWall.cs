@@ -1,73 +1,73 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.BattleWall
 using DBUtils;
 using MHUtils;
-using MOM;
 using UnityEngine;
 
-public class BattleWall
+namespace MOM
 {
-    public bool standing;
-
-    public bool gate;
-
-    public Vector3i position;
-
-    public GameObject mapModel;
-
-    public Vector3 defenceNormal;
-
-    public Animator animator;
-
-    public void AnimateDestroy()
+    public class BattleWall
     {
-        if (this.animator == null)
-        {
-            this.animator = this.mapModel.GetComponent<Animator>();
-        }
-        if (this.animator == null)
-        {
-            Debug.LogError("Missing animator for wall " + this.mapModel);
-        }
-        this.animator.SetBool("Destroy", value: true);
-        AudioLibrary.RequestSFX("DestroyWall");
-        BattleHUD.CombatLogAdd(Localization.Get("UI_COMBAT_LOG_WALL_DESTROYED", true));
-        this.standing = false;
-    }
+        public bool standing;
 
-    public void AnimateOpen()
-    {
-        if (!this.gate)
-        {
-            Debug.LogError("Asking to animate open not-gate" + this.mapModel);
-        }
-        if (this.animator == null)
-        {
-            this.animator = this.mapModel.GetComponent<Animator>();
-        }
-        if (this.animator == null)
-        {
-            Debug.LogError("Missing animator for wall " + this.mapModel);
-        }
-        this.animator.SetBool("Open", value: true);
-        AudioLibrary.RequestSFX("OpenGate");
-    }
+        public bool gate;
 
-    public void AnimateClose()
-    {
-        if (!this.gate)
+        public Vector3i position;
+
+        public GameObject mapModel;
+
+        public Vector3 defenceNormal;
+
+        public Animator animator;
+
+        public void AnimateDestroy()
         {
-            Debug.LogError("Asking to animate close not-gate" + this.mapModel);
+            if (this.animator == null)
+            {
+                this.animator = this.mapModel.GetComponent<Animator>();
+            }
+            if (this.animator == null)
+            {
+                Debug.LogError("Missing animator for wall " + this.mapModel);
+            }
+            this.animator.SetBool("Destroy", value: true);
+            AudioLibrary.RequestSFX("DestroyWall");
+            BattleHUD.CombatLogAdd(Localization.Get("UI_COMBAT_LOG_WALL_DESTROYED", true));
+            this.standing = false;
         }
-        if (this.animator == null)
+
+        public void AnimateOpen()
         {
-            this.animator = this.mapModel.GetComponent<Animator>();
+            if (!this.gate)
+            {
+                Debug.LogError("Asking to animate open not-gate" + this.mapModel);
+            }
+            if (this.animator == null)
+            {
+                this.animator = this.mapModel.GetComponent<Animator>();
+            }
+            if (this.animator == null)
+            {
+                Debug.LogError("Missing animator for wall " + this.mapModel);
+            }
+            this.animator.SetBool("Open", value: true);
+            AudioLibrary.RequestSFX("OpenGate");
         }
-        if (this.animator == null)
+
+        public void AnimateClose()
         {
-            Debug.LogError("Missing animator for wall " + this.mapModel);
+            if (!this.gate)
+            {
+                Debug.LogError("Asking to animate close not-gate" + this.mapModel);
+            }
+            if (this.animator == null)
+            {
+                this.animator = this.mapModel.GetComponent<Animator>();
+            }
+            if (this.animator == null)
+            {
+                Debug.LogError("Missing animator for wall " + this.mapModel);
+            }
+            this.animator.SetBool("Close", value: true);
+            AudioLibrary.RequestSFX("CloseGate");
         }
-        this.animator.SetBool("Close", value: true);
-        AudioLibrary.RequestSFX("CloseGate");
     }
 }

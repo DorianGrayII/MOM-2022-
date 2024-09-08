@@ -1,36 +1,42 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Returns the EventSystem's currently select GameObject.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Returns the EventSystem's currently select GameObject.")]
     public class UiGetSelectedGameObject : FsmStateAction
     {
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The currently selected GameObject")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The currently selected GameObject")]
         public FsmGameObject StoreGameObject;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Event when the selected GameObject changes")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Event when the selected GameObject changes")]
         public FsmEvent ObjectChangedEvent;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("If true, each frame will check the currently selected GameObject")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("If true, each frame will check the currently selected GameObject")]
         public bool everyFrame;
+
         private GameObject lastGameObject;
 
-        private void GetCurrentSelectedGameObject()
+        public override void Reset()
         {
-            this.StoreGameObject.set_Value(EventSystem.current.currentSelectedGameObject);
+            this.StoreGameObject = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
         {
             this.GetCurrentSelectedGameObject();
-            this.lastGameObject = this.StoreGameObject.get_Value();
+            this.lastGameObject = this.StoreGameObject.Value;
         }
 
         public override void OnUpdate()
         {
             this.GetCurrentSelectedGameObject();
-            if ((this.StoreGameObject.get_Value() != this.lastGameObject) && (this.ObjectChangedEvent != null))
+            if (this.StoreGameObject.Value != this.lastGameObject && this.ObjectChangedEvent != null)
             {
                 base.Fsm.Event(this.ObjectChangedEvent);
             }
@@ -40,11 +46,9 @@
             }
         }
 
-        public override void Reset()
+        private void GetCurrentSelectedGameObject()
         {
-            this.StoreGameObject = null;
-            this.everyFrame = false;
+            this.StoreGameObject.Value = EventSystem.current.currentSelectedGameObject;
         }
     }
 }
-

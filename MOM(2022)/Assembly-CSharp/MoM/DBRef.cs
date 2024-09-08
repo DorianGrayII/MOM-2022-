@@ -1,13 +1,20 @@
-﻿namespace MOM
-{
-    using System;
+using DBDef;
 
+namespace MOM
+{
     internal class DBRef
     {
-        public static bool Valid<T>(DBReference<T> inst) where T: DBClass
+        public static bool Valid<T>(DBReference<T> inst) where T : DBClass
         {
-            return ((inst != null) ? (inst.Get() != null) : false);
+            if (inst == null)
+            {
+                return false;
+            }
+            if (inst.Get() != null)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
-

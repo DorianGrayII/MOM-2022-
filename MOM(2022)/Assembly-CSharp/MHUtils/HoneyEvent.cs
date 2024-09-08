@@ -1,9 +1,5 @@
-﻿namespace MHUtils
+namespace MHUtils
 {
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Threading;
-
     public class HoneyEvent
     {
         public event EventFunction handler;
@@ -17,4 +13,3 @@
         }
     }
 }
-

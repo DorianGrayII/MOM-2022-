@@ -1,7 +1,6 @@
-﻿using DBDef;
+using DBDef;
 using MHUtils;
 using MOM;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,80 +8,76 @@ using UnityEngine.UI;
 public class EnchantmentTargetListItem : MonoBehaviour
 {
     public GameObject target;
+
     public GameObject world;
+
     public GameObject town;
+
     public TextMeshProUGUI townName;
+
     public RawImage targetIcon;
+
     public WizardItem itemOwningWizard;
+
     private object enchantment;
 
     public virtual void Set(EnchantmentInstance ei)
     {
         EnchantmentManager manager = ei.manager;
         bool flag = manager.owner is GameManager;
-        if (this.world)
+        if ((bool)this.world)
         {
-            this.world.SetActive(false);
+            this.world.SetActive(value: false);
         }
-        if (this.target)
+        if ((bool)this.target)
         {
             this.target.SetActive(!flag);
         }
-        if (this.town)
+        if ((bool)this.town)
         {
-            this.town.SetActive(false);
+            this.town.SetActive(value: false);
         }
-        if (!flag)
+        if (flag)
         {
-            if (this.itemOwningWizard)
+            return;
+        }
+        if ((bool)this.itemOwningWizard)
+        {
+            this.itemOwningWizard.gameObject.SetActive(!flag);
+            this.itemOwningWizard.Set(manager.owner.GetWizardOwner());
+        }
+        if (manager.owner is global::MOM.Location location)
+        {
+            TownLocation townLocation = location as TownLocation;
+            if ((bool)this.townName)
             {
-                this.itemOwningWizard.gameObject.SetActive(!flag);
-                this.itemOwningWizard.Set(manager.owner.GetWizardOwner());
+                this.townName.text = townLocation.name;
             }
-            MOM.Location owner = manager.owner as MOM.Location;
-            if (owner != null)
+            if ((bool)this.town)
             {
-                TownLocation location2 = owner as TownLocation;
-                if (this.townName)
-                {
-                    this.townName.text = location2.name;
-                }
-                if (this.town)
-                {
-                    this.town.SetActive(true);
-                }
-                if (this.target)
-                {
-                    this.target.SetActive(false);
-                }
+                this.town.SetActive(value: true);
             }
-            else
+            if ((bool)this.target)
             {
-                IEnchantable enchantable = manager.owner;
-                BaseUnit unit = enchantable as BaseUnit;
-                if (unit != null)
-                {
-                    this.targetIcon.texture = DescriptionInfoExtension.GetTexture(unit.GetDescriptionInfo());
-                    GameObjectUtils.GetOrAddComponent<RolloverObject>(base.gameObject).source = enchantable;
-                }
-                else
-                {
-                    BattlePlayer player = enchantable as BattlePlayer;
-                    if (player != null)
-                    {
-                        this.targetIcon.texture = player.wizard.Graphic;
-                    }
-                    else
-                    {
-                        PlayerWizard wizard = enchantable as PlayerWizard;
-                        if (wizard != null)
-                        {
-                            this.targetIcon.texture = wizard.Graphic;
-                        }
-                    }
-                }
+                this.target.SetActive(value: false);
+            }
+        }
+        else
+        {
+            IEnchantable owner = manager.owner;
+            if (owner is BaseUnit baseUnit)
+            {
+                this.targetIcon.texture = baseUnit.GetDescriptionInfo().GetTexture();
+                base.gameObject.GetOrAddComponent<RolloverObject>().source = owner;
+            }
+            else if (owner is BattlePlayer battlePlayer)
+            {
+                this.targetIcon.texture = battlePlayer.wizard.Graphic;
+            }
+            else if (owner is PlayerWizard playerWizard)
+            {
+                this.targetIcon.texture = playerWizard.Graphic;
             }
         }
     }
 }
-

@@ -1,128 +1,128 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using DBUtils;
-    using System;
-    using TMPro;
-    using UnityEngine;
+using DBDef;
+using DBUtils;
+using TMPro;
+using UnityEngine;
 
+namespace MOM
+{
     public class EnchantmentInfo : EnchantmentListItem
     {
         public TextMeshProUGUI labelDescription;
+
         public TextMeshProUGUI labelUpkeepCost;
+
         public TextMeshProUGUI labelController;
+
         public TextMeshProUGUI labelDuration;
+
         public TextMeshProUGUI labelCanBeDispelled;
+
         public TextMeshProUGUI labelTarget;
+
         public GameObjectEnabler<ERealm> realm;
+
         public GameObject descriptionVisibility;
+
         public GameObject upkeepVisibility;
+
         public GameObject controllerVisibility;
+
         public GameObject durationVisibility;
+
         public GameObject canBeDispelledVisibility;
+
         public GameObject targetVisibility;
 
         public override void Set(object e)
         {
             base.Set(e);
-            Enchantment source = e as Enchantment;
-            EnchantmentInstance instance = e as EnchantmentInstance;
+            Enchantment enchantment = e as Enchantment;
+            EnchantmentInstance enchantmentInstance = e as EnchantmentInstance;
             Spell spell = null;
-            if (instance != null)
+            if (enchantmentInstance != null)
             {
-                source = (Enchantment) instance.source;
+                enchantment = enchantmentInstance.source;
             }
             else
             {
-                spell = EnchantmentExtension.GetSpell(source);
+                spell = enchantment.GetSpell();
             }
-            if (source != null)
+            if (enchantment == null)
             {
-                if (this.labelDescription)
+                return;
+            }
+            if ((bool)this.labelDescription)
+            {
+                this.labelDescription.text = enchantment.GetDescriptionInfo().GetLocalizedDescription();
+            }
+            if ((bool)this.durationVisibility)
+            {
+                this.durationVisibility.gameObject.SetActive(enchantmentInstance != null);
+            }
+            if ((bool)this.controllerVisibility)
+            {
+                this.controllerVisibility.gameObject.SetActive(enchantmentInstance != null);
+            }
+            if ((bool)this.targetVisibility)
+            {
+                this.targetVisibility.gameObject.SetActive(enchantmentInstance != null || spell != null);
+            }
+            if (enchantmentInstance != null)
+            {
+                PlayerWizard playerWizard = enchantmentInstance.owner?.GetEntity() as PlayerWizard;
+                if ((bool)this.labelUpkeepCost)
                 {
-                    this.labelDescription.text = source.GetDescriptionInfo().GetLocalizedDescription();
+                    this.labelUpkeepCost.text = enchantmentInstance.GetEnchantmentCost(playerWizard).ToString();
                 }
-                bool local1 = (instance != null) || (spell != null);
-                if (this.durationVisibility)
+                if ((bool)this.labelDuration)
                 {
-                    this.durationVisibility.gameObject.SetActive(instance != null);
+                    this.labelDuration.text = enchantmentInstance.countDown.ToString();
                 }
-                if (this.controllerVisibility)
+                if ((bool)this.durationVisibility)
                 {
-                    this.controllerVisibility.gameObject.SetActive(instance != null);
+                    this.durationVisibility.gameObject.SetActive(enchantmentInstance.countDown > 0);
                 }
-                if (this.targetVisibility)
+                if ((bool)this.controllerVisibility)
                 {
-                    this.targetVisibility.gameObject.SetActive((instance != null) || (spell != null));
+                    this.controllerVisibility.gameObject.SetActive(playerWizard != null);
                 }
-                if (instance == null)
+                if (playerWizard != null && (bool)this.labelController)
                 {
-                    if (this.labelUpkeepCost)
-                    {
-                        this.labelUpkeepCost.text = source.upkeepCost.ToString();
-                    }
-                    if ((spell != null) && this.labelTarget)
-                    {
-                        this.labelTarget.text = TargetTypeExtension.GetLocalizedTargetTypeDescription(spell.targetType.desType);
-                    }
-                    if (this.durationVisibility)
-                    {
-                        this.durationVisibility.gameObject.SetActive(source.lifeTime > 0);
-                    }
-                    if (this.labelDuration)
-                    {
-                        this.labelDuration.text = source.lifeTime.ToString();
-                    }
+                    string text = ((!playerWizard.IsHuman) ? (GameManager.GetHumanWizard().GetDiscoveredWizards().Contains(playerWizard) ? playerWizard.name : global::DBUtils.Localization.Get("UI_UNKNOWN_WIZARD", true)) : playerWizard.name);
+                    this.labelController.text = text;
                 }
-                else
+                if ((bool)this.labelTarget)
                 {
-                    Entity entity;
-                    if (instance.owner != null)
-                    {
-                        entity = instance.owner.GetEntity();
-                    }
-                    else
-                    {
-                        Reference owner = instance.owner;
-                        entity = null;
-                    }
-                    PlayerWizard wizard = entity as PlayerWizard;
-                    if (this.labelUpkeepCost)
-                    {
-                        this.labelUpkeepCost.text = instance.GetEnchantmentCost(wizard).ToString();
-                    }
-                    if (this.labelDuration)
-                    {
-                        this.labelDuration.text = instance.countDown.ToString();
-                    }
-                    if (this.durationVisibility)
-                    {
-                        this.durationVisibility.gameObject.SetActive(instance.countDown > 0);
-                    }
-                    if (this.controllerVisibility)
-                    {
-                        this.controllerVisibility.gameObject.SetActive(wizard != null);
-                    }
-                    if ((wizard != null) && this.labelController)
-                    {
-                        string str = !wizard.IsHuman ? (GameManager.GetHumanWizard().GetDiscoveredWizards().Contains(wizard) ? wizard.name : DBUtils.Localization.Get("UI_UNKNOWN_WIZARD", true, Array.Empty<object>())) : wizard.name;
-                        this.labelController.text = str;
-                    }
-                    if (this.labelTarget)
-                    {
-                        this.labelTarget.text = instance.manager.owner.GetName();
-                    }
+                    this.labelTarget.text = enchantmentInstance.manager.owner.GetName();
                 }
-                if (this.labelCanBeDispelled)
+            }
+            else
+            {
+                if ((bool)this.labelUpkeepCost)
                 {
-                    this.labelCanBeDispelled.text = DBUtils.Localization.Get(source.allowDispel ? "UI_YES" : "UI_NO", true, Array.Empty<object>());
+                    this.labelUpkeepCost.text = enchantment.upkeepCost.ToString();
                 }
-                if (this.realm != null)
+                if (spell != null && (bool)this.labelTarget)
                 {
-                    this.realm.Set(source.realm);
+                    this.labelTarget.text = spell.targetType.desType.GetLocalizedTargetTypeDescription();
                 }
+                if ((bool)this.durationVisibility)
+                {
+                    this.durationVisibility.gameObject.SetActive(enchantment.lifeTime > 0);
+                }
+                if ((bool)this.labelDuration)
+                {
+                    this.labelDuration.text = enchantment.lifeTime.ToString();
+                }
+            }
+            if ((bool)this.labelCanBeDispelled)
+            {
+                this.labelCanBeDispelled.text = global::DBUtils.Localization.Get(enchantment.allowDispel ? "UI_YES" : "UI_NO", true);
+            }
+            if (this.realm != null)
+            {
+                this.realm.Set(enchantment.realm);
             }
         }
     }
 }
-

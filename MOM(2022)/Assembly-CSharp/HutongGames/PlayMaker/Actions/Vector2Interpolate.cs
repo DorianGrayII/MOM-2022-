@@ -1,28 +1,57 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Vector2), HutongGames.PlayMaker.Tooltip("Interpolates between 2 Vector2 values over a specified Time.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Vector2)]
+    [Tooltip("Interpolates between 2 Vector2 values over a specified Time.")]
     public class Vector2Interpolate : FsmStateAction
     {
-        [HutongGames.PlayMaker.Tooltip("The interpolation type")]
+        [Tooltip("The interpolation type")]
         public InterpolationType mode;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The vector to interpolate from")]
+
+        [RequiredField]
+        [Tooltip("The vector to interpolate from")]
         public FsmVector2 fromVector;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The vector to interpolate to")]
+
+        [RequiredField]
+        [Tooltip("The vector to interpolate to")]
         public FsmVector2 toVector;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("the interpolate time")]
+
+        [RequiredField]
+        [Tooltip("the interpolate time")]
         public FsmFloat time;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("the interpolated result")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("the interpolated result")]
         public FsmVector2 storeResult;
-        [HutongGames.PlayMaker.Tooltip("This event is fired when the interpolation is done.")]
+
+        [Tooltip("This event is fired when the interpolation is done.")]
         public FsmEvent finishEvent;
-        [HutongGames.PlayMaker.Tooltip("Ignore TimeScale")]
+
+        [Tooltip("Ignore TimeScale")]
         public bool realTime;
+
         private float startTime;
+
         private float currentTime;
+
+        public override void Reset()
+        {
+            this.mode = InterpolationType.Linear;
+            this.fromVector = new FsmVector2
+            {
+                UseVariable = true
+            };
+            this.toVector = new FsmVector2
+            {
+                UseVariable = true
+            };
+            this.time = 1f;
+            this.storeResult = null;
+            this.finishEvent = null;
+            this.realTime = false;
+        }
 
         public override void OnEnter()
         {
@@ -34,21 +63,28 @@
             }
             else
             {
-                this.storeResult.set_Value(this.fromVector.get_Value());
+                this.storeResult.Value = this.fromVector.Value;
             }
         }
 
         public override void OnUpdate()
         {
-            this.currentTime = !this.realTime ? (this.currentTime + Time.deltaTime) : (FsmTime.RealtimeSinceStartup - this.startTime);
-            float t = this.currentTime / this.time.Value;
-            InterpolationType mode = this.mode;
-            if ((mode != InterpolationType.Linear) && (mode == InterpolationType.EaseInOut))
+            if (this.realTime)
             {
-                t = Mathf.SmoothStep(0f, 1f, t);
+                this.currentTime = FsmTime.RealtimeSinceStartup - this.startTime;
             }
-            this.storeResult.set_Value(Vector2.Lerp(this.fromVector.get_Value(), this.toVector.get_Value(), t));
-            if (t >= 1f)
+            else
+            {
+                this.currentTime += Time.deltaTime;
+            }
+            float num = this.currentTime / this.time.Value;
+            InterpolationType interpolationType = this.mode;
+            if (interpolationType != 0 && interpolationType == InterpolationType.EaseInOut)
+            {
+                num = Mathf.SmoothStep(0f, 1f, num);
+            }
+            this.storeResult.Value = Vector2.Lerp(this.fromVector.Value, this.toVector.Value, num);
+            if (num >= 1f)
             {
                 if (this.finishEvent != null)
                 {
@@ -57,21 +93,5 @@
                 base.Finish();
             }
         }
-
-        public override void Reset()
-        {
-            this.mode = InterpolationType.Linear;
-            FsmVector2 vector1 = new FsmVector2();
-            vector1.UseVariable = true;
-            this.fromVector = vector1;
-            FsmVector2 vector2 = new FsmVector2();
-            vector2.UseVariable = true;
-            this.toVector = vector2;
-            this.time = 1f;
-            this.storeResult = null;
-            this.finishEvent = null;
-            this.realTime = false;
-        }
     }
 }
-

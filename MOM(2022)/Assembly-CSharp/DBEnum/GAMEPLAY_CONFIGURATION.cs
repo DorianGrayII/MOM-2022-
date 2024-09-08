@@ -1,10 +1,7 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum GAMEPLAY_CONFIGURATION
     {
-        DEFAULT
+        DEFAULT = 0
     }
 }
-

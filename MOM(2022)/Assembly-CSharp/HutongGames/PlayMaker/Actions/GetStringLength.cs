@@ -1,23 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.String), Tooltip("Gets the Length of a String.")]
+    [ActionCategory(ActionCategory.String)]
+    [Tooltip("Gets the Length of a String.")]
     public class GetStringLength : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString stringVariable;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmInt storeResult;
+
         public bool everyFrame;
 
-        private void DoGetStringLength()
+        public override void Reset()
         {
-            if ((this.stringVariable != null) && (this.storeResult != null))
-            {
-                this.storeResult.Value = this.stringVariable.Value.Length;
-            }
+            this.stringVariable = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -34,12 +35,12 @@
             this.DoGetStringLength();
         }
 
-        public override void Reset()
+        private void DoGetStringLength()
         {
-            this.stringVariable = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (this.stringVariable != null && this.storeResult != null)
+            {
+                this.storeResult.Value = this.stringVariable.Value.Length;
+            }
         }
     }
 }
-

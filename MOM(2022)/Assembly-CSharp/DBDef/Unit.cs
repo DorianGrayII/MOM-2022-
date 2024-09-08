@@ -1,52 +1,52 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DBDef.Unit
 using System;
 using System.Collections.Generic;
-using DBDef;
 using MHUtils;
 using UnityEngine;
 
-[ClassPrototype("UNIT", "")]
-public class Unit : Subrace
+namespace DBDef
 {
-    public new static string abbreviation = "";
-
-    [Prototype("Figures", true)]
-    public int figures;
-
-    [Prototype("RequiredBuildings", false)]
-    public Building[] requiredBuildings;
-
-    [Prototype("ConstructionCost", false)]
-    public int constructionCost;
-
-    [Prototype("PopulationCost", false)]
-    public int populationCost;
-
-    public static explicit operator Unit(Enum e)
+    [ClassPrototype("UNIT", "")]
+    public class Unit : Subrace
     {
-        return DataBase.Get<Unit>(e);
-    }
+        public new static string abbreviation = "";
 
-    public static explicit operator Unit(string e)
-    {
-        return DataBase.Get<Unit>(e, reportMissing: true);
-    }
+        [Prototype("Figures", true)]
+        public int figures;
 
-    public void Set_requiredBuildings(List<object> list)
-    {
-        if (list == null || list.Count == 0)
+        [Prototype("RequiredBuildings", false)]
+        public Building[] requiredBuildings;
+
+        [Prototype("ConstructionCost", false)]
+        public int constructionCost;
+
+        [Prototype("PopulationCost", false)]
+        public int populationCost;
+
+        public static explicit operator Unit(Enum e)
         {
-            return;
+            return DataBase.Get<Unit>(e);
         }
-        this.requiredBuildings = new Building[list.Count];
-        for (int i = 0; i < list.Count; i++)
+
+        public static explicit operator Unit(string e)
         {
-            if (!(list[i] is Building))
+            return DataBase.Get<Unit>(e, reportMissing: true);
+        }
+
+        public void Set_requiredBuildings(List<object> list)
+        {
+            if (list == null || list.Count == 0)
             {
-                Debug.LogError("requiredBuildings of type Building received invalid type from array! " + list[i]);
+                return;
             }
-            this.requiredBuildings[i] = list[i] as Building;
+            this.requiredBuildings = new Building[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!(list[i] is Building))
+                {
+                    Debug.LogError("requiredBuildings of type Building received invalid type from array! " + list[i]);
+                }
+                this.requiredBuildings[i] = list[i] as Building;
+            }
         }
     }
 }

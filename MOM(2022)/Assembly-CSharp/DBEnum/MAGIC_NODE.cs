@@ -1,12 +1,9 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum MAGIC_NODE
     {
-        CHAOS,
-        NATURE,
-        SORCERY
+        CHAOS = 0,
+        NATURE = 1,
+        SORCERY = 2
     }
 }
-

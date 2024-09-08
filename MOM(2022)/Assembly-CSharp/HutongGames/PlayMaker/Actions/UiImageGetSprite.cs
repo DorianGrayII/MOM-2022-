@@ -1,25 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the source image sprite of a UI Image component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the source image sprite of a UI Image component.")]
     public class UiImageGetSprite : ComponentAction<Image>
     {
-        [RequiredField, CheckForComponent(typeof(Image)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Image component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Image))]
+        [Tooltip("The GameObject with the UI Image component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The source sprite of the UI Image component."), UIHint(UIHint.Variable), ObjectType(typeof(Sprite))]
+
+        [RequiredField]
+        [Tooltip("The source sprite of the UI Image component.")]
+        [UIHint(UIHint.Variable)]
+        [ObjectType(typeof(Sprite))]
         public FsmObject sprite;
+
         private Image image;
 
-        private void DoSetImageSourceValue()
+        public override void Reset()
         {
-            if (this.image != null)
-            {
-                this.sprite.set_Value(this.image.sprite);
-            }
+            this.gameObject = null;
+            this.sprite = null;
         }
 
         public override void OnEnter()
@@ -33,11 +37,12 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetImageSourceValue()
         {
-            this.gameObject = null;
-            this.sprite = null;
+            if (this.image != null)
+            {
+                this.sprite.Value = this.image.sprite;
+            }
         }
     }
 }
-

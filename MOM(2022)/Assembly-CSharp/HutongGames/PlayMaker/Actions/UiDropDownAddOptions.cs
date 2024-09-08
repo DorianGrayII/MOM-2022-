@@ -1,38 +1,34 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.UI;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Add multiple options to the options of the Dropdown UI Component")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Add multiple options to the options of the Dropdown UI Component")]
     public class UiDropDownAddOptions : ComponentAction<Dropdown>
     {
-        [RequiredField, CheckForComponent(typeof(Dropdown)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI DropDown component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Dropdown))]
+        [Tooltip("The GameObject with the UI DropDown component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The Options."), CompoundArray("Options", "Text", "Image")]
+
+        [Tooltip("The Options.")]
+        [CompoundArray("Options", "Text", "Image")]
         public FsmString[] optionText;
+
         [ObjectType(typeof(Sprite))]
         public FsmObject[] optionImage;
+
         private Dropdown dropDown;
+
         private List<Dropdown.OptionData> options;
 
-        private void DoAddOptions()
+        public override void Reset()
         {
-            if (this.dropDown != null)
-            {
-                this.options = new List<Dropdown.OptionData>();
-                for (int i = 0; i < this.optionText.Length; i++)
-                {
-                    FsmString str = this.optionText[i];
-                    Dropdown.OptionData item = new Dropdown.OptionData();
-                    item.text = str.Value;
-                    item.image = this.optionImage[i].RawValue as Sprite;
-                    this.options.Add(item);
-                }
-                this.dropDown.AddOptions(this.options);
-            }
+            this.gameObject = null;
+            this.optionText = new FsmString[1];
+            this.optionImage = new FsmObject[1];
         }
 
         public override void OnEnter()
@@ -46,12 +42,22 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoAddOptions()
         {
-            this.gameObject = null;
-            this.optionText = new FsmString[1];
-            this.optionImage = new FsmObject[1];
+            if (!(this.dropDown == null))
+            {
+                this.options = new List<Dropdown.OptionData>();
+                for (int i = 0; i < this.optionText.Length; i++)
+                {
+                    FsmString fsmString = this.optionText[i];
+                    this.options.Add(new Dropdown.OptionData
+                    {
+                        text = fsmString.Value,
+                        image = (this.optionImage[i].RawValue as Sprite)
+                    });
+                }
+                this.dropDown.AddOptions(this.options);
+            }
         }
     }
 }
-

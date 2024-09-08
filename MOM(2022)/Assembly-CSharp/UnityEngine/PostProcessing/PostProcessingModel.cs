@@ -1,23 +1,13 @@
-﻿namespace UnityEngine.PostProcessing
-{
-    using System;
-    using UnityEngine;
+using System;
 
+namespace UnityEngine.PostProcessing
+{
     [Serializable]
     public abstract class PostProcessingModel
     {
-        [SerializeField, GetSet("enabled")]
+        [SerializeField]
+        [GetSet("enabled")]
         private bool m_Enabled;
-
-        protected PostProcessingModel()
-        {
-        }
-
-        public virtual void OnValidate()
-        {
-        }
-
-        public abstract void Reset();
 
         public bool enabled
         {
@@ -34,6 +24,11 @@
                 }
             }
         }
+
+        public abstract void Reset();
+
+        public virtual void OnValidate()
+        {
+        }
     }
 }
-

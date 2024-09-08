@@ -1,9 +1,8 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MHUtils.MHVector2
-using MHUtils;
 using ProtoBuf;
 using UnityEngine;
 
+namespace MHUtils
+{
 [ProtoContract]
 public struct MHVector2
 {
@@ -86,5 +85,6 @@ public struct MHVector2
     public static MHVector2 operator /(MHVector2 a, float b)
     {
         return new MHVector2(a.x / b, a.y / b);
+        }
     }
 }

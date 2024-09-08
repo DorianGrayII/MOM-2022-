@@ -1,10 +1,9 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using MHUtils.UI;
-    using System;
-    using UnityEngine;
+using DBDef;
+using MHUtils.UI;
+using UnityEngine;
 
+namespace MOM
+{
     [RequireComponent(typeof(RaceInfo))]
     public class TooltipCitizens : TooltipBase
     {
@@ -18,12 +17,10 @@
 
         public override void Populate(object source)
         {
-            Race race = source as Race;
-            if (race != null)
+            if (source is Race race)
             {
-                this.raceInfo.Set(race, null);
+                this.raceInfo.Set(race);
             }
         }
     }
 }
-

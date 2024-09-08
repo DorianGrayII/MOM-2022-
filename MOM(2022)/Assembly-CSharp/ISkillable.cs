@@ -1,7 +1,6 @@
-﻿using MOM;
+using MOM;
 
 public interface ISkillable
 {
     SkillManager GetSkillManager();
 }
-

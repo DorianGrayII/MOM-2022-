@@ -1,18 +1,15 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
+namespace HutongGames.PlayMaker
+{
     public abstract class PlayMakerUiEventBase : MonoBehaviour
     {
         public List<PlayMakerFSM> targetFsms = new List<PlayMakerFSM>();
+
         [NonSerialized]
         protected bool initialized;
-
-        protected PlayMakerUiEventBase()
-        {
-        }
 
         public void AddTargetFsm(PlayMakerFSM fsm)
         {
@@ -23,9 +20,17 @@
             this.Initialize();
         }
 
-        protected virtual void Initialize()
+        private bool TargetsFsm(PlayMakerFSM fsm)
         {
-            this.initialized = true;
+            for (int i = 0; i < this.targetFsms.Count; i++)
+            {
+                PlayMakerFSM playMakerFSM = this.targetFsms[i];
+                if (fsm == playMakerFSM)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         protected void OnEnable()
@@ -38,6 +43,11 @@
             this.Initialize();
         }
 
+        protected virtual void Initialize()
+        {
+            this.initialized = true;
+        }
+
         protected void SendEvent(FsmEvent fsmEvent)
         {
             for (int i = 0; i < this.targetFsms.Count; i++)
@@ -45,19 +55,5 @@
                 this.targetFsms[i].Fsm.Event(base.gameObject, fsmEvent);
             }
         }
-
-        private bool TargetsFsm(PlayMakerFSM fsm)
-        {
-            for (int i = 0; i < this.targetFsms.Count; i++)
-            {
-                PlayMakerFSM rfsm = this.targetFsms[i];
-                if (fsm == rfsm)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
-

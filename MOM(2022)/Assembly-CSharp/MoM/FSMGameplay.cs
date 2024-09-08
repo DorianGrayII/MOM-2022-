@@ -1,21 +1,20 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using System;
+using HutongGames.PlayMaker;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMGameplay : FSMStateBase
     {
         public static FSMGameplay instance;
 
-        public static void Clear()
+        public override void OnEnter()
         {
-            instance = null;
+            FSMGameplay.instance = this;
         }
 
         public static FSMGameplay Get()
         {
-            return instance;
+            return FSMGameplay.instance;
         }
 
         public void HandleEvent(string ev)
@@ -23,10 +22,9 @@
             base.Fsm.Event(ev);
         }
 
-        public override void OnEnter()
+        public static void Clear()
         {
-            instance = this;
+            FSMGameplay.instance = null;
         }
     }
 }
-

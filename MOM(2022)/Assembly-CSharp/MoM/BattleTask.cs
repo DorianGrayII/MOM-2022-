@@ -1,18 +1,19 @@
-﻿namespace MOM
-{
-    using MHUtils;
-    using ProtoBuf;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Runtime.InteropServices;
-    using System.Text;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using MHUtils;
+using ProtoBuf;
 
+namespace MOM
+{
     public class BattleTask : BaseBattleTask
     {
         public List<BattleUnit> defenderSources;
+
         public int maxRound = 50;
+
         public int iterations = 30;
+
         public int initialDistance = 8;
 
         public override object Execute()
@@ -23,110 +24,98 @@
             for (int i = 0; i < this.defenderSources.Count; i++)
             {
                 base.defender = this.defenderSources[i];
-                if (ReferenceEquals(base.defender, base.attacker))
+                if (base.defender == base.attacker)
+                {
+                    num2++;
+                    continue;
+                }
+                base.attacker.attackingSide = true;
+                base.defender.attackingSide = false;
+                base.InitializeMelee();
+                float num4 = this.UnitWar();
+                if (num4 <= 0.4f)
+                {
+                    num3++;
+                }
+                else if (num4 <= 0.6f)
                 {
                     num2++;
                 }
                 else
                 {
-                    base.attacker.attackingSide = true;
-                    base.defender.attackingSide = false;
-                    base.InitializeMelee();
-                    float num5 = this.UnitWar();
-                    if (num5 <= 0.4f)
-                    {
-                        num3++;
-                    }
-                    else if (num5 <= 0.6f)
-                    {
-                        num2++;
-                    }
-                    else
-                    {
-                        num++;
-                    }
+                    num++;
                 }
             }
-            return ((num * 3) + num2);
+            return num * 3 + num2;
         }
 
-        private BattleAttackStack GetOrCreate(Battle battle, BattleUnit active, BattleUnit oponent, MHRandom random, List<BattleAttackStack> battleStacks)
+        public float UnitWar()
         {
-            return new BattleAttackStack(battle, active, oponent, random);
-        }
-
-        private void LogAttack(StringBuilder sb, int[] source, string header)
-        {
-            sb.AppendLine(header + " rolls");
-            for (int i = 0; i < source.Length; i++)
+            int num = 0;
+            int num2 = 0;
+            int num3 = 0;
+            float num4 = -1f;
+            EnchantmentManager enchantmentManager = base.attacker.GetEnchantmentManager();
+            int iteration = enchantmentManager.iteration;
+            MemoryStream memoryStream = new MemoryStream();
+            Serializer.Serialize(memoryStream, enchantmentManager);
+            enchantmentManager = base.defender.GetEnchantmentManager();
+            int iteration2 = enchantmentManager.iteration;
+            MemoryStream memoryStream2 = new MemoryStream();
+            Serializer.Serialize(memoryStream2, enchantmentManager);
+            List<BattleAttackStack> battleStacks = new List<BattleAttackStack>();
+            for (int i = 0; i < this.iterations; i++)
             {
-                if (source[i] < 1)
+                int num5 = this.Singlebattle(battleStacks);
+                enchantmentManager = base.attacker.GetEnchantmentManager();
+                if (enchantmentManager.iteration != iteration)
                 {
-                    sb.Append(" F" + i.ToString() + ":-;");
+                    base.attacker.DeserializeEnchantmentManager(memoryStream);
                 }
-                else
+                enchantmentManager = base.defender.GetEnchantmentManager();
+                if (enchantmentManager.iteration != iteration2)
                 {
-                    string[] textArray1 = new string[] { " F", i.ToString(), ":[<color=red>", source[i].ToString(), "</color>];" };
-                    sb.Append(string.Concat(textArray1));
+                    base.defender.DeserializeEnchantmentManager(memoryStream2);
+                }
+                switch (num5)
+                {
+                case -1:
+                    num2++;
+                    break;
+                case 1:
+                    num++;
+                    break;
+                default:
+                    num3++;
+                    break;
+                }
+                if (num > (num2 + num3 + 1) * 10)
+                {
+                    num4 = 1f;
+                    break;
+                }
+                if (num2 > (num + num3 + 1) * 10)
+                {
+                    num4 = 0f;
+                    break;
+                }
+                if (num3 > (num + num2 + 1) * 10)
+                {
+                    num4 = 0.5f;
+                    break;
                 }
             }
-            sb.AppendLine("---");
-        }
-
-        private void ResolveTurn(BattleUnit active, BattleUnit oponent, List<BattleAttackStack> battleStacks)
-        {
-            int movementSpeed = active.GetCurentFigure().movementSpeed;
-            int num2 = oponent.GetCurentFigure().movementSpeed;
-            int mp = movementSpeed;
-            while (true)
+            memoryStream.Dispose();
+            memoryStream2.Dispose();
+            if (num4 > -1f)
             {
-                if (mp > 0)
-                {
-                    Battle.AttackForm form = base.AttackPossible(active, oponent);
-                    if ((form == Battle.AttackForm.eMelee) && base.MeleeAttackPreference(active))
-                    {
-                        mp -= (movementSpeed + 1) / 2;
-                        BattleAttackStack stack = this.GetOrCreate(null, active, oponent, base.random, battleStacks);
-                        base.Execute(stack);
-                        continue;
-                    }
-                    if (form == Battle.AttackForm.eRanged)
-                    {
-                        base.ChangeDistance(mp - 1, num2 + 1);
-                        mp = 0;
-                        BattleFigure curentFigure = active.GetCurentFigure();
-                        curentFigure.rangedAmmo--;
-                        BattleAttackStack stack = this.GetOrCreate(null, active, oponent, base.random, battleStacks);
-                        base.Execute(stack);
-                        continue;
-                    }
-                    if (HexCoordinates.HexDistance(active.GetPosition(), oponent.GetPosition()) != 1)
-                    {
-                        mp = base.ChangeDistance(-mp, 1);
-                        continue;
-                    }
-                    if (base.attacker.GetCurentFigure().rangedAmmo != 0)
-                    {
-                        if (mp <= 1)
-                        {
-                            base.ChangeDistance(mp, num2 + 1);
-                            return;
-                        }
-                        base.ChangeDistance(mp - 1, num2 + 1);
-                        if (base.AttackPossible(active, oponent) != Battle.AttackForm.eRanged)
-                        {
-                            continue;
-                        }
-                        mp = 0;
-                        BattleFigure curentFigure = active.GetCurentFigure();
-                        curentFigure.rangedAmmo--;
-                        BattleAttackStack stack = this.GetOrCreate(null, active, oponent, base.random, battleStacks);
-                        base.Execute(stack);
-                        continue;
-                    }
-                }
-                return;
+                return num4;
             }
+            if (num + num2 == 0)
+            {
+                return 0.5f;
+            }
+            return (float)num / (float)(num + num2 + num3);
         }
 
         private int Singlebattle(List<BattleAttackStack> battleStacks)
@@ -136,9 +125,9 @@
             base.SetDistance(this.initialDistance);
             if (this.maxRound <= 0)
             {
-                this.maxRound = 0x7fffffff;
+                this.maxRound = int.MaxValue;
             }
-            for (int i = this.maxRound; i >= 0; i--)
+            for (int num = this.maxRound; num >= 0; num--)
             {
                 this.ResolveTurn(base.attacker, base.defender, battleStacks);
                 if (!base.attacker.IsAlive() && !base.defender.IsAlive())
@@ -170,71 +159,75 @@
             return 0;
         }
 
-        public float UnitWar()
+        private void ResolveTurn(BattleUnit active, BattleUnit oponent, List<BattleAttackStack> battleStacks)
         {
-            int num = 0;
-            int num2 = 0;
-            int num3 = 0;
-            float num4 = -1f;
-            EnchantmentManager enchantmentManager = base.attacker.GetEnchantmentManager();
-            int iteration = enchantmentManager.iteration;
-            MemoryStream destination = new MemoryStream();
-            Serializer.Serialize<EnchantmentManager>(destination, enchantmentManager);
-            enchantmentManager = base.defender.GetEnchantmentManager();
-            int num6 = enchantmentManager.iteration;
-            MemoryStream stream2 = new MemoryStream();
-            Serializer.Serialize<EnchantmentManager>(stream2, enchantmentManager);
-            List<BattleAttackStack> battleStacks = new List<BattleAttackStack>();
-            int num7 = 0;
-            while (true)
+            int movementSpeed = active.GetCurentFigure().movementSpeed;
+            int movementSpeed2 = oponent.GetCurentFigure().movementSpeed;
+            int num = movementSpeed;
+            while (num > 0)
             {
-                if (num7 < this.iterations)
+                Battle.AttackForm attackForm = base.AttackPossible(active, oponent);
+                if (attackForm == Battle.AttackForm.eMelee && base.MeleeAttackPreference(active))
                 {
-                    int num8 = this.Singlebattle(battleStacks);
-                    if (base.attacker.GetEnchantmentManager().iteration != iteration)
+                    int num2 = (movementSpeed + 1) / 2;
+                    num -= num2;
+                    BattleAttackStack orCreate = this.GetOrCreate(null, active, oponent, base.random, battleStacks);
+                    base.Execute(orCreate);
+                }
+                else if (attackForm == Battle.AttackForm.eRanged)
+                {
+                    base.ChangeDistance(num - 1, movementSpeed2 + 1);
+                    num = 0;
+                    active.GetCurentFigure().rangedAmmo--;
+                    BattleAttackStack orCreate2 = this.GetOrCreate(null, active, oponent, base.random, battleStacks);
+                    base.Execute(orCreate2);
+                }
+                else if (HexCoordinates.HexDistance(active.GetPosition(), oponent.GetPosition()) == 1)
+                {
+                    if (base.attacker.GetCurentFigure().rangedAmmo == 0)
                     {
-                        base.attacker.DeserializeEnchantmentManager(destination);
+                        break;
                     }
-                    enchantmentManager = base.defender.GetEnchantmentManager();
-                    if (enchantmentManager.iteration != num6)
+                    if (num <= 1)
                     {
-                        base.defender.DeserializeEnchantmentManager(stream2);
+                        base.ChangeDistance(num, movementSpeed2 + 1);
+                        break;
                     }
-                    if (num8 == -1)
+                    base.ChangeDistance(num - 1, movementSpeed2 + 1);
+                    attackForm = base.AttackPossible(active, oponent);
+                    if (attackForm == Battle.AttackForm.eRanged)
                     {
-                        num2++;
-                    }
-                    else if (num8 == 1)
-                    {
-                        num++;
-                    }
-                    else
-                    {
-                        num3++;
-                    }
-                    if (num > (((num2 + num3) + 1) * 10))
-                    {
-                        num4 = 1f;
-                    }
-                    else if (num2 > (((num + num3) + 1) * 10))
-                    {
-                        num4 = 0f;
-                    }
-                    else
-                    {
-                        if (num3 <= (((num + num2) + 1) * 10))
-                        {
-                            num7++;
-                            continue;
-                        }
-                        num4 = 0.5f;
+                        num = 0;
+                        active.GetCurentFigure().rangedAmmo--;
+                        BattleAttackStack orCreate3 = this.GetOrCreate(null, active, oponent, base.random, battleStacks);
+                        base.Execute(orCreate3);
                     }
                 }
-                destination.Dispose();
-                stream2.Dispose();
-                return ((num4 <= -1f) ? (((num + num2) != 0) ? (((float) num) / ((float) ((num + num2) + num3))) : 0.5f) : num4);
+                else
+                {
+                    num = base.ChangeDistance(-num, 1);
+                }
             }
+        }
+
+        private BattleAttackStack GetOrCreate(Battle battle, BattleUnit active, BattleUnit oponent, MHRandom random, List<BattleAttackStack> battleStacks = null)
+        {
+            return new BattleAttackStack(battle, active, oponent, random);
+        }
+
+        private void LogAttack(StringBuilder sb, int[] source, string header)
+        {
+            sb.AppendLine(header + " rolls");
+            for (int i = 0; i < source.Length; i++)
+            {
+                if (source[i] < 1)
+                {
+                    sb.Append(" F" + i + ":-;");
+                    continue;
+                }
+                sb.Append(" F" + i + ":[<color=red>" + source[i] + "</color>];");
+            }
+            sb.AppendLine("---");
         }
     }
 }
-

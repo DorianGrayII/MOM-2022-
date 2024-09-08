@@ -1,23 +1,17 @@
-﻿using DBDef;
-using MOM;
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using DBDef;
+using MOM;
 
-[Extension]
 public static class ISkillableExtension
 {
-    [Extension]
-    public static void AddSkill(ISkillable obj, Skill skill)
+    public static void AddSkill(this ISkillable obj, Skill skill)
     {
-        if (!GetSkills(obj).Contains(skill) || skill.stackable)
+        if (!obj.GetSkills().Contains(skill) || skill.stackable)
         {
             obj.GetSkillManager().Add(skill);
             if (skill.applicationScript != null)
             {
-                object[] parameters = new object[] { obj, skill, skill.applicationScript };
-                ScriptLibrary.Call(skill.applicationScript.activatorMain, parameters);
+                ScriptLibrary.Call(skill.applicationScript.activatorMain, obj, skill, skill.applicationScript);
             }
             if (obj is IAttributable)
             {
@@ -26,56 +20,12 @@ public static class ISkillableExtension
         }
     }
 
-    [Extension]
-    public static SkillManager CopySkillManager(ISkillable obj, ISkillable newOwner)
-    {
-        return obj.GetSkillManager().CopySkillManager(newOwner);
-    }
-
-    [Extension]
-    public static void CopySkillManagerFrom(ISkillable obj, ISkillable source, List<Skill> exceptions)
-    {
-        ResetSkillManager(obj);
-        obj.GetSkillManager().CopySkillManagerFrom(source, exceptions);
-    }
-
-    [Extension]
-    public static void CopySkillManagerFrom(ISkillable obj, SkillManager source, List<Skill> exceptions)
-    {
-        ResetSkillManager(obj);
-        obj.GetSkillManager().CopySkillManagerFrom(source, exceptions);
-    }
-
-    [Extension]
-    public static List<DBReference<Skill>> GetSkills(ISkillable obj)
-    {
-        return obj.GetSkillManager().GetSkills();
-    }
-
-    [Extension]
-    public static List<SkillScript> GetSkillsByType(ISkillable obj, ESkillType eType, bool canReturnNull)
-    {
-        return obj.GetSkillManager().GetSkillsByType(eType, canReturnNull);
-    }
-
-    [Extension]
-    public static List<Skill> GetSkillsConverted(ISkillable obj)
-    {
-        List<Skill> skills = new List<Skill>(GetSkills(obj).Count);
-        GetSkills(obj).ForEach(delegate (DBReference<Skill> o) {
-            skills.Add(o.Get());
-        });
-        return skills;
-    }
-
-    [Extension]
-    public static void RemoveSkill(ISkillable obj, Skill skill)
+    public static void RemoveSkill(this ISkillable obj, Skill skill)
     {
         obj.GetSkillManager().Remove(skill);
         if (skill.removalScript != null)
         {
-            object[] parameters = new object[] { obj, skill, skill.removalScript };
-            ScriptLibrary.Call(skill.removalScript.activatorMain, parameters);
+            ScriptLibrary.Call(skill.removalScript.activatorMain, obj, skill, skill.removalScript);
         }
         if (obj is IAttributable)
         {
@@ -83,21 +33,55 @@ public static class ISkillableExtension
         }
     }
 
-    [Extension]
-    public static void ResetSkillManager(ISkillable obj)
+    public static List<SkillScript> GetSkillsByType(this ISkillable obj, ESkillType eType, bool canReturnNull = true)
     {
-        List<DBReference<Skill>> skills = GetSkills(obj);
-        for (int i = skills.Count - 1; i >= 0; i--)
-        {
-            RemoveSkill(obj, skills[i]);
-        }
-        obj.GetSkillManager().ResetSkillManager();
+        return obj.GetSkillManager().GetSkillsByType(eType, canReturnNull);
     }
 
-    [Extension]
-    public static void TriggerSkillScripts(ISkillable obj, ESkillType type)
+    public static List<DBReference<Skill>> GetSkills(this ISkillable obj)
+    {
+        return obj.GetSkillManager().GetSkills();
+    }
+
+    public static List<Skill> GetSkillsConverted(this ISkillable obj)
+    {
+        List<Skill> skills = new List<Skill>(obj.GetSkills().Count);
+        obj.GetSkills().ForEach(delegate(DBReference<Skill> o)
+        {
+            skills.Add(o.Get());
+        });
+        return skills;
+    }
+
+    public static SkillManager CopySkillManager(this ISkillable obj, ISkillable newOwner)
+    {
+        return obj.GetSkillManager().CopySkillManager(newOwner);
+    }
+
+    public static void CopySkillManagerFrom(this ISkillable obj, ISkillable source, List<Skill> exceptions = null)
+    {
+        obj.ResetSkillManager();
+        obj.GetSkillManager().CopySkillManagerFrom(source, exceptions);
+    }
+
+    public static void CopySkillManagerFrom(this ISkillable obj, SkillManager source, List<Skill> exceptions = null)
+    {
+        obj.ResetSkillManager();
+        obj.GetSkillManager().CopySkillManagerFrom(source, exceptions);
+    }
+
+    public static void TriggerSkillScripts(this ISkillable obj, ESkillType type)
     {
         obj.GetSkillManager().TriggerScripts(type, null, obj);
     }
-}
 
+    public static void ResetSkillManager(this ISkillable obj)
+    {
+        List<DBReference<Skill>> skills = obj.GetSkills();
+        for (int num = skills.Count - 1; num >= 0; num--)
+        {
+            obj.RemoveSkill(skills[num]);
+        }
+        obj.GetSkillManager().ResetSkillManager();
+    }
+}

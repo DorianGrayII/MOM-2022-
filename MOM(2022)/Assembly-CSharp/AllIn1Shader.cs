@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// AllIn1Shader
 using System.Collections.Generic;
 using System.IO;
 using AllIn1SpriteShader;

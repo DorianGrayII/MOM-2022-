@@ -1,112 +1,112 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DBDef.Hero
 using System;
 using System.Collections.Generic;
-using DBDef;
 using MHUtils;
 using UnityEngine;
 
-[ClassPrototype("HERO", "")]
-public class Hero : Subrace
+namespace DBDef
 {
-    public new static string abbreviation = "";
-
-    [Prototype("AlterName", false)]
-    public string[] alterName;
-
-    [Prototype("Champion", false)]
-    public bool champion;
-
-    [Prototype("RecruitmentCost", true)]
-    public int recruitmentCost;
-
-    [Prototype("RecruitmentMinFame", true)]
-    public int recruitmentMinFame;
-
-    [Prototype("RecruitmentMinBooks", false)]
-    public CountedTag[] recruitmentMinBooks;
-
-    [Prototype("SkillPacks", false)]
-    public SkillPack[] skillPacks;
-
-    [Prototype("EquipmentSlot", true)]
-    public ArtefactSlot[] equipmentSlot;
-
-    public static explicit operator Hero(Enum e)
+    [ClassPrototype("HERO", "")]
+    public class Hero : Subrace
     {
-        return DataBase.Get<Hero>(e);
-    }
+        public new static string abbreviation = "";
 
-    public static explicit operator Hero(string e)
-    {
-        return DataBase.Get<Hero>(e, reportMissing: true);
-    }
+        [Prototype("AlterName", false)]
+        public string[] alterName;
 
-    public void Set_alterName(List<object> list)
-    {
-        if (list == null || list.Count == 0)
+        [Prototype("Champion", false)]
+        public bool champion;
+
+        [Prototype("RecruitmentCost", true)]
+        public int recruitmentCost;
+
+        [Prototype("RecruitmentMinFame", true)]
+        public int recruitmentMinFame;
+
+        [Prototype("RecruitmentMinBooks", false)]
+        public CountedTag[] recruitmentMinBooks;
+
+        [Prototype("SkillPacks", false)]
+        public SkillPack[] skillPacks;
+
+        [Prototype("EquipmentSlot", true)]
+        public ArtefactSlot[] equipmentSlot;
+
+        public static explicit operator Hero(Enum e)
         {
-            return;
+            return DataBase.Get<Hero>(e);
         }
-        this.alterName = new string[list.Count];
-        for (int i = 0; i < list.Count; i++)
+
+        public static explicit operator Hero(string e)
         {
-            if (!(list[i] is string))
+            return DataBase.Get<Hero>(e, reportMissing: true);
+        }
+
+        public void Set_alterName(List<object> list)
+        {
+            if (list == null || list.Count == 0)
             {
-                Debug.LogError("alterName of type string received invalid type from array! " + list[i]);
+                return;
             }
-            this.alterName[i] = list[i] as string;
-        }
-    }
-
-    public void Set_recruitmentMinBooks(List<object> list)
-    {
-        if (list == null || list.Count == 0)
-        {
-            return;
-        }
-        this.recruitmentMinBooks = new CountedTag[list.Count];
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (!(list[i] is CountedTag))
+            this.alterName = new string[list.Count];
+            for (int i = 0; i < list.Count; i++)
             {
-                Debug.LogError("recruitmentMinBooks of type CountedTag received invalid type from array! " + list[i]);
+                if (!(list[i] is string))
+                {
+                    Debug.LogError("alterName of type string received invalid type from array! " + list[i]);
+                }
+                this.alterName[i] = list[i] as string;
             }
-            this.recruitmentMinBooks[i] = list[i] as CountedTag;
         }
-    }
 
-    public void Set_skillPacks(List<object> list)
-    {
-        if (list == null || list.Count == 0)
+        public void Set_recruitmentMinBooks(List<object> list)
         {
-            return;
-        }
-        this.skillPacks = new SkillPack[list.Count];
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (!(list[i] is SkillPack))
+            if (list == null || list.Count == 0)
             {
-                Debug.LogError("skillPacks of type SkillPack received invalid type from array! " + list[i]);
+                return;
             }
-            this.skillPacks[i] = list[i] as SkillPack;
+            this.recruitmentMinBooks = new CountedTag[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!(list[i] is CountedTag))
+                {
+                    Debug.LogError("recruitmentMinBooks of type CountedTag received invalid type from array! " + list[i]);
+                }
+                this.recruitmentMinBooks[i] = list[i] as CountedTag;
+            }
         }
-    }
 
-    public void Set_equipmentSlot(List<object> list)
-    {
-        if (list == null || list.Count == 0)
+        public void Set_skillPacks(List<object> list)
         {
-            return;
-        }
-        this.equipmentSlot = new ArtefactSlot[list.Count];
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (!(list[i] is ArtefactSlot))
+            if (list == null || list.Count == 0)
             {
-                Debug.LogError("equipmentSlot of type ArtefactSlot received invalid type from array! " + list[i]);
+                return;
             }
-            this.equipmentSlot[i] = list[i] as ArtefactSlot;
+            this.skillPacks = new SkillPack[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!(list[i] is SkillPack))
+                {
+                    Debug.LogError("skillPacks of type SkillPack received invalid type from array! " + list[i]);
+                }
+                this.skillPacks[i] = list[i] as SkillPack;
+            }
+        }
+
+        public void Set_equipmentSlot(List<object> list)
+        {
+            if (list == null || list.Count == 0)
+            {
+                return;
+            }
+            this.equipmentSlot = new ArtefactSlot[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!(list[i] is ArtefactSlot))
+                {
+                    Debug.LogError("equipmentSlot of type ArtefactSlot received invalid type from array! " + list[i]);
+                }
+                this.equipmentSlot[i] = list[i] as ArtefactSlot;
+            }
         }
     }
 }

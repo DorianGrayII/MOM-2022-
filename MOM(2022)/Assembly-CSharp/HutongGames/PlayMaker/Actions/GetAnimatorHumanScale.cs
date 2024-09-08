@@ -1,24 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Returns the scale of the current Avatar for a humanoid rig, (1 by default if the rig is generic).\n The scale is relative to Unity's Default Avatar")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Returns the scale of the current Avatar for a humanoid rig, (1 by default if the rig is generic).\n The scale is relative to Unity's Default Avatar")]
     public class GetAnimatorHumanScale : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [ActionSection("Result"), UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("the scale of the current Avatar")]
+
+        [ActionSection("Result")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("the scale of the current Avatar")]
         public FsmFloat humanScale;
+
         private Animator _animator;
 
-        private void DoGetHumanScale()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this.humanScale.Value = this._animator.humanScale;
-            }
+            this.gameObject = null;
+            this.humanScale = null;
         }
 
         public override void OnEnter()
@@ -27,27 +30,24 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoGetHumanScale();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
+            this.DoGetHumanScale();
+            base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetHumanScale()
         {
-            this.gameObject = null;
-            this.humanScale = null;
+            if (!(this._animator == null))
+            {
+                this.humanScale.Value = this._animator.humanScale;
+            }
         }
     }
 }
-

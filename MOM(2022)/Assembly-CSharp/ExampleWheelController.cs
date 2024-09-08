@@ -1,10 +1,16 @@
-﻿using System;
 using UnityEngine;
 
 public class ExampleWheelController : MonoBehaviour
 {
+    private static class Uniforms
+    {
+        internal static readonly int _MotionAmount = Shader.PropertyToID("_MotionAmount");
+    }
+
     public float acceleration;
+
     public Renderer motionVectorRenderer;
+
     private Rigidbody m_Rigidbody;
 
     private void Start()
@@ -23,16 +29,10 @@ public class ExampleWheelController : MonoBehaviour
         {
             this.m_Rigidbody.AddRelativeTorque(new Vector3(1f * this.acceleration, 0f, 0f), ForceMode.Acceleration);
         }
-        float num = -this.m_Rigidbody.angularVelocity.x / 100f;
-        if (this.motionVectorRenderer)
+        float value = (0f - this.m_Rigidbody.angularVelocity.x) / 100f;
+        if ((bool)this.motionVectorRenderer)
         {
-            this.motionVectorRenderer.material.SetFloat(Uniforms._MotionAmount, Mathf.Clamp(num, -0.25f, 0.25f));
+            this.motionVectorRenderer.material.SetFloat(Uniforms._MotionAmount, Mathf.Clamp(value, -0.25f, 0.25f));
         }
     }
-
-    private static class Uniforms
-    {
-        internal static readonly int _MotionAmount = Shader.PropertyToID("_MotionAmount");
-    }
 }
-

@@ -1,31 +1,38 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Tests if 2 Array Variables have the same values.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Tests if 2 Array Variables have the same values.")]
     public class ArrayCompare : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The first Array Variable to test.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The first Array Variable to test.")]
         public FsmArray array1;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The second Array Variable to test.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The second Array Variable to test.")]
         public FsmArray array2;
+
         [Tooltip("Event to send if the 2 arrays have the same values.")]
         public FsmEvent SequenceEqual;
+
         [Tooltip("Event to send if the 2 arrays have different values.")]
         public FsmEvent SequenceNotEqual;
-        [UIHint(UIHint.Variable), Tooltip("Store the result in a Bool variable.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in a Bool variable.")]
         public FsmBool storeResult;
+
         [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoSequenceEqual()
+        public override void Reset()
         {
-            if ((this.array1.Values != null) && (this.array2.Values != null))
-            {
-                this.storeResult.Value = this.TestSequenceEqual(this.array1.Values, this.array2.Values);
-                base.Fsm.Event(this.storeResult.Value ? this.SequenceEqual : this.SequenceNotEqual);
-            }
+            this.array1 = null;
+            this.array2 = null;
+            this.SequenceEqual = null;
+            this.SequenceNotEqual = null;
         }
 
         public override void OnEnter()
@@ -37,12 +44,13 @@
             }
         }
 
-        public override void Reset()
+        private void DoSequenceEqual()
         {
-            this.array1 = null;
-            this.array2 = null;
-            this.SequenceEqual = null;
-            this.SequenceNotEqual = null;
+            if (this.array1.Values != null && this.array2.Values != null)
+            {
+                this.storeResult.Value = this.TestSequenceEqual(this.array1.Values, this.array2.Values);
+                base.Fsm.Event(this.storeResult.Value ? this.SequenceEqual : this.SequenceNotEqual);
+            }
         }
 
         private bool TestSequenceEqual(object[] _array1, object[] _array2)
@@ -62,4 +70,3 @@
         }
     }
 }
-

@@ -1,12 +1,15 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("End a centered GUILayout block started with GUILayoutBeginCentered.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUILayout)]
+    [Tooltip("End a centered GUILayout block started with GUILayoutBeginCentered.")]
     public class GUILayoutEndCentered : FsmStateAction
     {
+        public override void Reset()
+        {
+        }
+
         public override void OnGUI()
         {
             GUILayout.EndVertical();
@@ -15,10 +18,5 @@
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
         }
-
-        public override void Reset()
-        {
-        }
     }
 }
-

@@ -1,40 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Material), HutongGames.PlayMaker.Tooltip("Sets a Game Object's material randomly from an array of Materials.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Material)]
+    [Tooltip("Sets a Game Object's material randomly from an array of Materials.")]
     public class SetRandomMaterial : ComponentAction<Renderer>
     {
-        [RequiredField, CheckForComponent(typeof(Renderer))]
+        [RequiredField]
+        [CheckForComponent(typeof(Renderer))]
         public FsmOwnerDefault gameObject;
+
         public FsmInt materialIndex;
+
         public FsmMaterial[] materials;
 
-        private void DoSetRandomMaterial()
+        public override void Reset()
         {
-            if ((this.materials != null) && (this.materials.Length != 0))
-            {
-                GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-                if (base.UpdateCache(ownerDefaultTarget))
-                {
-                    if (base.renderer.material == null)
-                    {
-                        base.LogError("Missing Material!");
-                    }
-                    else if (this.materialIndex.Value == 0)
-                    {
-                        base.renderer.material = this.materials[UnityEngine.Random.Range(0, this.materials.Length)].get_Value();
-                    }
-                    else if (base.renderer.materials.Length > this.materialIndex.Value)
-                    {
-                        Material[] materials = base.renderer.materials;
-                        materials[this.materialIndex.Value] = this.materials[UnityEngine.Random.Range(0, this.materials.Length)].get_Value();
-                        base.renderer.materials = materials;
-                    }
-                }
-            }
+            this.gameObject = null;
+            this.materialIndex = 0;
+            this.materials = new FsmMaterial[3];
         }
 
         public override void OnEnter()
@@ -43,12 +27,30 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetRandomMaterial()
         {
-            this.gameObject = null;
-            this.materialIndex = 0;
-            this.materials = new FsmMaterial[3];
+            if (this.materials == null || this.materials.Length == 0)
+            {
+                return;
+            }
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                if (base.renderer.material == null)
+                {
+                    base.LogError("Missing Material!");
+                }
+                else if (this.materialIndex.Value == 0)
+                {
+                    base.renderer.material = this.materials[Random.Range(0, this.materials.Length)].Value;
+                }
+                else if (base.renderer.materials.Length > this.materialIndex.Value)
+                {
+                    Material[] array = base.renderer.materials;
+                    array[this.materialIndex.Value] = this.materials[Random.Range(0, this.materials.Length)].Value;
+                    base.renderer.materials = array;
+                }
+            }
         }
     }
 }
-

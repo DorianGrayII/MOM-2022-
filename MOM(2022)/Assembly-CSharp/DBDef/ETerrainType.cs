@@ -1,7 +1,5 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum ETerrainType
     {
         None = 0,
@@ -17,4 +15,3 @@
         RiverBank = 0x2000
     }
 }
-

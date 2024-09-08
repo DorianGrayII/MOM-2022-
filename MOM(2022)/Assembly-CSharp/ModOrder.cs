@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -6,12 +5,16 @@ public class ModOrder
 {
     [XmlAttribute]
     public string name;
+
     [XmlAttribute]
     public int order;
+
     [XmlAttribute]
     public bool active;
+
     [XmlIgnore]
     public string nameVersion;
+
     [XmlIgnore]
     public string version;
 
@@ -25,9 +28,20 @@ public class ModOrder
         return this.nameVersion;
     }
 
-    public string GetPath()
+    public void UpdateVersion()
     {
-        return ModManager.Get().GetPath(this);
+        if (this.version != null)
+        {
+            return;
+        }
+        foreach (KeyValuePair<string, ModSettings> mod in ModManager.Get().GetModList())
+        {
+            if (mod.Value.name == this.name)
+            {
+                this.version = mod.Value.version ?? "";
+                break;
+            }
+        }
     }
 
     public bool IsValid()
@@ -35,25 +49,8 @@ public class ModOrder
         return string.IsNullOrEmpty(ModManager.Get().ValidateMod(this));
     }
 
-    public void UpdateVersion()
+    public string GetPath()
     {
-        if (this.version == null)
-        {
-            foreach (KeyValuePair<string, ModSettings> pair in ModManager.Get().GetModList())
-            {
-                if (pair.Value.name == this.name)
-                {
-                    string version = pair.Value.version;
-                    if (pair.Value.version == null)
-                    {
-                        string local1 = pair.Value.version;
-                        version = "";
-                    }
-                    this.version = version;
-                    break;
-                }
-            }
-        }
+        return ModManager.Get().GetPath(this);
     }
 }
-

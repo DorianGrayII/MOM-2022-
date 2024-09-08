@@ -1,16 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Clear the list of options in a UI Dropdown Component")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Clear the list of options in a UI Dropdown Component")]
     public class UiDropDownClearOptions : ComponentAction<Dropdown>
     {
-        [RequiredField, CheckForComponent(typeof(Dropdown)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI DropDown component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Dropdown))]
+        [Tooltip("The GameObject with the UI DropDown component.")]
         public FsmOwnerDefault gameObject;
+
         private Dropdown dropDown;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+        }
 
         public override void OnEnter()
         {
@@ -25,11 +32,5 @@
             }
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-        }
     }
 }
-

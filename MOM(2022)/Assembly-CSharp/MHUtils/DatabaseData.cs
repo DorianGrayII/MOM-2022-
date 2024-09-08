@@ -1,14 +1,11 @@
-﻿namespace MHUtils
-{
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Xml;
+using System.Xml;
 
-    [StructLayout(LayoutKind.Sequential)]
+namespace MHUtils
+{
     public struct DatabaseData
     {
         public XmlElement data;
+
         public string dbName;
     }
 }
-

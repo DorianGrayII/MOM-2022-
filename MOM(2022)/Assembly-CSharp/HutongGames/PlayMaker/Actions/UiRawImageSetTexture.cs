@@ -1,28 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the texture of a UI RawImage component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the texture of a UI RawImage component.")]
     public class UiRawImageSetTexture : ComponentAction<RawImage>
     {
-        [RequiredField, CheckForComponent(typeof(RawImage)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI RawImage component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RawImage))]
+        [Tooltip("The GameObject with the UI RawImage component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The texture of the UI RawImage component.")]
+
+        [RequiredField]
+        [Tooltip("The texture of the UI RawImage component.")]
         public FsmTexture texture;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private RawImage _texture;
+
         private Texture _originalTexture;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this._texture != null)
-            {
-                this._texture.texture = this.texture.get_Value();
-            }
+            this.gameObject = null;
+            this.texture = null;
+            this.resetOnExit = null;
         }
 
         public override void OnEnter()
@@ -37,20 +42,20 @@
             base.Finish();
         }
 
+        private void DoSetValue()
+        {
+            if (this._texture != null)
+            {
+                this._texture.texture = this.texture.Value;
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this._texture != null) && this.resetOnExit.Value)
+            if (!(this._texture == null) && this.resetOnExit.Value)
             {
                 this._texture.texture = this._originalTexture;
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.texture = null;
-            this.resetOnExit = null;
-        }
     }
 }
-

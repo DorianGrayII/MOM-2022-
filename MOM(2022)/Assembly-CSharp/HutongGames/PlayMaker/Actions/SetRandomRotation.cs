@@ -1,51 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Transform), HutongGames.PlayMaker.Tooltip("Sets Random Rotation for a Game Object. Uncheck an axis to keep its current value.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Transform)]
+    [Tooltip("Sets Random Rotation for a Game Object. Uncheck an axis to keep its current value.")]
     public class SetRandomRotation : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmBool x;
+
         [RequiredField]
         public FsmBool y;
+
         [RequiredField]
         public FsmBool z;
-
-        private void DoRandomRotation()
-        {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                Vector3 localEulerAngles = ownerDefaultTarget.transform.localEulerAngles;
-                float x = localEulerAngles.x;
-                float y = localEulerAngles.y;
-                float z = localEulerAngles.z;
-                if (this.x.Value)
-                {
-                    x = UnityEngine.Random.Range(0, 360);
-                }
-                if (this.y.Value)
-                {
-                    y = UnityEngine.Random.Range(0, 360);
-                }
-                if (this.z.Value)
-                {
-                    z = UnityEngine.Random.Range(0, 360);
-                }
-                ownerDefaultTarget.transform.localEulerAngles = new Vector3(x, y, z);
-            }
-        }
-
-        public override void OnEnter()
-        {
-            this.DoRandomRotation();
-            base.Finish();
-        }
 
         public override void Reset()
         {
@@ -54,6 +25,36 @@
             this.y = true;
             this.z = true;
         }
+
+        public override void OnEnter()
+        {
+            this.DoRandomRotation();
+            base.Finish();
+        }
+
+        private void DoRandomRotation()
+        {
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                Vector3 localEulerAngles = ownerDefaultTarget.transform.localEulerAngles;
+                float num = localEulerAngles.x;
+                float num2 = localEulerAngles.y;
+                float num3 = localEulerAngles.z;
+                if (this.x.Value)
+                {
+                    num = Random.Range(0, 360);
+                }
+                if (this.y.Value)
+                {
+                    num2 = Random.Range(0, 360);
+                }
+                if (this.z.Value)
+                {
+                    num3 = Random.Range(0, 360);
+                }
+                ownerDefaultTarget.transform.localEulerAngles = new Vector3(num, num2, num3);
+            }
+        }
     }
 }
-

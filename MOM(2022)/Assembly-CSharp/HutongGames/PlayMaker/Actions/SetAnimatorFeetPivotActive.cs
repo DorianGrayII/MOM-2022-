@@ -1,24 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Activates feet pivot. At 0% blending point is body mass center. At 100% blending point is feet pivot")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Activates feet pivot. At 0% blending point is body mass center. At 100% blending point is feet pivot")]
     public class SetAnimatorFeetPivotActive : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The Target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The Target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Activates feet pivot. At 0% blending point is body mass center. At 100% blending point is feet pivot")]
+
+        [Tooltip("Activates feet pivot. At 0% blending point is body mass center. At 100% blending point is feet pivot")]
         public FsmFloat feetPivotActive;
+
         private Animator _animator;
 
-        private void DoFeetPivotActive()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this._animator.feetPivotActive = this.feetPivotActive.Value;
-            }
+            this.gameObject = null;
+            this.feetPivotActive = null;
         }
 
         public override void OnEnter()
@@ -27,27 +28,24 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.DoFeetPivotActive();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
+            this.DoFeetPivotActive();
+            base.Finish();
         }
 
-        public override void Reset()
+        private void DoFeetPivotActive()
         {
-            this.gameObject = null;
-            this.feetPivotActive = null;
+            if (!(this._animator == null))
+            {
+                this._animator.feetPivotActive = this.feetPivotActive.Value;
+            }
         }
     }
 }
-

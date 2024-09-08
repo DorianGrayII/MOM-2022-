@@ -1,25 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Camera), HutongGames.PlayMaker.Tooltip("Sets the Background Color used by the Camera.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Camera)]
+    [Tooltip("Sets the Background Color used by the Camera.")]
     public class SetBackgroundColor : ComponentAction<Camera>
     {
-        [RequiredField, CheckForComponent(typeof(Camera))]
+        [RequiredField]
+        [CheckForComponent(typeof(Camera))]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmColor backgroundColor;
+
         public bool everyFrame;
 
-        private void DoSetBackgroundColor()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.camera.backgroundColor = this.backgroundColor.get_Value();
-            }
+            this.gameObject = null;
+            this.backgroundColor = Color.black;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,12 +36,13 @@
             this.DoSetBackgroundColor();
         }
 
-        public override void Reset()
+        private void DoSetBackgroundColor()
         {
-            this.gameObject = null;
-            this.backgroundColor = (FsmColor) Color.black;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.camera.backgroundColor = this.backgroundColor.Value;
+            }
         }
     }
 }
-

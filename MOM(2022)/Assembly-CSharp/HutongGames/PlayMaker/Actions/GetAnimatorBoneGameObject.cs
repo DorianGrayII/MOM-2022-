@@ -1,23 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Gets the GameObject mapped to this human bone id")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Gets the GameObject mapped to this human bone id")]
     public class GetAnimatorBoneGameObject : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The bone reference"), ObjectType(typeof(HumanBodyBones))]
+
+        [Tooltip("The bone reference")]
+        [ObjectType(typeof(HumanBodyBones))]
         public FsmEnum bone;
-        [ActionSection("Results"), UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Bone's GameObject")]
+
+        [ActionSection("Results")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Bone's GameObject")]
         public FsmGameObject boneGameObject;
+
         private Animator _animator;
 
-        private void GetBoneTransform()
+        public override void Reset()
         {
-            this.boneGameObject.set_Value(this._animator.GetBoneTransform((HumanBodyBones) this.bone.Value).gameObject);
+            this.gameObject = null;
+            this.bone = HumanBodyBones.Hips;
+            this.boneGameObject = null;
         }
 
         public override void OnEnter()
@@ -26,28 +35,21 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.GetBoneTransform();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
+            this.GetBoneTransform();
+            base.Finish();
         }
 
-        public override void Reset()
+        private void GetBoneTransform()
         {
-            this.gameObject = null;
-            this.bone = HumanBodyBones.Hips;
-            this.boneGameObject = null;
+            this.boneGameObject.Value = this._animator.GetBoneTransform((HumanBodyBones)(object)this.bone.Value).gameObject;
         }
     }
 }
-

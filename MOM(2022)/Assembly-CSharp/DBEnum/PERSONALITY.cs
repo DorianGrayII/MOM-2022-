@@ -1,15 +1,12 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum PERSONALITY
     {
-        MANIACAL,
-        RUTHLESS,
-        LAWFUL,
-        AGGRESSIVE,
-        CHAOTIC,
-        PEACEFUL
+        MANIACAL = 0,
+        RUTHLESS = 1,
+        LAWFUL = 2,
+        AGGRESSIVE = 3,
+        CHAOTIC = 4,
+        PEACEFUL = 5
     }
 }
-

@@ -1,9 +1,8 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using MHUtils;
-    using System;
+using HutongGames.PlayMaker;
+using MHUtils;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMInitializeAssetBundles : FSMStateBase
     {
@@ -21,4 +20,3 @@
         }
     }
 }
-

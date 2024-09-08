@@ -1,24 +1,21 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Sets a Game Object's Layer.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Sets a Game Object's Layer.")]
     public class SetLayer : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [UIHint(UIHint.Layer)]
         public int layer;
 
-        private void DoSetLayer()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                ownerDefaultTarget.layer = this.layer;
-            }
+            this.gameObject = null;
+            this.layer = 0;
         }
 
         public override void OnEnter()
@@ -27,11 +24,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetLayer()
         {
-            this.gameObject = null;
-            this.layer = 0;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                ownerDefaultTarget.layer = this.layer;
+            }
         }
     }
 }
-

@@ -1,60 +1,62 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("The normalized position in the parent RectTransform that the upper right corner is anchored to. This is relative screen space, values ranges from 0 to 1")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("The normalized position in the parent RectTransform that the upper right corner is anchored to. This is relative screen space, values ranges from 0 to 1")]
     public class RectTransformSetAnchorMinAndMax : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The Vector2 anchor max. Set to none for no effect, and/or set individual axis below.")]
+
+        [Tooltip("The Vector2 anchor max. Set to none for no effect, and/or set individual axis below.")]
         public FsmVector2 anchorMax;
-        [HutongGames.PlayMaker.Tooltip("The Vector2 anchor min. Set to none for no effect, and/or set individual axis below.")]
+
+        [Tooltip("The Vector2 anchor min. Set to none for no effect, and/or set individual axis below.")]
         public FsmVector2 anchorMin;
-        [HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides anchorMax x value if set. Set to none for no effect")]
+
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("Setting only the x value. Overrides anchorMax x value if set. Set to none for no effect")]
         public FsmFloat xMax;
-        [HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides anchorMax x value if set. Set to none for no effect")]
+
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("Setting only the x value. Overrides anchorMax x value if set. Set to none for no effect")]
         public FsmFloat yMax;
-        [HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
+
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
         public FsmFloat xMin;
-        [HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
+
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
         public FsmFloat yMin;
+
         private RectTransform _rt;
 
-        private void DoSetAnchorMax()
+        public override void Reset()
         {
-            Vector2 anchorMax = this._rt.anchorMax;
-            Vector2 anchorMin = this._rt.anchorMin;
-            if (!this.anchorMax.IsNone)
+            base.Reset();
+            this.gameObject = null;
+            this.anchorMax = null;
+            this.anchorMin = null;
+            this.xMax = new FsmFloat
             {
-                anchorMax = this.anchorMax.get_Value();
-                anchorMin = this.anchorMin.get_Value();
-            }
-            if (!this.xMax.IsNone)
+                UseVariable = true
+            };
+            this.yMax = new FsmFloat
             {
-                anchorMax.x = this.xMax.Value;
-            }
-            if (!this.yMax.IsNone)
+                UseVariable = true
+            };
+            this.xMin = new FsmFloat
             {
-                anchorMax.y = this.yMax.Value;
-            }
-            if (!this.xMin.IsNone)
+                UseVariable = true
+            };
+            this.yMin = new FsmFloat
             {
-                anchorMin.x = this.xMin.Value;
-            }
-            if (!this.yMin.IsNone)
-            {
-                anchorMin.y = this.yMin.Value;
-            }
-            this._rt.anchorMax = anchorMax;
-            this._rt.anchorMin = anchorMin;
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoSetAnchorMax();
+                UseVariable = true
+            };
         }
 
         public override void OnEnter()
@@ -71,25 +73,38 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.anchorMax = null;
-            this.anchorMin = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.xMax = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.yMax = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.xMin = num3;
-            FsmFloat num4 = new FsmFloat();
-            num4.UseVariable = true;
-            this.yMin = num4;
+            this.DoSetAnchorMax();
+        }
+
+        private void DoSetAnchorMax()
+        {
+            Vector2 value = this._rt.anchorMax;
+            Vector2 value2 = this._rt.anchorMin;
+            if (!this.anchorMax.IsNone)
+            {
+                value = this.anchorMax.Value;
+                value2 = this.anchorMin.Value;
+            }
+            if (!this.xMax.IsNone)
+            {
+                value.x = this.xMax.Value;
+            }
+            if (!this.yMax.IsNone)
+            {
+                value.y = this.yMax.Value;
+            }
+            if (!this.xMin.IsNone)
+            {
+                value2.x = this.xMin.Value;
+            }
+            if (!this.yMin.IsNone)
+            {
+                value2.y = this.yMin.Value;
+            }
+            this._rt.anchorMax = value;
+            this._rt.anchorMin = value2;
         }
     }
 }
-

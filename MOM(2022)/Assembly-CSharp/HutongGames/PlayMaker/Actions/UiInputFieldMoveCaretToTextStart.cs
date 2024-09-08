@@ -1,25 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Move Caret to text start in a UI InputField component. Optionally select from the current caret position")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Move Caret to text start in a UI InputField component. Optionally select from the current caret position")]
     public class UiInputFieldMoveCaretToTextStart : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Define if we select or not from the current caret position. Default is true = no selection")]
+
+        [Tooltip("Define if we select or not from the current caret position. Default is true = no selection")]
         public FsmBool shift;
+
         private InputField inputField;
 
-        private void DoAction()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.inputField.MoveTextStart(this.shift.Value);
-            }
+            this.gameObject = null;
+            this.shift = true;
         }
 
         public override void OnEnter()
@@ -33,11 +34,12 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoAction()
         {
-            this.gameObject = null;
-            this.shift = true;
+            if (this.inputField != null)
+            {
+                this.inputField.MoveTextStart(this.shift.Value);
+            }
         }
     }
 }
-

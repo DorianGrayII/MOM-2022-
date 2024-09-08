@@ -1,8 +1,7 @@
-﻿namespace Thea2.Common
-{
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
+namespace Thea2.Common
+{
     public class AssetModding : MonoBehaviour
     {
         private void Start()
@@ -10,4 +9,3 @@
         }
     }
 }
-

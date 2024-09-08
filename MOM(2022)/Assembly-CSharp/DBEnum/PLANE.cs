@@ -1,11 +1,8 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum PLANE
     {
-        ARCANUS,
-        MYRROR
+        ARCANUS = 0,
+        MYRROR = 1
     }
 }
-

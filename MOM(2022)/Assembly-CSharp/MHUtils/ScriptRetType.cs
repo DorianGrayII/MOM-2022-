@@ -1,9 +1,9 @@
-﻿namespace MHUtils
-{
-    using MOM.Adventures;
-    using System;
+using System;
+using MOM.Adventures;
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple=false)]
+namespace MHUtils
+{
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class ScriptRetType : Attribute
     {
         public LogicEntry.LEntry type;
@@ -14,4 +14,3 @@
         }
     }
 }
-

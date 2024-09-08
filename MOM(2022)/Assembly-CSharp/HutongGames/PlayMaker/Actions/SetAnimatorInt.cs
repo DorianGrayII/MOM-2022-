@@ -1,24 +1,34 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets the value of a int parameter")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets the value of a int parameter")]
     public class SetAnimatorInt : FsmStateActionAnimatorBase
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.AnimatorInt), HutongGames.PlayMaker.Tooltip("The animator parameter")]
+
+        [RequiredField]
+        [UIHint(UIHint.AnimatorInt)]
+        [Tooltip("The animator parameter")]
         public FsmString parameter;
-        [HutongGames.PlayMaker.Tooltip("The Int value to assign to the animator parameter")]
+
+        [Tooltip("The Int value to assign to the animator parameter")]
         public FsmInt Value;
+
         private Animator _animator;
+
         private int _paramID;
 
-        public override void OnActionUpdate()
+        public override void Reset()
         {
-            this.SetParameter();
+            base.Reset();
+            this.gameObject = null;
+            this.parameter = null;
+            this.Value = null;
         }
 
         public override void OnEnter()
@@ -27,32 +37,25 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this._paramID = Animator.StringToHash(this.parameter.Value);
-                    this.SetParameter();
-                    if (!base.everyFrame)
-                    {
-                        base.Finish();
-                    }
-                }
+                base.Finish();
+                return;
+            }
+            this._paramID = Animator.StringToHash(this.parameter.Value);
+            this.SetParameter();
+            if (!base.everyFrame)
+            {
+                base.Finish();
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.parameter = null;
-            this.Value = null;
+            this.SetParameter();
         }
 
         private void SetParameter()
@@ -64,4 +67,3 @@
         }
     }
 }
-

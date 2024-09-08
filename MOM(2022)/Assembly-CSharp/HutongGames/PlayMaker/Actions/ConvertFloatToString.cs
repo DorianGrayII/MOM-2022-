@@ -1,30 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Convert), Tooltip("Converts a Float value to a String value with optional format.")]
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts a Float value to a String value with optional format.")]
     public class ConvertFloatToString : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The float variable to convert.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The float variable to convert.")]
         public FsmFloat floatVariable;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("A string variable to store the converted value.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("A string variable to store the converted value.")]
         public FsmString stringVariable;
+
         [Tooltip("Optional Format, allows for leading zeros. E.g., 0000")]
         public FsmString format;
+
         [Tooltip("Repeat every frame. Useful if the float variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertFloatToString()
+        public override void Reset()
         {
-            if (!this.format.IsNone && !string.IsNullOrEmpty(this.format.Value))
-            {
-                this.stringVariable.Value = this.floatVariable.Value.ToString(this.format.Value);
-            }
-            else
-            {
-                this.stringVariable.Value = this.floatVariable.Value.ToString();
-            }
+            this.floatVariable = null;
+            this.stringVariable = null;
+            this.everyFrame = false;
+            this.format = null;
         }
 
         public override void OnEnter()
@@ -41,13 +42,16 @@
             this.DoConvertFloatToString();
         }
 
-        public override void Reset()
+        private void DoConvertFloatToString()
         {
-            this.floatVariable = null;
-            this.stringVariable = null;
-            this.everyFrame = false;
-            this.format = null;
+            if (this.format.IsNone || string.IsNullOrEmpty(this.format.Value))
+            {
+                this.stringVariable.Value = this.floatVariable.Value.ToString();
+            }
+            else
+            {
+                this.stringVariable.Value = this.floatVariable.Value.ToString(this.format.Value);
+            }
         }
     }
 }
-

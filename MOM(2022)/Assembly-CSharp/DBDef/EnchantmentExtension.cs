@@ -1,55 +1,52 @@
-﻿namespace DBDef
-{
-    using MHUtils;
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using MHUtils;
 
-    [Extension]
+namespace DBDef
+{
     public static class EnchantmentExtension
     {
         private static Dictionary<string, Spell> spellsByEnchantment;
 
-        [Extension]
-        public static Spell GetSpell(Enchantment enchantment)
-        {
-            if (spellsByEnchantment == null)
-            {
-                InitSBE();
-            }
-            Spell spell = null;
-            spellsByEnchantment.TryGetValue(enchantment.dbName, out spell);
-            return spell;
-        }
-
         private static void InitSBE()
         {
-            spellsByEnchantment = new Dictionary<string, Spell>();
+            EnchantmentExtension.spellsByEnchantment = new Dictionary<string, Spell>();
+            List<Spell> type = DataBase.GetType<Spell>();
             List<string> list = new List<string>();
-            foreach (Spell spell in DataBase.GetType<Spell>())
+            foreach (Spell item in type)
             {
-                if ((spell.enchantmentData != null) && (spell.enchantmentData.Length != 0))
+                if (item.enchantmentData == null || item.enchantmentData.Length == 0)
                 {
-                    Enchantment[] enchantmentData = spell.enchantmentData;
-                    for (int i = 0; i < enchantmentData.Length; i++)
+                    continue;
+                }
+                Enchantment[] enchantmentData = item.enchantmentData;
+                for (int i = 0; i < enchantmentData.Length; i++)
+                {
+                    string dbName = enchantmentData[i].dbName;
+                    if (EnchantmentExtension.spellsByEnchantment.ContainsKey(dbName))
                     {
-                        string dbName = enchantmentData[i].dbName;
-                        if (spellsByEnchantment.ContainsKey(dbName))
-                        {
-                            list.Add(dbName);
-                        }
-                        else
-                        {
-                            spellsByEnchantment.Add(dbName, spell);
-                        }
+                        list.Add(dbName);
+                    }
+                    else
+                    {
+                        EnchantmentExtension.spellsByEnchantment.Add(dbName, item);
                     }
                 }
             }
-            foreach (string str2 in list)
+            foreach (string item2 in list)
             {
-                spellsByEnchantment.Remove(str2);
+                EnchantmentExtension.spellsByEnchantment.Remove(item2);
             }
+        }
+
+        public static Spell GetSpell(this Enchantment enchantment)
+        {
+            if (EnchantmentExtension.spellsByEnchantment == null)
+            {
+                EnchantmentExtension.InitSBE();
+            }
+            Spell value = null;
+            EnchantmentExtension.spellsByEnchantment.TryGetValue(enchantment.dbName, out value);
+            return value;
         }
     }
 }
-

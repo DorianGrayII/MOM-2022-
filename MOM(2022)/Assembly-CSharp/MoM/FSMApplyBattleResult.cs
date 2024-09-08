@@ -1,51 +1,51 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.FSMApplyBattleResult
 using System.Collections;
 using HutongGames.PlayMaker;
-using MOM;
 
-[ActionCategory(ActionCategory.GameLogic)]
-public class FSMApplyBattleResult : FSMStateBase
+namespace MOM
 {
-    private Battle battle;
-
-    public override void OnEnter()
+    [ActionCategory(ActionCategory.GameLogic)]
+    public class FSMApplyBattleResult : FSMStateBase
     {
-        base.OnEnter();
-        this.battle = Battle.GetBattle();
-        Battle.ApplyBattleChanges(this.battle);
-        if (this.battle.battleWinner == Battle.BattleWinner.ATTACKER_WINS)
+        private Battle battle;
+
+        public override void OnEnter()
         {
-            Location locationHostSmart = this.battle.gDefender.GetLocationHostSmart();
-            if (locationHostSmart != null)
+            base.OnEnter();
+            this.battle = Battle.GetBattle();
+            Battle.ApplyBattleChanges(this.battle);
+            if (this.battle.battleWinner == Battle.BattleWinner.ATTACKER_WINS)
             {
-                base.StartCoroutine(this.Finishing(locationHostSmart));
+                Location locationHostSmart = this.battle.gDefender.GetLocationHostSmart();
+                if (locationHostSmart != null)
+                {
+                    base.StartCoroutine(this.Finishing(locationHostSmart));
+                }
+                else
+                {
+                    base.Finish();
+                }
             }
             else
             {
                 base.Finish();
             }
         }
-        else
+
+        private IEnumerator Finishing(Location loc)
         {
+            if (this.battle.playerIsAttacker)
+            {
+                if (loc is TownLocation)
+                {
+                    base.Fsm.Event("PopupTownCaptured");
+                    yield break;
+                }
+            }
+            else
+            {
+                this.battle.gAttacker.TakeOverLocation(loc);
+            }
             base.Finish();
         }
-    }
-
-    private IEnumerator Finishing(Location loc)
-    {
-        if (this.battle.playerIsAttacker)
-        {
-            if (loc is TownLocation)
-            {
-                base.Fsm.Event("PopupTownCaptured");
-                yield break;
-            }
-        }
-        else
-        {
-            this.battle.gAttacker.TakeOverLocation(loc);
-        }
-        base.Finish();
     }
 }

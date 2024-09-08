@@ -1,45 +1,30 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Tests if all the Bool Variables are False.\nSend an event or store the result.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Tests if all the Bool Variables are False.\nSend an event or store the result.")]
     public class BoolNoneTrue : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Bool variables to check.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Bool variables to check.")]
         public FsmBool[] boolVariables;
+
         [Tooltip("Event to send if none of the Bool variables are True.")]
         public FsmEvent sendEvent;
-        [UIHint(UIHint.Variable), Tooltip("Store the result in a Bool variable.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in a Bool variable.")]
         public FsmBool storeResult;
+
         [Tooltip("Repeat every frame while the state is active.")]
         public bool everyFrame;
 
-        private void DoNoneTrue()
+        public override void Reset()
         {
-            if (this.boolVariables.Length != 0)
-            {
-                bool flag = true;
-                int index = 0;
-                while (true)
-                {
-                    if (index < this.boolVariables.Length)
-                    {
-                        if (!this.boolVariables[index].Value)
-                        {
-                            index++;
-                            continue;
-                        }
-                        flag = false;
-                    }
-                    if (flag)
-                    {
-                        base.Fsm.Event(this.sendEvent);
-                    }
-                    this.storeResult.Value = flag;
-                    return;
-                }
-            }
+            this.boolVariables = null;
+            this.sendEvent = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -56,13 +41,26 @@
             this.DoNoneTrue();
         }
 
-        public override void Reset()
+        private void DoNoneTrue()
         {
-            this.boolVariables = null;
-            this.sendEvent = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (this.boolVariables.Length == 0)
+            {
+                return;
+            }
+            bool flag = true;
+            for (int i = 0; i < this.boolVariables.Length; i++)
+            {
+                if (this.boolVariables[i].Value)
+                {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag)
+            {
+                base.Fsm.Event(this.sendEvent);
+            }
+            this.storeResult.Value = flag;
         }
     }
 }
-

@@ -1,14 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using System.Collections.Generic;
+using System.Collections.Generic;
 
-    [ActionCategory(ActionCategory.Array), Tooltip("Reverse the order of items in an Array.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Array)]
+    [Tooltip("Reverse the order of items in an Array.")]
     public class ArrayReverse : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Array to reverse.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Array to reverse.")]
         public FsmArray array;
+
+        public override void Reset()
+        {
+            this.array = null;
+        }
 
         public override void OnEnter()
         {
@@ -17,11 +23,5 @@
             this.array.Values = list.ToArray();
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.array = null;
-        }
     }
 }
-

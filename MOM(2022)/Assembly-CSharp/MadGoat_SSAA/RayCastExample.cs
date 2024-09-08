@@ -1,25 +1,22 @@
-﻿namespace MadGoat_SSAA
-{
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
+namespace MadGoat_SSAA
+{
     public class RayCastExample : MonoBehaviour
     {
         private void Update()
         {
             if (Input.GetKeyUp(KeyCode.Mouse0))
             {
-                RaycastHit hit;
-                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f))
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out var hitInfo, 1000f))
                 {
-                    Debug.Log("Offsetted Hit Info: " + hit.point.ToString());
+                    Debug.Log("Offsetted Hit Info: " + hitInfo.point.ToString());
                 }
-                if (Physics.Raycast(Camera.main.GetComponent<MadGoatSSAA>().ScreenPointToRay(Input.mousePosition), out hit, 1000f))
+                if (Physics.Raycast(Camera.main.GetComponent<MadGoatSSAA>().ScreenPointToRay(Input.mousePosition), out hitInfo, 1000f))
                 {
-                    Debug.Log("Correct Hit Info: " + hit.point.ToString());
+                    Debug.Log("Correct Hit Info: " + hitInfo.point.ToString());
                 }
             }
         }
     }
 }
-

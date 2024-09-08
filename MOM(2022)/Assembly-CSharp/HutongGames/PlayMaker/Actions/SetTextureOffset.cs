@@ -1,22 +1,52 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Material), HutongGames.PlayMaker.Tooltip("Sets the Offset of a named texture in a Game Object's Material. Useful for scrolling texture effects.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Material)]
+    [Tooltip("Sets the Offset of a named texture in a Game Object's Material. Useful for scrolling texture effects.")]
     public class SetTextureOffset : ComponentAction<Renderer>
     {
-        [RequiredField, CheckForComponent(typeof(Renderer))]
+        [RequiredField]
+        [CheckForComponent(typeof(Renderer))]
         public FsmOwnerDefault gameObject;
+
         public FsmInt materialIndex;
-        [RequiredField, UIHint(UIHint.NamedColor)]
+
+        [RequiredField]
+        [UIHint(UIHint.NamedColor)]
         public FsmString namedTexture;
+
         [RequiredField]
         public FsmFloat offsetX;
+
         [RequiredField]
         public FsmFloat offsetY;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.materialIndex = 0;
+            this.namedTexture = "_MainTex";
+            this.offsetX = 0f;
+            this.offsetY = 0f;
+            this.everyFrame = false;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoSetTextureOffset();
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            this.DoSetTextureOffset();
+        }
 
         private void DoSetTextureOffset()
         {
@@ -39,30 +69,5 @@
                 }
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoSetTextureOffset();
-            if (!this.everyFrame)
-            {
-                base.Finish();
-            }
-        }
-
-        public override void OnUpdate()
-        {
-            this.DoSetTextureOffset();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.materialIndex = 0;
-            this.namedTexture = "_MainTex";
-            this.offsetX = 0f;
-            this.offsetY = 0f;
-            this.everyFrame = false;
-        }
     }
 }
-

@@ -1,44 +1,44 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DBDef.ArtefactSlot
 using System;
 using System.Collections.Generic;
-using DBDef;
 using MHUtils;
 
-[ClassPrototype("ARTEFACT_SLOT", "")]
-public class ArtefactSlot : DBClass, IDescriptionInfoType
+namespace DBDef
 {
-    public static string abbreviation = "";
-
-    [Prototype("DescriptionInfo", true)]
-    public DescriptionInfo descriptionInfo;
-
-    [Prototype("ETypes", false)]
-    public EEquipmentType[] eTypes;
-
-    public DescriptionInfo GetDescriptionInfo()
+    [ClassPrototype("ARTEFACT_SLOT", "")]
+    public class ArtefactSlot : DBClass, IDescriptionInfoType
     {
-        return this.descriptionInfo;
-    }
+        public static string abbreviation = "";
 
-    public static explicit operator ArtefactSlot(Enum e)
-    {
-        return DataBase.Get<ArtefactSlot>(e);
-    }
+        [Prototype("DescriptionInfo", true)]
+        public DescriptionInfo descriptionInfo;
 
-    public static explicit operator ArtefactSlot(string e)
-    {
-        return DataBase.Get<ArtefactSlot>(e, reportMissing: true);
-    }
+        [Prototype("ETypes", false)]
+        public EEquipmentType[] eTypes;
 
-    public void Set_eTypes(List<object> list)
-    {
-        if (list != null && list.Count != 0)
+        public DescriptionInfo GetDescriptionInfo()
         {
-            this.eTypes = new EEquipmentType[list.Count];
-            for (int i = 0; i < list.Count; i++)
+            return this.descriptionInfo;
+        }
+
+        public static explicit operator ArtefactSlot(Enum e)
+        {
+            return DataBase.Get<ArtefactSlot>(e);
+        }
+
+        public static explicit operator ArtefactSlot(string e)
+        {
+            return DataBase.Get<ArtefactSlot>(e, reportMissing: true);
+        }
+
+        public void Set_eTypes(List<object> list)
+        {
+            if (list != null && list.Count != 0)
             {
-                this.eTypes[i] = (EEquipmentType)list[i];
+                this.eTypes = new EEquipmentType[list.Count];
+                for (int i = 0; i < list.Count; i++)
+                {
+                    this.eTypes[i] = (EEquipmentType)list[i];
+                }
             }
         }
     }

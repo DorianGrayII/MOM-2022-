@@ -1,27 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Transform), HutongGames.PlayMaker.Tooltip("Transforms a Direction from world space to a Game Object's local space. The opposite of TransformDirection.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Transform)]
+    [Tooltip("Transforms a Direction from world space to a Game Object's local space. The opposite of TransformDirection.")]
     public class InverseTransformDirection : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmVector3 worldDirection;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmVector3 storeResult;
+
         public bool everyFrame;
 
-        private void DoInverseTransformDirection()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                this.storeResult.set_Value(ownerDefaultTarget.transform.InverseTransformDirection(this.worldDirection.get_Value()));
-            }
+            this.gameObject = null;
+            this.worldDirection = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,13 +40,13 @@
             this.DoInverseTransformDirection();
         }
 
-        public override void Reset()
+        private void DoInverseTransformDirection()
         {
-            this.gameObject = null;
-            this.worldDirection = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                this.storeResult.Value = ownerDefaultTarget.transform.InverseTransformDirection(this.worldDirection.Value);
+            }
         }
     }
 }
-

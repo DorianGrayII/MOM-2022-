@@ -1,19 +1,24 @@
-﻿namespace MOM
-{
-    using MHUtils.UI;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.UI;
+using System.Collections.Generic;
+using MHUtils.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class UIKeyboardClick : MonoBehaviour
     {
         public KeyCode button = KeyCode.Return;
+
         public Settings.KeyActions action;
+
         public int priority;
+
         private Selectable selectable;
+
         private ScreenBase parent;
+
         private CanvasGroup cg;
+
         private PlaySFX sfx;
 
         private void Start()
@@ -29,71 +34,65 @@
             this.UpdateByRemap();
         }
 
-        private void Update()
+        public void UpdateByRemap()
         {
-            if ((this.selectable.interactable && ((this.cg == null) || (this.cg.interactable && (this.cg.alpha >= 0.9f)))) && (SettingsBlock.IsKeyUp(this.action) && UIManager.IsTopForInput(this.parent)))
+            if (this.action != 0)
             {
-                ScreenBase componentInParent = base.gameObject.GetComponentInParent<ScreenBase>();
-                if (componentInParent != null)
+                return;
+            }
+            foreach (KeyValuePair<Settings.KeyActions, KeyCode> item in Settings.defaultMapping)
+            {
+                if (item.Value == this.button)
                 {
-                    UIKeyboardClick[] componentsInChildren = componentInParent.gameObject.GetComponentsInChildren<UIKeyboardClick>();
-                    if (componentsInChildren.Length > 1)
-                    {
-                        int priority = -2147483648;
-                        UIKeyboardClick[] clickArray2 = componentsInChildren;
-                        int index = 0;
-                        while (true)
-                        {
-                            if (index >= clickArray2.Length)
-                            {
-                                if (this.priority == priority)
-                                {
-                                    break;
-                                }
-                                return;
-                            }
-                            UIKeyboardClick click = clickArray2[index];
-                            if (click.gameObject.activeInHierarchy && (priority < click.priority))
-                            {
-                                priority = click.priority;
-                            }
-                            index++;
-                        }
-                    }
-                }
-                if (this.selectable is Button)
-                {
-                    if (this.sfx != null)
-                    {
-                        AudioLibrary.RequestSFX(this.sfx.clickEffect, 0f, 0f, 1f);
-                    }
-                    (this.selectable as Button).onClick.Invoke();
-                }
-                else if (this.selectable is Toggle)
-                {
-                    if (this.sfx != null)
-                    {
-                        AudioLibrary.RequestSFX(this.sfx.clickEffect, 0f, 0f, 1f);
-                    }
-                    (this.selectable as Toggle).isOn = !(this.selectable as Toggle).isOn;
+                    this.action = item.Key;
+                    break;
                 }
             }
         }
 
-        public void UpdateByRemap()
+        private void Update()
         {
-            if (this.action == Settings.KeyActions.None)
+            if (!this.selectable.interactable || (this.cg != null && (!this.cg.interactable || this.cg.alpha < 0.9f)) || !SettingsBlock.IsKeyUp(this.action) || !UIManager.IsTopForInput(this.parent))
             {
-                foreach (KeyValuePair<Settings.KeyActions, KeyCode> pair in Settings.defaultMapping)
+                return;
+            }
+            ScreenBase componentInParent = base.gameObject.GetComponentInParent<ScreenBase>();
+            if (componentInParent != null)
+            {
+                UIKeyboardClick[] componentsInChildren = componentInParent.gameObject.GetComponentsInChildren<UIKeyboardClick>();
+                if (componentsInChildren.Length > 1)
                 {
-                    if (((KeyCode) pair.Value) == this.button)
+                    int num = int.MinValue;
+                    UIKeyboardClick[] array = componentsInChildren;
+                    foreach (UIKeyboardClick uIKeyboardClick in array)
                     {
-                        this.action = pair.Key;
-                        break;
+                        if (uIKeyboardClick.gameObject.activeInHierarchy && num < uIKeyboardClick.priority)
+                        {
+                            num = uIKeyboardClick.priority;
+                        }
+                    }
+                    if (this.priority != num)
+                    {
+                        return;
                     }
                 }
+            }
+            if (this.selectable is Button)
+            {
+                if (this.sfx != null)
+                {
+                    AudioLibrary.RequestSFX(this.sfx.clickEffect);
+                }
+                (this.selectable as Button).onClick.Invoke();
+            }
+            else if (this.selectable is Toggle)
+            {
+                if (this.sfx != null)
+                {
+                    AudioLibrary.RequestSFX(this.sfx.clickEffect);
+                }
+                (this.selectable as Toggle).isOn = !(this.selectable as Toggle).isOn;
             }
         }
     }
 }
-

@@ -1,197 +1,42 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using DBEnum;
-    using MHUtils;
-    using MHUtils.UI;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.UI;
+using System.Collections.Generic;
+using DBDef;
+using DBEnum;
+using MHUtils;
+using MHUtils.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class ArmyListItem : MonoBehaviour
     {
         public RawImage portrait;
+
         public RawImage experience;
+
         public RawImage race;
+
         public GameObject goodEnchantment;
+
         public GameObject badEnchantment;
+
         public GameObject goodBadEnchantment;
+
         public GameObject highlight;
+
         public Slider hp;
+
         public bool greyScaleWhenNoMP = true;
+
         public bool useTooltip = true;
+
         private BaseUnit unit;
+
         private RolloverUnitTooltip unitTooltip;
+
         private Toggle toggle;
+
         private ArmyGrid grid;
-
-        public void Awake()
-        {
-            this.grid = base.GetComponentInParent<ArmyGrid>();
-            if (this.useTooltip)
-            {
-                this.unitTooltip = GameObjectUtils.GetOrAddComponent<RolloverUnitTooltip>(base.gameObject);
-            }
-            MouseClickEvent orAddComponent = GameObjectUtils.GetOrAddComponent<MouseClickEvent>(base.gameObject);
-            orAddComponent.mouseRightClick = delegate (object d) {
-                MOM.Unit unit = this.unit as MOM.Unit;
-                if (unit != null)
-                {
-                    MOM.UnitInfo info = UIManager.Open<MOM.UnitInfo>(UIManager.Layer.Popup, base.GetComponentInParent<ScreenBase>());
-                    List<MOM.Unit> units = null;
-                    if (unit.group != null)
-                    {
-                        List<Reference<MOM.Unit>> list = unit.group.Get().GetUnits();
-                        units = new List<MOM.Unit>(list.Count);
-                        list.ForEach(o => units.Add(o.Get()));
-                    }
-                    else if (this.grid)
-                    {
-                        foreach (object obj2 in this.grid.GetObjectsInGrid())
-                        {
-                            if (obj2 is MOM.Unit)
-                            {
-                                units = new List<MOM.Unit> {
-                                    obj2 as MOM.Unit
-                                };
-                            }
-                        }
-                    }
-                    info.SetData(units, unit);
-                }
-            };
-            orAddComponent.mouseDoubleClick = delegate (object d) {
-                TownScreen screen = TownScreen.Get();
-                if (screen != null)
-                {
-                    MOM.Unit unit = this.unit as MOM.Unit;
-                    if (((unit != null) ? unit.group : null) != null)
-                    {
-                        UIManager.Close(screen);
-                        FSMSelectionManager.Get().Select(unit.group.Get(), true);
-                    }
-                }
-                ArmyManager manager = UIManager.GetScreen<ArmyManager>(UIManager.Layer.Standard);
-                if (manager != null)
-                {
-                    MOM.Unit unit = this.unit as MOM.Unit;
-                    if (((unit != null) ? unit.group : null) != null)
-                    {
-                        UIManager.Close(manager);
-                        FSMSelectionManager.Get().Select(unit.group.Get(), true);
-                    }
-                }
-            };
-            orAddComponent.mouseLeftClick = delegate (object d) {
-                ArmyManager screen = UIManager.GetScreen<ArmyManager>(UIManager.Layer.Standard);
-                if ((screen != null) && FSMMapGame.Get().IsCasting())
-                {
-                    FSMMapGame.Get().SetChosenTarget(this.unit.GetPosition());
-                    MOM.Unit unit = this.unit as MOM.Unit;
-                    if (((unit != null) ? unit.group : null) != null)
-                    {
-                        FSMSelectionManager.Get().Select(unit.group.Get(), true);
-                        UIManager.Close(screen);
-                    }
-                }
-            };
-            if (this.grid)
-            {
-                this.toggle = base.GetComponent<Toggle>();
-                if (this.toggle)
-                {
-                    this.toggle.onValueChanged.RemoveAllListeners();
-                    this.toggle.onValueChanged.AddListener(b => this.grid.UpdateToggleState(this.unit, b));
-                }
-            }
-        }
-
-        private void UpdateVisuals()
-        {
-            string graphic = this.unit.dbSource.Get().GetDescriptionInfo().graphic;
-            this.portrait.texture = AssetManager.Get<Texture2D>(graphic, true);
-            if (this.greyScaleWhenNoMP)
-            {
-                this.portrait.material = (this.unit.Mp > 0) ? null : UIReferences.GetGrayscale();
-            }
-            if (this.unitTooltip)
-            {
-                this.unitTooltip.sourceAsUnit = this.Unit;
-            }
-            if (this.hp)
-            {
-                this.hp.value = this.unit.GetTotalHpPercent();
-                this.hp.gameObject.SetActive((this.unit.GetTotalHpPercent() != 1f) && (this.unit.GetTotalHpPercent() != 0f));
-            }
-            if (this.experience)
-            {
-                Tag uType = (this.unit.dbSource.Get() is Hero) ? ((Tag) TAG.HERO_CLASS) : ((Tag) TAG.NORMAL_CLASS);
-                UnitLvl lvl = DataBase.GetType<UnitLvl>().Find(o => ReferenceEquals(o.unitClass, uType) && (o.level == this.unit.GetLevel()));
-                if (lvl == null)
-                {
-                    this.experience.gameObject.SetActive(false);
-                }
-                else
-                {
-                    this.experience.gameObject.SetActive(true);
-                    this.experience.texture = DescriptionInfoExtension.GetTexture(lvl.GetDescriptionInfo());
-                }
-            }
-            if (this.race != null)
-            {
-                if (IAttributeableExtension.GetAttFinal(this.unit, (Tag) TAG.REANIMATED) > 0)
-                {
-                    this.race.gameObject.SetActive(true);
-                    this.race.texture = DescriptionInfoExtension.GetTexture(((Race) RACE.REALM_DEATH).GetDescriptionInfo());
-                }
-                else if ((IAttributeableExtension.GetAttFinal(this.unit, (Tag) TAG.FANTASTIC_CLASS) <= 0) && (IAttributeableExtension.GetAttFinal(this.unit, (Tag) TAG.HERO_CLASS) <= 0))
-                {
-                    this.race.gameObject.SetActive(false);
-                }
-                else
-                {
-                    this.race.gameObject.SetActive(true);
-                    this.race.texture = DescriptionInfoExtension.GetTexture(this.unit.race.Get().GetDescriptionInfo());
-                }
-            }
-            if ((this.goodEnchantment != null) && ((this.badEnchantment != null) && (this.goodBadEnchantment != null)))
-            {
-                bool flag = false;
-                bool flag2 = false;
-                foreach (EnchantmentInstance instance in this.unit.GetEnchantmentManager().GetEnchantmentsWithRemotes(false))
-                {
-                    if (instance.GetEnchantmentType() == EEnchantmentCategory.Positive)
-                    {
-                        flag = true;
-                        continue;
-                    }
-                    if (instance.GetEnchantmentType() == EEnchantmentCategory.Negative)
-                    {
-                        flag2 = true;
-                    }
-                }
-                this.goodEnchantment.SetActive(false);
-                this.badEnchantment.SetActive(false);
-                this.goodBadEnchantment.SetActive(false);
-                if (flag & flag2)
-                {
-                    this.goodBadEnchantment.SetActive(true);
-                }
-                else if (flag)
-                {
-                    this.goodEnchantment.SetActive(true);
-                }
-                else if (flag2)
-                {
-                    this.badEnchantment.SetActive(true);
-                }
-            }
-            if (this.toggle)
-            {
-                this.toggle.isOn = this.grid.IsSelected(this.unit);
-            }
-        }
 
         public BaseUnit Unit
         {
@@ -205,6 +50,184 @@
                 this.UpdateVisuals();
             }
         }
+
+        public void Awake()
+        {
+            this.grid = base.GetComponentInParent<ArmyGrid>();
+            if (this.useTooltip)
+            {
+                this.unitTooltip = base.gameObject.GetOrAddComponent<RolloverUnitTooltip>();
+            }
+            MouseClickEvent orAddComponent = base.gameObject.GetOrAddComponent<MouseClickEvent>();
+            orAddComponent.mouseRightClick = delegate
+            {
+                if (this.unit is Unit unit4)
+                {
+                    ScreenBase componentInParent = base.GetComponentInParent<ScreenBase>();
+                    UnitInfo unitInfo = UIManager.Open<UnitInfo>(UIManager.Layer.Popup, componentInParent);
+                    List<Unit> units = null;
+                    if (unit4.group != null)
+                    {
+                        List<Reference<Unit>> units2 = unit4.group.Get().GetUnits();
+                        units = new List<Unit>(units2.Count);
+                        units2.ForEach(delegate(Reference<Unit> o)
+                        {
+                            units.Add(o.Get());
+                        });
+                    }
+                    else if ((bool)this.grid)
+                    {
+                        foreach (object item in this.grid.GetObjectsInGrid())
+                        {
+                            if (item is Unit)
+                            {
+                                if (units == null)
+                                {
+                                    units = new List<Unit>();
+                                }
+                                units.Add(item as Unit);
+                            }
+                        }
+                    }
+                    unitInfo.SetData(units, unit4);
+                }
+            };
+            orAddComponent.mouseDoubleClick = delegate
+            {
+                TownScreen townScreen = TownScreen.Get();
+                if (townScreen != null)
+                {
+                    Unit unit2 = this.unit as Unit;
+                    if (unit2?.group != null)
+                    {
+                        UIManager.Close(townScreen);
+                        FSMSelectionManager.Get().Select(unit2.group.Get(), focus: true);
+                    }
+                }
+                ArmyManager screen2 = UIManager.GetScreen<ArmyManager>(UIManager.Layer.Standard);
+                if (screen2 != null)
+                {
+                    Unit unit3 = this.unit as Unit;
+                    if (unit3?.group != null)
+                    {
+                        UIManager.Close(screen2);
+                        FSMSelectionManager.Get().Select(unit3.group.Get(), focus: true);
+                    }
+                }
+            };
+            orAddComponent.mouseLeftClick = delegate
+            {
+                ArmyManager screen = UIManager.GetScreen<ArmyManager>(UIManager.Layer.Standard);
+                if (screen != null && FSMMapGame.Get().IsCasting())
+                {
+                    FSMMapGame.Get().SetChosenTarget(this.unit.GetPosition());
+                    Unit unit = this.unit as Unit;
+                    if (unit?.group != null)
+                    {
+                        FSMSelectionManager.Get().Select(unit.group.Get(), focus: true);
+                        UIManager.Close(screen);
+                    }
+                }
+            };
+            if (!this.grid)
+            {
+                return;
+            }
+            this.toggle = base.GetComponent<Toggle>();
+            if ((bool)this.toggle)
+            {
+                this.toggle.onValueChanged.RemoveAllListeners();
+                this.toggle.onValueChanged.AddListener(delegate(bool b)
+                {
+                    this.grid.UpdateToggleState(this.unit, b);
+                });
+            }
+        }
+
+        private void UpdateVisuals()
+        {
+            string graphic = this.unit.dbSource.Get().GetDescriptionInfo().graphic;
+            this.portrait.texture = AssetManager.Get<Texture2D>(graphic);
+            if (this.greyScaleWhenNoMP)
+            {
+                this.portrait.material = ((this.unit.Mp > 0) ? null : UIReferences.GetGrayscale());
+            }
+            if ((bool)this.unitTooltip)
+            {
+                this.unitTooltip.sourceAsUnit = this.Unit;
+            }
+            if ((bool)this.hp)
+            {
+                this.hp.value = this.unit.GetTotalHpPercent();
+                this.hp.gameObject.SetActive(this.unit.GetTotalHpPercent() != 1f && !(this.unit.GetTotalHpPercent() <= 0f));
+            }
+            if ((bool)this.experience)
+            {
+                Tag uType = ((this.unit.dbSource.Get() is Hero) ? ((Tag)TAG.HERO_CLASS) : ((Tag)TAG.NORMAL_CLASS));
+                UnitLvl unitLvl = DataBase.GetType<UnitLvl>().Find((UnitLvl o) => o.unitClass == uType && o.level == this.unit.GetLevel());
+                if (unitLvl != null)
+                {
+                    this.experience.gameObject.SetActive(value: true);
+                    this.experience.texture = unitLvl.GetDescriptionInfo().GetTexture();
+                }
+                else
+                {
+                    this.experience.gameObject.SetActive(value: false);
+                }
+            }
+            if (this.race != null)
+            {
+                if (this.unit.GetAttFinal((Tag)TAG.REANIMATED) > 0)
+                {
+                    this.race.gameObject.SetActive(value: true);
+                    this.race.texture = ((Race)RACE.REALM_DEATH).GetDescriptionInfo().GetTexture();
+                }
+                else if (this.unit.GetAttFinal((Tag)TAG.FANTASTIC_CLASS) > 0 || this.unit.GetAttFinal((Tag)TAG.HERO_CLASS) > 0)
+                {
+                    this.race.gameObject.SetActive(value: true);
+                    this.race.texture = this.unit.race.Get().GetDescriptionInfo().GetTexture();
+                }
+                else
+                {
+                    this.race.gameObject.SetActive(value: false);
+                }
+            }
+            if (this.goodEnchantment != null && this.badEnchantment != null && this.goodBadEnchantment != null)
+            {
+                List<EnchantmentInstance> enchantmentsWithRemotes = this.unit.GetEnchantmentManager().GetEnchantmentsWithRemotes();
+                bool flag = false;
+                bool flag2 = false;
+                foreach (EnchantmentInstance item in enchantmentsWithRemotes)
+                {
+                    if (item.GetEnchantmentType() == EEnchantmentCategory.Positive)
+                    {
+                        flag = true;
+                    }
+                    else if (item.GetEnchantmentType() == EEnchantmentCategory.Negative)
+                    {
+                        flag2 = true;
+                    }
+                }
+                this.goodEnchantment.SetActive(value: false);
+                this.badEnchantment.SetActive(value: false);
+                this.goodBadEnchantment.SetActive(value: false);
+                if (flag && flag2)
+                {
+                    this.goodBadEnchantment.SetActive(value: true);
+                }
+                else if (flag)
+                {
+                    this.goodEnchantment.SetActive(value: true);
+                }
+                else if (flag2)
+                {
+                    this.badEnchantment.SetActive(value: true);
+                }
+            }
+            if ((bool)this.toggle)
+            {
+                this.toggle.isOn = this.grid.IsSelected(this.unit);
+            }
+        }
     }
 }
-

@@ -1,13 +1,10 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum SKILL_PACK
     {
-        ANY_SKILLS,
-        FIGHTER_SKILLS,
-        MAGE_SKILLS,
-        ANY_SKILLS_NO_ARCANE_POWER
+        ANY_SKILLS = 0,
+        FIGHTER_SKILLS = 1,
+        MAGE_SKILLS = 2,
+        ANY_SKILLS_NO_ARCANE_POWER = 3
     }
 }
-

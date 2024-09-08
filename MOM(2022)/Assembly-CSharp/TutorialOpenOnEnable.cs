@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// TutorialOpenOnEnable
 using System.Collections;
 using MOM;
 using UnityEngine;

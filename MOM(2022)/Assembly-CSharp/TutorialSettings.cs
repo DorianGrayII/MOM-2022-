@@ -1,5 +1,3 @@
-﻿using System;
-
 public class TutorialSettings
 {
     private void Start()
@@ -10,4 +8,3 @@ public class TutorialSettings
     {
     }
 }
-

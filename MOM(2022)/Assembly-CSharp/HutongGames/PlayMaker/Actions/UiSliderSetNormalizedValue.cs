@@ -1,30 +1,38 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the normalized value ( between 0 and 1) of a UI Slider component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the normalized value ( between 0 and 1) of a UI Slider component.")]
     public class UiSliderSetNormalizedValue : ComponentAction<Slider>
     {
-        [RequiredField, CheckForComponent(typeof(Slider)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Slider component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Slider))]
+        [Tooltip("The GameObject with the UI Slider component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("The normalized value ( between 0 and 1) of the UI Slider component.")]
+
+        [RequiredField]
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("The normalized value ( between 0 and 1) of the UI Slider component.")]
         public FsmFloat value;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Slider slider;
+
         private float originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.slider != null)
-            {
-                this.slider.normalizedValue = this.value.Value;
-            }
+            this.gameObject = null;
+            this.value = null;
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,26 +50,25 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.slider != null) && this.resetOnExit.Value)
-            {
-                this.slider.normalizedValue = this.originalValue;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetValue();
         }
 
-        public override void Reset()
+        private void DoSetValue()
         {
-            this.gameObject = null;
-            this.value = null;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (this.slider != null)
+            {
+                this.slider.normalizedValue = this.value.Value;
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.slider == null) && this.resetOnExit.Value)
+            {
+                this.slider.normalizedValue = this.originalValue;
+            }
         }
     }
 }
-

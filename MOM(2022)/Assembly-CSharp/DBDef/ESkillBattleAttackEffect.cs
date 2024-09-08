@@ -1,14 +1,11 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum ESkillBattleAttackEffect
     {
-        None,
-        Piercing,
-        Illusion,
-        FirstStrike,
-        AntiFirstStrike
+        None = 0,
+        Piercing = 1,
+        Illusion = 2,
+        FirstStrike = 3,
+        AntiFirstStrike = 4
     }
 }
-

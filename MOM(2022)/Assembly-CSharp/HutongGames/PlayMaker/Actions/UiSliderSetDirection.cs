@@ -1,37 +1,41 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the direction of a UI Slider component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the direction of a UI Slider component.")]
     public class UiSliderSetDirection : ComponentAction<Slider>
     {
-        [RequiredField, CheckForComponent(typeof(Slider)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Slider component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Slider))]
+        [Tooltip("The GameObject with the UI Slider component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The direction of the UI Slider component."), ObjectType(typeof(Slider.Direction))]
+
+        [RequiredField]
+        [Tooltip("The direction of the UI Slider component.")]
+        [ObjectType(typeof(Slider.Direction))]
         public FsmEnum direction;
-        [HutongGames.PlayMaker.Tooltip("Include the  RectLayouts. Leave to none for no effect")]
+
+        [Tooltip("Include the  RectLayouts. Leave to none for no effect")]
         public FsmBool includeRectLayouts;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private Slider slider;
+
         private Slider.Direction originalValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.slider != null)
+            this.gameObject = null;
+            this.direction = Slider.Direction.LeftToRight;
+            this.includeRectLayouts = new FsmBool
             {
-                if (this.includeRectLayouts.IsNone)
-                {
-                    this.slider.direction = (Slider.Direction) this.direction.Value;
-                }
-                else
-                {
-                    this.slider.SetDirection((Slider.Direction) this.direction.Value, this.includeRectLayouts.Value);
-                }
-            }
+                UseVariable = true
+            };
+            this.resetOnExit = null;
         }
 
         public override void OnEnter()
@@ -45,9 +49,24 @@
             this.DoSetValue();
         }
 
+        private void DoSetValue()
+        {
+            if (!(this.slider == null))
+            {
+                if (this.includeRectLayouts.IsNone)
+                {
+                    this.slider.direction = (Slider.Direction)(object)this.direction.Value;
+                }
+                else
+                {
+                    this.slider.SetDirection((Slider.Direction)(object)this.direction.Value, this.includeRectLayouts.Value);
+                }
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.slider != null) && this.resetOnExit.Value)
+            if (!(this.slider == null) && this.resetOnExit.Value)
             {
                 if (this.includeRectLayouts.IsNone)
                 {
@@ -59,16 +78,5 @@
                 }
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.direction = Slider.Direction.LeftToRight;
-            FsmBool bool1 = new FsmBool();
-            bool1.UseVariable = true;
-            this.includeRectLayouts = bool1;
-            this.resetOnExit = null;
-        }
     }
 }
-

@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public class DestroyAfterTime : MonoBehaviour
@@ -7,7 +6,6 @@ public class DestroyAfterTime : MonoBehaviour
 
     private void Start()
     {
-        Destroy(base.gameObject, this.time);
+        Object.Destroy(base.gameObject, this.time);
     }
 }
-

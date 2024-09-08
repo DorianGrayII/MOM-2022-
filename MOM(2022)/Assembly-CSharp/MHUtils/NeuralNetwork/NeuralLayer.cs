@@ -1,9 +1,8 @@
-﻿namespace MHUtils.NeuralNetwork
-{
-    using ProtoBuf;
-    using System;
-    using System.Collections.Generic;
+using System.Collections.Generic;
+using ProtoBuf;
 
+namespace MHUtils.NeuralNetwork
+{
     [ProtoContract]
     public class NeuralLayer
     {
@@ -20,4 +19,3 @@
         }
     }
 }
-

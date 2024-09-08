@@ -1,47 +1,59 @@
-﻿using MOM;
-using System;
 using System.Collections.Generic;
+using MOM;
 using UnityEngine;
 
 public class WizardColors : MonoBehaviour
 {
-    public UnityEngine.Color none;
-    public UnityEngine.Color green;
-    public UnityEngine.Color blue;
-    public UnityEngine.Color red;
-    public UnityEngine.Color purple;
-    public UnityEngine.Color yellow;
-    private static Dictionary<PlayerWizard.Color, UnityEngine.Color> cols = new Dictionary<PlayerWizard.Color, UnityEngine.Color>();
+    public Color none;
 
-    private void Awake()
+    public Color green;
+
+    public Color blue;
+
+    public Color red;
+
+    public Color purple;
+
+    public Color yellow;
+
+    private static Dictionary<PlayerWizard.Color, Color> cols = new Dictionary<PlayerWizard.Color, Color>();
+
+    public static Color GetColor(PlayerWizard.Color c)
     {
-        cols[PlayerWizard.Color.None] = this.none;
-        cols[PlayerWizard.Color.Green] = this.green;
-        cols[PlayerWizard.Color.Blue] = this.blue;
-        cols[PlayerWizard.Color.Red] = this.red;
-        cols[PlayerWizard.Color.Purple] = this.purple;
-        cols[PlayerWizard.Color.Yellow] = this.yellow;
-        cols[PlayerWizard.Color.MAX] = UnityEngine.Color.white;
+        return WizardColors.cols[c];
     }
 
-    public static UnityEngine.Color GetColor(PlayerWizard w)
+    public static Color GetColor(PlayerWizard w)
     {
-        return ((w != null) ? cols[w.color] : cols[PlayerWizard.Color.None]);
+        if (w == null)
+        {
+            return WizardColors.cols[PlayerWizard.Color.None];
+        }
+        return WizardColors.cols[w.color];
     }
 
-    public static UnityEngine.Color GetColor(PlayerWizard.Color c)
+    public static Color GetColor(int id)
     {
-        return cols[c];
-    }
-
-    public static UnityEngine.Color GetColor(int id)
-    {
-        return ((id != 0) ? GetColor(GameManager.GetWizard(id)) : cols[PlayerWizard.Color.None]);
+        if (id == 0)
+        {
+            return WizardColors.cols[PlayerWizard.Color.None];
+        }
+        return WizardColors.GetColor(GameManager.GetWizard(id));
     }
 
     public static string GetHex(PlayerWizard w)
     {
-        return ColorUtility.ToHtmlStringRGB(GetColor(w));
+        return ColorUtility.ToHtmlStringRGB(WizardColors.GetColor(w));
+    }
+
+    private void Awake()
+    {
+        WizardColors.cols[PlayerWizard.Color.None] = this.none;
+        WizardColors.cols[PlayerWizard.Color.Green] = this.green;
+        WizardColors.cols[PlayerWizard.Color.Blue] = this.blue;
+        WizardColors.cols[PlayerWizard.Color.Red] = this.red;
+        WizardColors.cols[PlayerWizard.Color.Purple] = this.purple;
+        WizardColors.cols[PlayerWizard.Color.Yellow] = this.yellow;
+        WizardColors.cols[PlayerWizard.Color.MAX] = Color.white;
     }
 }
-

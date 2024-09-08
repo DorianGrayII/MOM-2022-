@@ -1,8 +1,7 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using System;
+using HutongGames.PlayMaker;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMSendEvent : FSMStateBase
     {
@@ -11,9 +10,8 @@
         public override void OnEnter()
         {
             base.OnEnter();
-            base.Fsm.BroadcastEvent(this.action, false);
+            base.Fsm.BroadcastEvent(this.action);
             base.Finish();
         }
     }
 }
-

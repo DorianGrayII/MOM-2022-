@@ -1,48 +1,49 @@
-﻿namespace MOM.Adventures
-{
-    using MOM;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Runtime.InteropServices;
-    using System.Xml.Serialization;
-    using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
+using UnityEngine;
 
+namespace MOM.Adventures
+{
     public class Module
     {
         [XmlAttribute]
         public bool isAllowed;
+
         [XmlAttribute]
         public int uniqueID;
+
         [XmlAttribute]
         public int nextAdventureID;
+
         [XmlAttribute]
         public string name;
+
         [XmlElement]
         public List<Adventure> adventures;
 
         public Module Clone()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Module));
-            using (MemoryStream stream = new MemoryStream())
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Module));
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                serializer.Serialize((Stream) stream, this);
-                stream.Position = 0L;
-                Module m = serializer.Deserialize(stream) as Module;
-                EventEditorModules.GenerateUniqueID(m);
-                return m;
+                xmlSerializer.Serialize(memoryStream, this);
+                memoryStream.Position = 0L;
+                Module obj = xmlSerializer.Deserialize(memoryStream) as Module;
+                EventEditorModules.GenerateUniqueID(obj);
+                return obj;
             }
         }
 
-        public int Test(bool showPopupIfOk)
+        public int Test(bool showPopupIfOk = true)
         {
             int num = 0;
-            string message = null;
-            if ((this.adventures == null) || (this.adventures.Count == 0))
+            string text = null;
+            if (this.adventures == null || this.adventures.Count == 0)
             {
-                message = "[EDITOR] Module " + this.name + " lacks events!";
-                Debug.LogWarning(message);
-                PopupGeneral.OpenPopup(null, "Finished", message, "UI_OKAY", null, null, null, null, null, null);
+                text = "[EDITOR] Module " + this.name + " lacks events!";
+                Debug.LogWarning(text);
+                PopupGeneral.OpenPopup(null, "Finished", text, "UI_OKAY");
                 num++;
             }
             else
@@ -52,23 +53,21 @@
                     num += adventure.Test(this);
                 }
             }
-            if (num <= 0)
+            if (num > 0)
+            {
+                text = "[EDITOR] Detected " + num + " error(s) in the module " + this.name + "!\nCheck C:\\Users\\[USER_NAME]\\AppData\\LocalLow\\MuHa Games\\MoM\\GameLog.txt for details";
+            }
+            else
             {
                 if (!showPopupIfOk)
                 {
                     return num;
                 }
-                message = "[EDITOR] Detected no errors in the module " + this.name;
+                text = "[EDITOR] Detected no errors in the module " + this.name;
             }
-            else
-            {
-                string[] textArray1 = new string[] { "[EDITOR] Detected ", num.ToString(), " error(s) in the module ", this.name, "!\nCheck C:\\Users\\[USER_NAME]\\AppData\\LocalLow\\MuHa Games\\MoM\\GameLog.txt for details" };
-                message = string.Concat(textArray1);
-            }
-            Debug.LogWarning(message);
-            PopupGeneral.OpenPopup(null, "Finished", message, "UI_OKAY", null, null, null, null, null, null);
+            Debug.LogWarning(text);
+            PopupGeneral.OpenPopup(null, "Finished", text, "UI_OKAY");
             return num;
         }
     }
 }
-

@@ -1,80 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Color), HutongGames.PlayMaker.Tooltip("Interpolate through an array of Colors over a specified amount of Time.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Color)]
+    [Tooltip("Interpolate through an array of Colors over a specified amount of Time.")]
     public class ColorInterpolate : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Array of colors to interpolate through.")]
+        [RequiredField]
+        [Tooltip("Array of colors to interpolate through.")]
         public FsmColor[] colors;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Interpolation time.")]
+
+        [RequiredField]
+        [Tooltip("Interpolation time.")]
         public FsmFloat time;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the interpolated color in a Color variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the interpolated color in a Color variable.")]
         public FsmColor storeColor;
-        [HutongGames.PlayMaker.Tooltip("Event to send when the interpolation finishes.")]
+
+        [Tooltip("Event to send when the interpolation finishes.")]
         public FsmEvent finishEvent;
-        [HutongGames.PlayMaker.Tooltip("Ignore TimeScale")]
+
+        [Tooltip("Ignore TimeScale")]
         public bool realTime;
+
         private float startTime;
+
         private float currentTime;
-
-        public override string ErrorCheck()
-        {
-            return ((this.colors.Length < 2) ? "Define at least 2 colors to make a gradient." : null);
-        }
-
-        public override void OnEnter()
-        {
-            this.startTime = FsmTime.RealtimeSinceStartup;
-            this.currentTime = 0f;
-            if (this.colors.Length >= 2)
-            {
-                this.storeColor.set_Value(this.colors[0].get_Value());
-            }
-            else
-            {
-                if (this.colors.Length == 1)
-                {
-                    this.storeColor.set_Value(this.colors[0].get_Value());
-                }
-                base.Finish();
-            }
-        }
-
-        public override void OnUpdate()
-        {
-            this.currentTime = !this.realTime ? (this.currentTime + Time.deltaTime) : (FsmTime.RealtimeSinceStartup - this.startTime);
-            if (this.currentTime > this.time.Value)
-            {
-                base.Finish();
-                this.storeColor.set_Value(this.colors[this.colors.Length - 1].get_Value());
-                if (this.finishEvent != null)
-                {
-                    base.Fsm.Event(this.finishEvent);
-                }
-            }
-            else
-            {
-                Color color;
-                float f = ((this.colors.Length - 1) * this.currentTime) / this.time.Value;
-                if (f.Equals((float) 0f))
-                {
-                    color = this.colors[0].get_Value();
-                }
-                else if (f.Equals((float) (this.colors.Length - 1)))
-                {
-                    color = this.colors[this.colors.Length - 1].get_Value();
-                }
-                else
-                {
-                    Color a = this.colors[Mathf.FloorToInt(f)].get_Value();
-                    color = Color.Lerp(a, this.colors[Mathf.CeilToInt(f)].get_Value(), f - Mathf.Floor(f));
-                }
-                this.storeColor.set_Value(color);
-            }
-        }
 
         public override void Reset()
         {
@@ -84,6 +37,72 @@
             this.finishEvent = null;
             this.realTime = false;
         }
+
+        public override void OnEnter()
+        {
+            this.startTime = FsmTime.RealtimeSinceStartup;
+            this.currentTime = 0f;
+            if (this.colors.Length < 2)
+            {
+                if (this.colors.Length == 1)
+                {
+                    this.storeColor.Value = this.colors[0].Value;
+                }
+                base.Finish();
+            }
+            else
+            {
+                this.storeColor.Value = this.colors[0].Value;
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            if (this.realTime)
+            {
+                this.currentTime = FsmTime.RealtimeSinceStartup - this.startTime;
+            }
+            else
+            {
+                this.currentTime += Time.deltaTime;
+            }
+            if (this.currentTime > this.time.Value)
+            {
+                base.Finish();
+                this.storeColor.Value = this.colors[this.colors.Length - 1].Value;
+                if (this.finishEvent != null)
+                {
+                    base.Fsm.Event(this.finishEvent);
+                }
+                return;
+            }
+            float num = (float)(this.colors.Length - 1) * this.currentTime / this.time.Value;
+            Color value;
+            if (num.Equals(0f))
+            {
+                value = this.colors[0].Value;
+            }
+            else if (num.Equals(this.colors.Length - 1))
+            {
+                value = this.colors[this.colors.Length - 1].Value;
+            }
+            else
+            {
+                Color value2 = this.colors[Mathf.FloorToInt(num)].Value;
+                Color value3 = this.colors[Mathf.CeilToInt(num)].Value;
+                num -= Mathf.Floor(num);
+                value = Color.Lerp(value2, value3, num);
+            }
+            this.storeColor.Value = value;
+        }
+
+        public override string ErrorCheck()
+        {
+            if (this.colors.Length >= 2)
+            {
+                return null;
+            }
+            return "Define at least 2 colors to make a gradient.";
+        }
     }
 }
-

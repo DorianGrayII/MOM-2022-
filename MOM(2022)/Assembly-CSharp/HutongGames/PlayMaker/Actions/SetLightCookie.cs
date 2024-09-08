@@ -1,23 +1,21 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Sets the Texture projected by a Light.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Sets the Texture projected by a Light.")]
     public class SetLightCookie : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         public FsmTexture lightCookie;
 
-        private void DoSetLightCookie()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.light.cookie = this.lightCookie.get_Value();
-            }
+            this.gameObject = null;
+            this.lightCookie = null;
         }
 
         public override void OnEnter()
@@ -26,11 +24,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetLightCookie()
         {
-            this.gameObject = null;
-            this.lightCookie = null;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.light.cookie = this.lightCookie.Value;
+            }
         }
     }
 }
-

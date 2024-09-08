@@ -1,20 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Quaternion), HutongGames.PlayMaker.Tooltip("Inverse a quaternion")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Quaternion)]
+    [Tooltip("Inverse a quaternion")]
     public class QuaternionInverse : QuaternionBaseAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("the rotation")]
+        [RequiredField]
+        [Tooltip("the rotation")]
         public FsmQuaternion rotation;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the inverse of the rotation variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the inverse of the rotation variable.")]
         public FsmQuaternion result;
 
-        private void DoQuatInverse()
+        public override void Reset()
         {
-            this.result.set_Value(Quaternion.Inverse(this.rotation.get_Value()));
+            this.rotation = null;
+            this.result = null;
+            base.everyFrame = true;
+            base.everyFrameOption = everyFrameOptions.Update;
         }
 
         public override void OnEnter()
@@ -26,9 +32,9 @@
             }
         }
 
-        public override void OnFixedUpdate()
+        public override void OnUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.FixedUpdate)
+            if (base.everyFrameOption == everyFrameOptions.Update)
             {
                 this.DoQuatInverse();
             }
@@ -36,27 +42,23 @@
 
         public override void OnLateUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.LateUpdate)
+            if (base.everyFrameOption == everyFrameOptions.LateUpdate)
             {
                 this.DoQuatInverse();
             }
         }
 
-        public override void OnUpdate()
+        public override void OnFixedUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.Update)
+            if (base.everyFrameOption == everyFrameOptions.FixedUpdate)
             {
                 this.DoQuatInverse();
             }
         }
 
-        public override void Reset()
+        private void DoQuatInverse()
         {
-            this.rotation = null;
-            this.result = null;
-            base.everyFrame = true;
-            base.everyFrameOption = QuaternionBaseAction.everyFrameOptions.Update;
+            this.result.Value = Quaternion.Inverse(this.rotation.Value);
         }
     }
 }
-

@@ -1,52 +1,48 @@
-﻿namespace DBDef
-{
-    using MHUtils;
-    using System;
-    using System.Runtime.CompilerServices;
-    using UnityEngine;
+using MHUtils;
+using UnityEngine;
 
-    [Extension]
+namespace DBDef
+{
     public static class DescriptionInfoExtension
     {
-        [Extension]
-        public static string GetDILocalizedDescription(IDescriptionInfoType t)
+        public static Texture2D GetTexture(this DescriptionInfo di)
+        {
+            return AssetManager.Get<Texture2D>(di.graphic);
+        }
+
+        public static Texture2D GetTexture(this IDescriptionInfoType t)
+        {
+            return t.GetDescriptionInfo()?.GetTexture();
+        }
+
+        public static Texture2D GetTextureLarge(this DescriptionInfo di)
+        {
+            return AssetManager.Get<Texture2D>(di.graphic + "_FULL");
+        }
+
+        public static Texture2D GetTextureLarge(this IDescriptionInfoType t)
+        {
+            return t.GetDescriptionInfo()?.GetTextureLarge();
+        }
+
+        public static string GetDILocalizedName(this IDescriptionInfoType t)
         {
             DescriptionInfo descriptionInfo = t.GetDescriptionInfo();
-            return ((descriptionInfo != null) ? descriptionInfo.GetLocalizedDescription() : "DB Missing DI");
+            if (descriptionInfo == null)
+            {
+                return "DB Missing DI";
+            }
+            return descriptionInfo.GetLocalizedName();
         }
 
-        [Extension]
-        public static string GetDILocalizedName(IDescriptionInfoType t)
+        public static string GetDILocalizedDescription(this IDescriptionInfoType t)
         {
             DescriptionInfo descriptionInfo = t.GetDescriptionInfo();
-            return ((descriptionInfo != null) ? descriptionInfo.GetLocalizedName() : "DB Missing DI");
-        }
-
-        [Extension]
-        public static Texture2D GetTexture(DescriptionInfo di)
-        {
-            return AssetManager.Get<Texture2D>(di.graphic, true);
-        }
-
-        [Extension]
-        public static Texture2D GetTexture(IDescriptionInfoType t)
-        {
-            DescriptionInfo descriptionInfo = t.GetDescriptionInfo();
-            return ((descriptionInfo != null) ? GetTexture(descriptionInfo) : null);
-        }
-
-        [Extension]
-        public static Texture2D GetTextureLarge(DescriptionInfo di)
-        {
-            return AssetManager.Get<Texture2D>(di.graphic + "_FULL", true);
-        }
-
-        [Extension]
-        public static Texture2D GetTextureLarge(IDescriptionInfoType t)
-        {
-            DescriptionInfo descriptionInfo = t.GetDescriptionInfo();
-            return ((descriptionInfo != null) ? GetTextureLarge(descriptionInfo) : null);
+            if (descriptionInfo == null)
+            {
+                return "DB Missing DI";
+            }
+            return descriptionInfo.GetLocalizedDescription();
         }
     }
 }
-

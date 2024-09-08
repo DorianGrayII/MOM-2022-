@@ -1,22 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Vector2), HutongGames.PlayMaker.Tooltip("Clamps the Magnitude of Vector2 Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Vector2)]
+    [Tooltip("Clamps the Magnitude of Vector2 Variable.")]
     public class Vector2ClampMagnitude : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Vector2")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Vector2")]
         public FsmVector2 vector2Variable;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The maximum Magnitude")]
+
+        [RequiredField]
+        [Tooltip("The maximum Magnitude")]
         public FsmFloat maxLength;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame")]
+
+        [Tooltip("Repeat every frame")]
         public bool everyFrame;
 
-        private void DoVector2ClampMagnitude()
+        public override void Reset()
         {
-            this.vector2Variable.set_Value(Vector2.ClampMagnitude(this.vector2Variable.get_Value(), this.maxLength.Value));
+            this.vector2Variable = null;
+            this.maxLength = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -33,12 +39,9 @@
             this.DoVector2ClampMagnitude();
         }
 
-        public override void Reset()
+        private void DoVector2ClampMagnitude()
         {
-            this.vector2Variable = null;
-            this.maxLength = null;
-            this.everyFrame = false;
+            this.vector2Variable.Value = Vector2.ClampMagnitude(this.vector2Variable.Value, this.maxLength.Value);
         }
     }
 }
-

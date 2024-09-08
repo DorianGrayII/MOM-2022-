@@ -1,17 +1,17 @@
-﻿namespace MOM
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
+namespace MOM
+{
     public class NestedToggleMouseEvent : MonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
     {
         private Toggle toggle;
 
         public void Awake()
         {
-            this.toggle = base.gameObject.transform.parent.gameObject.GetComponentInParent<Toggle>();
+            GameObject gameObject = base.gameObject.transform.parent.gameObject;
+            this.toggle = gameObject.GetComponentInParent<Toggle>();
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -39,4 +39,3 @@
         }
     }
 }
-

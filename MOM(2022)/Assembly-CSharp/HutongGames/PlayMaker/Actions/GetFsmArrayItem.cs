@@ -1,36 +1,62 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false), HutongGames.PlayMaker.Tooltip("Gets an item in an Array Variable in another FSM.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false)]
+    [Tooltip("Gets an item in an Array Variable in another FSM.")]
     public class GetFsmArrayItem : BaseFsmVariableIndexAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The GameObject that owns the FSM.")]
+        [RequiredField]
+        [Tooltip("The GameObject that owns the FSM.")]
         public FsmOwnerDefault gameObject;
-        [UIHint(UIHint.FsmName), HutongGames.PlayMaker.Tooltip("Optional name of FSM on Game Object.")]
+
+        [UIHint(UIHint.FsmName)]
+        [Tooltip("Optional name of FSM on Game Object.")]
         public FsmString fsmName;
-        [RequiredField, UIHint(UIHint.FsmArray), HutongGames.PlayMaker.Tooltip("The name of the FSM variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.FsmArray)]
+        [Tooltip("The name of the FSM variable.")]
         public FsmString variableName;
-        [HutongGames.PlayMaker.Tooltip("The index into the array.")]
+
+        [Tooltip("The index into the array.")]
         public FsmInt index;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Get the value of the array at the specified index.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Get the value of the array at the specified index.")]
         public FsmVar storeValue;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful if the value is changing.")]
+
+        [Tooltip("Repeat every frame. Useful if the value is changing.")]
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.fsmName = "";
+            this.storeValue = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoGetFsmArray();
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
+        }
 
         private void DoGetFsmArray()
         {
             GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget, this.fsmName.Value))
+            if (!base.UpdateCache(ownerDefaultTarget, this.fsmName.Value))
             {
-                FsmArray fsmArray = base.fsm.FsmVariables.GetFsmArray(this.variableName.Value);
-                if (fsmArray == null)
-                {
-                    base.DoVariableNotFound(this.variableName.Value);
-                }
-                else if ((this.index.Value < 0) || (this.index.Value >= fsmArray.Length))
+                return;
+            }
+            FsmArray fsmArray = base.fsm.FsmVariables.GetFsmArray(this.variableName.Value);
+            if (fsmArray != null)
+            {
+                if (this.index.Value < 0 || this.index.Value >= fsmArray.Length)
                 {
                     base.Fsm.Event(base.indexOutOfRange);
                     base.Finish();
@@ -44,14 +70,9 @@
                     base.LogWarning("Incompatible variable type: " + this.variableName.Value);
                 }
             }
-        }
-
-        public override void OnEnter()
-        {
-            this.DoGetFsmArray();
-            if (!this.everyFrame)
+            else
             {
-                base.Finish();
+                base.DoVariableNotFound(this.variableName.Value);
             }
         }
 
@@ -59,13 +80,5 @@
         {
             this.DoGetFsmArray();
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.fsmName = "";
-            this.storeValue = null;
-        }
     }
 }
-

@@ -1,19 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.RenderSettings), HutongGames.PlayMaker.Tooltip("Sets the size of light halos.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.RenderSettings)]
+    [Tooltip("Sets the size of light halos.")]
     public class SetHaloStrength : FsmStateAction
     {
         [RequiredField]
         public FsmFloat haloStrength;
+
         public bool everyFrame;
 
-        private void DoSetHaloStrength()
+        public override void Reset()
         {
-            RenderSettings.haloStrength = this.haloStrength.Value;
+            this.haloStrength = 0.5f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -30,11 +31,9 @@
             this.DoSetHaloStrength();
         }
 
-        public override void Reset()
+        private void DoSetHaloStrength()
         {
-            this.haloStrength = 0.5f;
-            this.everyFrame = false;
+            RenderSettings.haloStrength = this.haloStrength.Value;
         }
     }
 }
-

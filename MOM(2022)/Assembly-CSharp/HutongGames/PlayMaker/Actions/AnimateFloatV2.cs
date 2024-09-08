@@ -1,27 +1,43 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.AnimateVariables), Tooltip("Animates the value of a Float Variable using an Animation Curve.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.AnimateVariables)]
+    [Tooltip("Animates the value of a Float Variable using an Animation Curve.")]
     public class AnimateFloatV2 : AnimateFsmAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmFloat floatVariable;
+
         [RequiredField]
         public FsmAnimationCurve animCurve;
+
         [Tooltip("Calculation lets you set a type of curve deformation that will be applied to floatVariable")]
-        public AnimateFsmAction.Calculation calculation;
+        public Calculation calculation;
+
         private bool finishInNextStep;
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.floatVariable = new FsmFloat
+            {
+                UseVariable = true
+            };
+        }
 
         public override void OnEnter()
         {
             base.OnEnter();
             this.finishInNextStep = false;
             base.resultFloats = new float[1];
-            base.fromFloats = new float[] { this.floatVariable.IsNone ? 0f : this.floatVariable.Value };
-            base.calculations = new AnimateFsmAction.Calculation[] { this.calculation };
-            base.curves = new AnimationCurve[] { this.animCurve.curve };
+            base.fromFloats = new float[1];
+            base.fromFloats[0] = (this.floatVariable.IsNone ? 0f : this.floatVariable.Value);
+            base.calculations = new Calculation[1];
+            base.calculations[0] = this.calculation;
+            base.curves = new AnimationCurve[1];
+            base.curves[0] = this.animCurve.curve;
             base.Init();
         }
 
@@ -53,14 +69,5 @@
                 this.finishInNextStep = true;
             }
         }
-
-        public override void Reset()
-        {
-            base.Reset();
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.floatVariable = num1;
-        }
     }
 }
-

@@ -1,15 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Audio), HutongGames.PlayMaker.Tooltip("Sets the global sound volume.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Audio)]
+    [Tooltip("Sets the global sound volume.")]
     public class SetGameVolume : FsmStateAction
     {
-        [RequiredField, HasFloatSlider(0f, 1f)]
+        [RequiredField]
+        [HasFloatSlider(0f, 1f)]
         public FsmFloat volume;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.volume = 1f;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
@@ -24,12 +31,5 @@
         {
             AudioListener.volume = this.volume.Value;
         }
-
-        public override void Reset()
-        {
-            this.volume = 1f;
-            this.everyFrame = false;
-        }
     }
 }
-

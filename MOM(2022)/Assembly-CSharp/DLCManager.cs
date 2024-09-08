@@ -1,65 +1,102 @@
-﻿using System;
 using System.Collections.Generic;
 
 public class DLCManager
 {
-    public const string USE_DLC_KEY = "UseDLC";
-    private static int useDLC;
-    public static List<DLCs> paidDlcList;
-    public static HashSet<DLCs> ownedDLC;
-    public static Dictionary<string, DLCs> dlcIdentifiers;
-
-    static DLCManager()
-    {
-        List<DLCs> list1 = new List<DLCs>();
-        list1.Add(DLCs.Dlc2);
-        list1.Add(DLCs.Dlc3);
-        paidDlcList = list1;
-        ownedDLC = new HashSet<DLCs>();
-        Dictionary<string, DLCs> dictionary1 = new Dictionary<string, DLCs>();
-        dictionary1.Add("Dlc0", DLCs.Dlc0);
-        dictionary1.Add("Dlc1", DLCs.Dlc1);
-        dictionary1.Add("Dlc2", DLCs.Dlc2);
-        dictionary1.Add("Dlc3", DLCs.Dlc3);
-        dlcIdentifiers = dictionary1;
-    }
-
-    public static int GetActiveDLC()
-    {
-        return useDLC;
-    }
-
-    public static bool IsDlcActive(int d)
-    {
-        return ((d >= 0) ? ((useDLC & d) > 0) : true);
-    }
-
-    public static bool IsDlcActive(string d)
-    {
-        return ((d != null) ? (IsDlcOwned(d) ? (dlcIdentifiers.ContainsKey(d) && ((useDLC & dlcIdentifiers[d]) > 0)) : false) : true);
-    }
-
-    public static bool IsDlcOwned(DLCs d)
-    {
-        return ownedDLC.Contains(d);
-    }
-
-    public static bool IsDlcOwned(string d)
-    {
-        return ((d != null) ? (dlcIdentifiers.ContainsKey(d) && IsDlcOwned(dlcIdentifiers[d])) : true);
-    }
-
-    public static void SetActiveDLC(int d)
-    {
-        useDLC = d;
-    }
-
     public enum DLCs
     {
-        Dlc0 = 0x40000000,
+        Dlc0 = 1073741824,
         Dlc1 = 1,
         Dlc2 = 2,
         Dlc3 = 4
     }
-}
 
+    public const string USE_DLC_KEY = "UseDLC";
+
+    private static int useDLC;
+
+    public static List<DLCs> paidDlcList = new List<DLCs>
+    {
+        DLCs.Dlc2,
+        DLCs.Dlc3
+    };
+
+    public static HashSet<DLCs> ownedDLC = new HashSet<DLCs>();
+
+    public static Dictionary<string, DLCs> dlcIdentifiers = new Dictionary<string, DLCs>
+    {
+        {
+            "Dlc0",
+            DLCs.Dlc0
+        },
+        {
+            "Dlc1",
+            DLCs.Dlc1
+        },
+        {
+            "Dlc2",
+            DLCs.Dlc2
+        },
+        {
+            "Dlc3",
+            DLCs.Dlc3
+        }
+    };
+
+    public static bool IsDlcOwned(DLCs d)
+    {
+        if (DLCManager.ownedDLC.Contains(d))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static bool IsDlcOwned(string d)
+    {
+        if (d == null)
+        {
+            return true;
+        }
+        if (DLCManager.dlcIdentifiers.ContainsKey(d))
+        {
+            return DLCManager.IsDlcOwned(DLCManager.dlcIdentifiers[d]);
+        }
+        return false;
+    }
+
+    public static void SetActiveDLC(int d)
+    {
+        DLCManager.useDLC = d;
+    }
+
+    public static bool IsDlcActive(string d)
+    {
+        if (d == null)
+        {
+            return true;
+        }
+        if (!DLCManager.IsDlcOwned(d))
+        {
+            return false;
+        }
+        if (DLCManager.dlcIdentifiers.ContainsKey(d))
+        {
+            return (int)((uint)DLCManager.useDLC & (uint)DLCManager.dlcIdentifiers[d]) > 0;
+        }
+        return false;
+    }
+
+    public static bool IsDlcActive(int d)
+    {
+        if (d < 0)
+        {
+            return true;
+        }
+        return (DLCManager.useDLC & d) > 0;
+    }
+
+    public static int GetActiveDLC()
+    {
+        return DLCManager.useDLC;
+    }
+}

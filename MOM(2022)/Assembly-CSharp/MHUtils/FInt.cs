@@ -1,25 +1,30 @@
-﻿namespace MHUtils
-{
-    using ProtoBuf;
-    using System;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
+using System;
+using ProtoBuf;
+using UnityEngine;
 
-    [StructLayout(LayoutKind.Sequential), ProtoContract]
+namespace MHUtils
+{
+    [ProtoContract]
     public struct FInt : IComparable
     {
         [ProtoMember(1)]
         public int storage;
-        public static FInt ZERO;
-        public static FInt ONE;
-        public static FInt N_ONE;
-        public static FInt MAX;
+
+        public static FInt ZERO = new FInt(0);
+
+        public static FInt ONE = new FInt(1);
+
+        public static FInt N_ONE = new FInt(-1);
+
+        public static FInt MAX = new FInt(int.MaxValue);
+
         private const int SCALE = 100;
+
         public FInt(int iValue)
         {
-            if (0x7fffffff == iValue)
+            if (int.MaxValue == iValue)
             {
-                this.storage = 0x7fffffff;
+                this.storage = int.MaxValue;
             }
             else
             {
@@ -44,12 +49,12 @@
 
         public int ToInt()
         {
-            return (this.storage / 100);
+            return this.storage / 100;
         }
 
         public float ToFloat()
         {
-            return (((float) this.storage) / 100f);
+            return (float)this.storage / 100f;
         }
 
         public int ToIntX100()
@@ -80,12 +85,12 @@
 
         public static FInt operator *(FInt a, int b)
         {
-            return new FInt(a.ToFloat() * b);
+            return new FInt(a.ToFloat() * (float)b);
         }
 
         public static FInt operator *(int a, FInt b)
         {
-            return new FInt(a * b.ToFloat());
+            return new FInt((float)a * b.ToFloat());
         }
 
         public static FInt operator *(FInt a, float b)
@@ -105,12 +110,12 @@
 
         public static FInt operator /(FInt a, int b)
         {
-            return new FInt(a.ToFloat() / ((float) b));
+            return new FInt(a.ToFloat() / (float)b);
         }
 
         public static FInt operator /(int a, FInt b)
         {
-            return new FInt(((float) a) / b.ToFloat());
+            return new FInt((float)a / b.ToFloat());
         }
 
         public static FInt operator /(FInt a, float b)
@@ -130,12 +135,12 @@
 
         public static FInt operator %(FInt a, int b)
         {
-            return new FInt(a.ToFloat() % ((float) b));
+            return new FInt(a.ToFloat() % (float)b);
         }
 
         public static FInt operator %(int a, FInt b)
         {
-            return new FInt(((float) a) % b.ToFloat());
+            return new FInt((float)a % b.ToFloat());
         }
 
         public static FInt operator +(FInt a, FInt b)
@@ -145,12 +150,12 @@
 
         public static FInt operator +(FInt a, int b)
         {
-            return new FInt(a.ToFloat() + b);
+            return new FInt(a.ToFloat() + (float)b);
         }
 
         public static FInt operator +(int a, FInt b)
         {
-            return new FInt(a + b.ToFloat());
+            return new FInt((float)a + b.ToFloat());
         }
 
         public static FInt operator +(FInt a, float b)
@@ -170,12 +175,12 @@
 
         public static FInt operator -(FInt a, int b)
         {
-            return new FInt(a.ToFloat() - b);
+            return new FInt(a.ToFloat() - (float)b);
         }
 
         public static FInt operator -(int a, FInt b)
         {
-            return new FInt(a - b.ToFloat());
+            return new FInt((float)a - b.ToFloat());
         }
 
         public static FInt operator -(FInt a, float b)
@@ -190,157 +195,169 @@
 
         public static bool operator ==(FInt a, FInt b)
         {
-            return (a.storage == b.storage);
+            return a.storage == b.storage;
         }
 
         public static bool operator ==(FInt a, int b)
         {
-            return (a.storage == (b * 100));
+            return a.storage == b * 100;
         }
 
         public static bool operator ==(int a, FInt b)
         {
-            return ((a * 100) == b.storage);
+            return a * 100 == b.storage;
         }
 
         public static bool operator ==(FInt a, float b)
         {
-            return (a.storage == new FInt(b).storage);
+            return a.storage == new FInt(b).storage;
         }
 
         public static bool operator ==(float a, FInt b)
         {
-            return (new FInt(a).storage == b.storage);
+            return new FInt(a).storage == b.storage;
         }
 
         public static bool operator !=(FInt a, FInt b)
         {
-            return (a.storage != b.storage);
+            return a.storage != b.storage;
         }
 
         public static bool operator !=(FInt a, int b)
         {
-            return (a.storage != (b * 100));
+            return a.storage != b * 100;
         }
 
         public static bool operator !=(int a, FInt b)
         {
-            return ((a * 100) != b.storage);
+            return a * 100 != b.storage;
         }
 
         public static bool operator !=(FInt a, float b)
         {
-            return (a.storage != new FInt(b).storage);
+            return a.storage != new FInt(b).storage;
         }
 
         public static bool operator !=(float a, FInt b)
         {
-            return (new FInt(a).storage != b.storage);
+            return new FInt(a).storage != b.storage;
         }
 
         public static bool operator >=(FInt a, FInt b)
         {
-            return (a.storage >= b.storage);
+            return a.storage >= b.storage;
         }
 
         public static bool operator >=(FInt a, int b)
         {
-            return (a.storage >= (b * 100));
+            return a.storage >= b * 100;
         }
 
         public static bool operator >=(int a, FInt b)
         {
-            return ((a * 100) >= b.storage);
+            return a * 100 >= b.storage;
         }
 
         public static bool operator >=(FInt a, float b)
         {
-            return (a.storage >= new FInt(b).storage);
+            return a.storage >= new FInt(b).storage;
         }
 
         public static bool operator >=(float a, FInt b)
         {
-            return (new FInt(a).storage >= b.storage);
+            return new FInt(a).storage >= b.storage;
         }
 
         public static bool operator <=(FInt a, FInt b)
         {
-            return (a.storage <= b.storage);
+            return a.storage <= b.storage;
         }
 
         public static bool operator <=(FInt a, int b)
         {
-            return (a.storage <= (b * 100));
+            return a.storage <= b * 100;
         }
 
         public static bool operator <=(int a, FInt b)
         {
-            return ((a * 100) <= b.storage);
+            return a * 100 <= b.storage;
         }
 
         public static bool operator <=(FInt a, float b)
         {
-            return (a.storage <= new FInt(b).storage);
+            return a.storage <= new FInt(b).storage;
         }
 
         public static bool operator <=(float a, FInt b)
         {
-            return (new FInt(a).storage <= b.storage);
+            return new FInt(a).storage <= b.storage;
         }
 
         public static bool operator >(FInt a, FInt b)
         {
-            return (a.storage > b.storage);
+            return a.storage > b.storage;
         }
 
         public static bool operator >(FInt a, int b)
         {
-            return (a.storage > (b * 100));
+            return a.storage > b * 100;
         }
 
         public static bool operator >(int a, FInt b)
         {
-            return ((a * 100) > b.storage);
+            return a * 100 > b.storage;
         }
 
         public static bool operator >(FInt a, float b)
         {
-            return (a.storage > new FInt(b).storage);
+            return a.storage > new FInt(b).storage;
         }
 
         public static bool operator >(float a, FInt b)
         {
-            return (new FInt(a).storage > b.storage);
+            return new FInt(a).storage > b.storage;
         }
 
         public static bool operator <(FInt a, FInt b)
         {
-            return (a.storage < b.storage);
+            return a.storage < b.storage;
         }
 
         public static bool operator <(FInt a, int b)
         {
-            return (a.storage < (b * 100));
+            return a.storage < b * 100;
         }
 
         public static bool operator <(int a, FInt b)
         {
-            return ((a * 100) < b.storage);
+            return a * 100 < b.storage;
         }
 
         public static bool operator <(FInt a, float b)
         {
-            return (a.storage < new FInt(b).storage);
+            return a.storage < new FInt(b).storage;
         }
 
         public static bool operator <(float a, FInt b)
         {
-            return (new FInt(a).storage < b.storage);
+            return new FInt(a).storage < b.storage;
         }
 
         public override bool Equals(object obj)
         {
-            return (!(obj is FInt) ? (!(obj is int) ? ((obj is float) && (this.storage == new FInt((float) obj))) : (this.storage == (((int) obj) * 100))) : (((FInt) obj).storage == this.storage));
+            if (obj is FInt)
+            {
+                return ((FInt)obj).storage == this.storage;
+            }
+            if (obj is int)
+            {
+                return this.storage == (int)obj * 100;
+            }
+            if (obj is float)
+            {
+                return this.storage == new FInt((float)obj);
+            }
+            return false;
         }
 
         public override int GetHashCode()
@@ -350,7 +367,11 @@
 
         public string ToStringTMesh()
         {
-            return ((this.storage >= 0) ? ((this.storage / 100).ToString() + "<#FFFFFF3F><size=70%>." + (this.storage % 100).ToString("00") + "</size></color>") : ((this.storage / 100).ToString() + "<#FFFFFF3F><size=70%>." + (-this.storage % 100).ToString("00") + "</size></color>"));
+            if (this.storage < 0)
+            {
+                return this.storage / 100 + "<#FFFFFF3F><size=70%>." + (-this.storage % 100).ToString("00") + "</size></color>";
+            }
+            return this.storage / 100 + "<#FFFFFF3F><size=70%>." + (this.storage % 100).ToString("00") + "</size></color>";
         }
 
         public override string ToString()
@@ -360,12 +381,40 @@
 
         public string ToStringTryInt()
         {
-            return ((((this.storage / 100) * 100) != this.storage) ? this.ToString(2) : (this.storage / 100).ToString());
+            if (this.storage / 100 * 100 == this.storage)
+            {
+                return (this.storage / 100).ToString();
+            }
+            return this.ToString(2);
         }
 
         public string ToString(int decimalPlaces)
         {
-            return ((decimalPlaces < 2) ? ((decimalPlaces != 1) ? (this.storage / 100).ToString() : ((this.storage >= 0) ? ((this.storage / 100).ToString() + "." + ((this.storage / 10) % 10).ToString("0")) : ((this.storage >= 100) ? ((this.storage / 100).ToString() + "." + ((-this.storage / 10) % 10).ToString("0")) : ("-" + (this.storage / 100).ToString() + "." + ((-this.storage / 10) % 10).ToString("0"))))) : ((this.storage >= 0) ? ((this.storage / 100).ToString() + "." + (this.storage % 100).ToString("00")) : ((this.storage >= 100) ? ((this.storage / 100).ToString() + "." + (-this.storage % 100).ToString("00")) : ("-" + (this.storage / 100).ToString() + "." + (-this.storage % 100).ToString("00")))));
+            if (decimalPlaces >= 2)
+            {
+                if (this.storage < 0)
+                {
+                    if (this.storage < 100)
+                    {
+                        return "-" + this.storage / 100 + "." + (-this.storage % 100).ToString("00");
+                    }
+                    return this.storage / 100 + "." + (-this.storage % 100).ToString("00");
+                }
+                return this.storage / 100 + "." + (this.storage % 100).ToString("00");
+            }
+            if (decimalPlaces == 1)
+            {
+                if (this.storage < 0)
+                {
+                    if (this.storage < 100)
+                    {
+                        return "-" + this.storage / 100 + "." + (-this.storage / 10 % 10).ToString("0");
+                    }
+                    return this.storage / 100 + "." + (-this.storage / 10 % 10).ToString("0");
+                }
+                return this.storage / 100 + "." + (this.storage / 10 % 10).ToString("0");
+            }
+            return (this.storage / 100).ToString();
         }
 
         public int CompareTo(FInt fInt)
@@ -375,12 +424,16 @@
 
         public int CompareTo(object obj)
         {
-            return (!(obj is FInt) ? -1 : this.storage.CompareTo(((FInt) obj).storage));
+            if (obj is FInt)
+            {
+                return this.storage.CompareTo(((FInt)obj).storage);
+            }
+            return -1;
         }
 
-        public void CutToInt(bool onlyIfZero)
+        public void CutToInt(bool onlyIfZero = false)
         {
-            if (!onlyIfZero || ((this.storage < 100) && (this.storage > -100)))
+            if (!onlyIfZero || (this.storage < 100 && this.storage > -100))
             {
                 int num = this.storage % 100;
                 this.storage -= num;
@@ -389,38 +442,63 @@
 
         public static FInt Min(FInt a, FInt b)
         {
-            return ((a.storage >= b.storage) ? b : a);
+            if (a.storage < b.storage)
+            {
+                return a;
+            }
+            return b;
         }
 
         public static FInt Min(FInt a, float b)
         {
-            return ((a.storage >= b) ? new FInt(b) : a);
+            if ((float)a.storage < b)
+            {
+                return a;
+            }
+            return new FInt(b);
         }
 
         public static FInt Min(float a, FInt b)
         {
-            return ((a >= b.storage) ? b : new FInt(a));
+            if (a < (float)b.storage)
+            {
+                return new FInt(a);
+            }
+            return b;
         }
 
         public static FInt Max(FInt a, FInt b)
         {
-            return ((a.storage <= b.storage) ? b : a);
+            if (a.storage > b.storage)
+            {
+                return a;
+            }
+            return b;
         }
 
         public static FInt Max(FInt a, float b)
         {
-            return ((a.storage <= (b * 100f)) ? new FInt(b) : a);
+            if ((float)a.storage > b * 100f)
+            {
+                return a;
+            }
+            return new FInt(b);
         }
 
         public static FInt Max(float a, FInt b)
         {
-            return (((a * 100f) <= b.storage) ? b : new FInt(a));
+            if (a * 100f > (float)b.storage)
+            {
+                return new FInt(a);
+            }
+            return b;
         }
 
         public static FInt Lerp(FInt from, FInt to, float progress)
         {
             float num = from.ToFloat();
-            return new FInt(num + ((to.ToFloat() - num) * progress));
+            float num2 = to.ToFloat() - num;
+            return new FInt(num + num2 * progress);
         }
 
         public static int Sort(FInt a, FInt b)
@@ -432,14 +510,5 @@
         {
             return -a.storage.CompareTo(b.storage);
         }
-
-        static FInt()
-        {
-            ZERO = new FInt(0);
-            ONE = new FInt(1);
-            N_ONE = new FInt(-1);
-            MAX = new FInt(0x7fffffff);
-        }
     }
 }
-

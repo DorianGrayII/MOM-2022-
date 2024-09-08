@@ -1,34 +1,35 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Vector2), HutongGames.PlayMaker.Tooltip("Adds a XY values to Vector2 Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Vector2)]
+    [Tooltip("Adds a XY values to Vector2 Variable.")]
     public class Vector2AddXY : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The vector2 target")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The vector2 target")]
         public FsmVector2 vector2Variable;
-        [HutongGames.PlayMaker.Tooltip("The x component to add")]
+
+        [Tooltip("The x component to add")]
         public FsmFloat addX;
-        [HutongGames.PlayMaker.Tooltip("The y component to add")]
+
+        [Tooltip("The y component to add")]
         public FsmFloat addY;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame")]
+
+        [Tooltip("Repeat every frame")]
         public bool everyFrame;
-        [HutongGames.PlayMaker.Tooltip("Add the value on a per second bases.")]
+
+        [Tooltip("Add the value on a per second bases.")]
         public bool perSecond;
 
-        private void DoVector2AddXYZ()
+        public override void Reset()
         {
-            Vector2 vector = new Vector2(this.addX.Value, this.addY.Value);
-            if (this.perSecond)
-            {
-                this.vector2Variable.set_Value(this.vector2Variable.get_Value() + (vector * Time.deltaTime));
-            }
-            else
-            {
-                this.vector2Variable.set_Value(this.vector2Variable.get_Value() + vector);
-            }
+            this.vector2Variable = null;
+            this.addX = 0f;
+            this.addY = 0f;
+            this.everyFrame = false;
+            this.perSecond = false;
         }
 
         public override void OnEnter()
@@ -45,14 +46,17 @@
             this.DoVector2AddXYZ();
         }
 
-        public override void Reset()
+        private void DoVector2AddXYZ()
         {
-            this.vector2Variable = null;
-            this.addX = 0f;
-            this.addY = 0f;
-            this.everyFrame = false;
-            this.perSecond = false;
+            Vector2 vector = new Vector2(this.addX.Value, this.addY.Value);
+            if (this.perSecond)
+            {
+                this.vector2Variable.Value += vector * Time.deltaTime;
+            }
+            else
+            {
+                this.vector2Variable.Value += vector;
+            }
         }
     }
 }
-

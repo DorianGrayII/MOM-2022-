@@ -1,28 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.GameObject), Tooltip("Selects a Random Game Object from an array of Game Objects.")]
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Selects a Random Game Object from an array of Game Objects.")]
     public class SelectRandomGameObject : FsmStateAction
     {
         [CompoundArray("Game Objects", "Game Object", "Weight")]
         public FsmGameObject[] gameObjects;
+
         [HasFloatSlider(0f, 1f)]
         public FsmFloat[] weights;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject storeGameObject;
 
-        private void DoSelectRandomGameObject()
+        public override void Reset()
         {
-            if (((this.gameObjects != null) && (this.gameObjects.Length != 0)) && (this.storeGameObject != null))
-            {
-                int randomWeightedIndex = ActionHelpers.GetRandomWeightedIndex(this.weights);
-                if (randomWeightedIndex != -1)
-                {
-                    this.storeGameObject.set_Value(this.gameObjects[randomWeightedIndex].get_Value());
-                }
-            }
+            this.gameObjects = new FsmGameObject[3];
+            this.weights = new FsmFloat[3] { 1f, 1f, 1f };
+            this.storeGameObject = null;
         }
 
         public override void OnEnter()
@@ -31,12 +27,16 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSelectRandomGameObject()
         {
-            this.gameObjects = new FsmGameObject[3];
-            this.weights = new FsmFloat[] { 1f, 1f, 1f };
-            this.storeGameObject = null;
+            if (this.gameObjects != null && this.gameObjects.Length != 0 && this.storeGameObject != null)
+            {
+                int randomWeightedIndex = ActionHelpers.GetRandomWeightedIndex(this.weights);
+                if (randomWeightedIndex != -1)
+                {
+                    this.storeGameObject.Value = this.gameObjects[randomWeightedIndex].Value;
+                }
+            }
         }
     }
 }
-

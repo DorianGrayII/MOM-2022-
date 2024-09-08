@@ -1,27 +1,35 @@
-﻿namespace MOM
-{
-    using System;
-    using System.Xml.Serialization;
-    using WorldCode;
+using System;
+using System.Xml.Serialization;
+using WorldCode;
 
+namespace MOM
+{
     public class SaveMeta
     {
         [XmlAttribute]
         public string wizardName;
+
         [XmlAttribute]
         public string saveName;
+
         [XmlAttribute]
         public int turn;
+
         [XmlAttribute]
         public int worldSeed;
+
         [XmlAttribute]
         public long saveDate;
+
         [XmlAttribute]
         public string gameVersion;
+
         [XmlAttribute]
         public int gameID;
+
         [XmlAttribute]
         public int worldSizeSetting;
+
         [XmlAttribute]
         public int dlc;
 
@@ -49,9 +57,7 @@
 
         public string GetTimeStamp()
         {
-            DateTime time = new DateTime(this.saveDate);
-            return time.ToString();
+            return new DateTime(this.saveDate).ToString();
         }
     }
 }
-

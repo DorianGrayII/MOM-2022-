@@ -1,25 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Device), HutongGames.PlayMaker.Tooltip("Sends an Event based on the Orientation of the mobile device.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Device)]
+    [Tooltip("Sends an Event based on the Orientation of the mobile device.")]
     public class DeviceOrientationEvent : FsmStateAction
     {
-        [HutongGames.PlayMaker.Tooltip("Note: If device is physically situated between discrete positions, as when (for example) rotated diagonally, system will report Unknown orientation.")]
+        [Tooltip("Note: If device is physically situated between discrete positions, as when (for example) rotated diagonally, system will report Unknown orientation.")]
         public DeviceOrientation orientation;
-        [HutongGames.PlayMaker.Tooltip("The event to send if the device orientation matches Orientation.")]
+
+        [Tooltip("The event to send if the device orientation matches Orientation.")]
         public FsmEvent sendEvent;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful if you want to wait for the orientation to be true.")]
+
+        [Tooltip("Repeat every frame. Useful if you want to wait for the orientation to be true.")]
         public bool everyFrame;
 
-        private void DoDetectDeviceOrientation()
+        public override void Reset()
         {
-            if (Input.deviceOrientation == this.orientation)
-            {
-                base.Fsm.Event(this.sendEvent);
-            }
+            this.orientation = DeviceOrientation.Portrait;
+            this.sendEvent = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,12 +36,12 @@
             this.DoDetectDeviceOrientation();
         }
 
-        public override void Reset()
+        private void DoDetectDeviceOrientation()
         {
-            this.orientation = DeviceOrientation.Portrait;
-            this.sendEvent = null;
-            this.everyFrame = false;
+            if (Input.deviceOrientation == this.orientation)
+            {
+                base.Fsm.Event(this.sendEvent);
+            }
         }
     }
 }
-

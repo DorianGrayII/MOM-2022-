@@ -1,26 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using System.Collections;
-    using UnityEngine;
+using System;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Set the Tag on all children of a GameObject. Optionally filter by component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Set the Tag on all children of a GameObject. Optionally filter by component.")]
     public class SetTagsOnChildren : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("GameObject Parent")]
+        [RequiredField]
+        [Tooltip("GameObject Parent")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Tag), HutongGames.PlayMaker.Tooltip("Set Tag To...")]
-        public FsmString tag;
-        [UIHint(UIHint.ScriptComponent), HutongGames.PlayMaker.Tooltip("Only set the Tag on children with this component.")]
-        public FsmString filterByComponent;
-        private System.Type componentFilter;
 
-        public override void OnEnter()
-        {
-            this.SetTag(base.Fsm.GetOwnerDefaultTarget(this.gameObject));
-            base.Finish();
-        }
+        [RequiredField]
+        [UIHint(UIHint.Tag)]
+        [Tooltip("Set Tag To...")]
+        public FsmString tag;
+
+        [UIHint(UIHint.ScriptComponent)]
+        [Tooltip("Only set the Tag on children with this component.")]
+        public FsmString filterByComponent;
+
+        private Type componentFilter;
 
         public override void Reset()
         {
@@ -29,34 +29,38 @@
             this.filterByComponent = null;
         }
 
+        public override void OnEnter()
+        {
+            this.SetTag(base.Fsm.GetOwnerDefaultTarget(this.gameObject));
+            base.Finish();
+        }
+
         private void SetTag(GameObject parent)
         {
-            if (parent != null)
+            if (parent == null)
             {
-                if (!string.IsNullOrEmpty(this.filterByComponent.Value))
-                {
-                    this.UpdateComponentFilter();
-                    if (this.componentFilter != null)
-                    {
-                        Component[] componentsInChildren = parent.GetComponentsInChildren(this.componentFilter);
-                        for (int i = 0; i < componentsInChildren.Length; i++)
-                        {
-                            componentsInChildren[i].gameObject.tag = this.tag.Value;
-                        }
-                    }
-                }
-                else
-                {
-                    using (IEnumerator enumerator = parent.transform.GetEnumerator())
-                    {
-                        while (enumerator.MoveNext())
-                        {
-                            ((Transform) enumerator.Current).gameObject.tag = this.tag.Value;
-                        }
-                    }
-                }
-                base.Finish();
+                return;
             }
+            if (string.IsNullOrEmpty(this.filterByComponent.Value))
+            {
+                foreach (Transform item in parent.transform)
+                {
+                    item.gameObject.tag = this.tag.Value;
+                }
+            }
+            else
+            {
+                this.UpdateComponentFilter();
+                if (this.componentFilter != null)
+                {
+                    Component[] componentsInChildren = parent.GetComponentsInChildren(this.componentFilter);
+                    for (int i = 0; i < componentsInChildren.Length; i++)
+                    {
+                        componentsInChildren[i].gameObject.tag = this.tag.Value;
+                    }
+                }
+            }
+            base.Finish();
         }
 
         private void UpdateComponentFilter()
@@ -73,4 +77,3 @@
         }
     }
 }
-

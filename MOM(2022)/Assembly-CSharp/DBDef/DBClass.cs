@@ -1,11 +1,12 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DBDef.DBClass
-public class DBClass
+namespace DBDef
 {
-    public string dbName;
-
-    public override string ToString()
+    public class DBClass
     {
-        return "DBClass:" + this.dbName;
+        public string dbName;
+
+        public override string ToString()
+        {
+            return "DBClass:" + this.dbName;
+        }
     }
 }

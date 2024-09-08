@@ -1,6 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class SelectableCollection : MonoBehaviour
 {
 }
-

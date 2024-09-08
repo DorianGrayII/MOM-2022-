@@ -1,18 +1,17 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUI), HutongGames.PlayMaker.Tooltip("Sets the sorting depth of subsequent GUI elements.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUI)]
+    [Tooltip("Sets the sorting depth of subsequent GUI elements.")]
     public class SetGUIDepth : FsmStateAction
     {
         [RequiredField]
         public FsmInt depth;
 
-        public override void OnGUI()
+        public override void Reset()
         {
-            GUI.depth = this.depth.Value;
+            this.depth = 0;
         }
 
         public override void OnPreprocess()
@@ -20,10 +19,9 @@
             base.Fsm.HandleOnGUI = true;
         }
 
-        public override void Reset()
+        public override void OnGUI()
         {
-            this.depth = 0;
+            GUI.depth = this.depth.Value;
         }
     }
 }
-

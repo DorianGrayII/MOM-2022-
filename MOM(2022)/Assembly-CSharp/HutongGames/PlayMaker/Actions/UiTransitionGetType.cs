@@ -1,31 +1,60 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the transition type of a UI Selectable component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the transition type of a UI Selectable component.")]
     public class UiTransitionGetType : ComponentAction<Selectable>
     {
-        [RequiredField, CheckForComponent(typeof(Selectable)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Selectable component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Selectable))]
+        [Tooltip("The GameObject with the UI Selectable component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The transition value")]
+
+        [Tooltip("The transition value")]
         public FsmString transition;
-        [HutongGames.PlayMaker.Tooltip("Event sent if transition is ColorTint")]
+
+        [Tooltip("Event sent if transition is ColorTint")]
         public FsmEvent colorTintEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if transition is SpriteSwap")]
+
+        [Tooltip("Event sent if transition is SpriteSwap")]
         public FsmEvent spriteSwapEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if transition is Animation")]
+
+        [Tooltip("Event sent if transition is Animation")]
         public FsmEvent animationEvent;
-        [HutongGames.PlayMaker.Tooltip("Event sent if transition is none")]
+
+        [Tooltip("Event sent if transition is none")]
         public FsmEvent noTransitionEvent;
+
         private Selectable selectable;
+
         private Selectable.Transition originalTransition;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.transition = null;
+            this.colorTintEvent = null;
+            this.spriteSwapEvent = null;
+            this.animationEvent = null;
+            this.noTransitionEvent = null;
+        }
+
+        public override void OnEnter()
+        {
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                this.selectable = base.cachedComponent;
+            }
+            this.DoGetValue();
+            base.Finish();
+        }
 
         private void DoGetValue()
         {
-            if (this.selectable != null)
+            if (!(this.selectable == null))
             {
                 this.transition.Value = this.selectable.transition.ToString();
                 if (this.selectable.transition == Selectable.Transition.None)
@@ -46,27 +75,5 @@
                 }
             }
         }
-
-        public override void OnEnter()
-        {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                this.selectable = base.cachedComponent;
-            }
-            this.DoGetValue();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.transition = null;
-            this.colorTintEvent = null;
-            this.spriteSwapEvent = null;
-            this.animationEvent = null;
-            this.noTransitionEvent = null;
-        }
     }
 }
-

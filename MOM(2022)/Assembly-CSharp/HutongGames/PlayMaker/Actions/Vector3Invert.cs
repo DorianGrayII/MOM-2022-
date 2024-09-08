@@ -1,18 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Vector3), Tooltip("Reverses the direction of a Vector3 Variable. Same as multiplying by -1.")]
+    [ActionCategory(ActionCategory.Vector3)]
+    [Tooltip("Reverses the direction of a Vector3 Variable. Same as multiplying by -1.")]
     public class Vector3Invert : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmVector3 vector3Variable;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.vector3Variable = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
-            this.vector3Variable.set_Value(this.vector3Variable.get_Value() * -1f);
+            this.vector3Variable.Value = this.vector3Variable.Value * -1f;
             if (!this.everyFrame)
             {
                 base.Finish();
@@ -21,14 +27,7 @@
 
         public override void OnUpdate()
         {
-            this.vector3Variable.set_Value(this.vector3Variable.get_Value() * -1f);
-        }
-
-        public override void Reset()
-        {
-            this.vector3Variable = null;
-            this.everyFrame = false;
+            this.vector3Variable.Value = this.vector3Variable.Value * -1f;
         }
     }
 }
-

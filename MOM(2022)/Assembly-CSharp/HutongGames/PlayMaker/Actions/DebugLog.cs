@@ -1,15 +1,21 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Debug), Tooltip("Sends a log message to the PlayMaker Log Window.")]
+    [ActionCategory(ActionCategory.Debug)]
+    [Tooltip("Sends a log message to the PlayMaker Log Window.")]
     public class DebugLog : BaseLogAction
     {
         [Tooltip("Info, Warning, or Error.")]
-        public HutongGames.PlayMaker.LogLevel logLevel;
+        public LogLevel logLevel;
+
         [Tooltip("Text to send to the log.")]
         public FsmString text;
+
+        public override void Reset()
+        {
+            this.logLevel = LogLevel.Info;
+            this.text = "";
+            base.Reset();
+        }
 
         public override void OnEnter()
         {
@@ -19,13 +25,5 @@
             }
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.logLevel = HutongGames.PlayMaker.LogLevel.Info;
-            this.text = "";
-            base.Reset();
-        }
     }
 }
-

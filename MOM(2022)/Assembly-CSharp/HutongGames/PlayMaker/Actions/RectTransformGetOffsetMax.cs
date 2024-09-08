@@ -1,41 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Get the offset of the upper right corner of the rectangle relative to the upper right anchor")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Get the offset of the upper right corner of the rectangle relative to the upper right anchor")]
     public class RectTransformGetOffsetMax : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The offsetMax"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The offsetMax")]
+        [UIHint(UIHint.Variable)]
         public FsmVector2 offsetMax;
-        [HutongGames.PlayMaker.Tooltip("The x component of the offsetMax"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The x component of the offsetMax")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("The y component of the offsetMax"), UIHint(UIHint.Variable)]
+
+        [Tooltip("The y component of the offsetMax")]
+        [UIHint(UIHint.Variable)]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoGetValues()
+        public override void Reset()
         {
-            if (!this.offsetMax.IsNone)
-            {
-                this.offsetMax.set_Value(this._rt.offsetMax);
-            }
-            if (!this.x.IsNone)
-            {
-                this.x.Value = this._rt.offsetMax.x;
-            }
-            if (!this.y.IsNone)
-            {
-                this.y.Value = this._rt.offsetMax.y;
-            }
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoGetValues();
+            base.Reset();
+            this.gameObject = null;
+            this.offsetMax = null;
+            this.x = null;
+            this.y = null;
         }
 
         public override void OnEnter()
@@ -52,14 +48,25 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.offsetMax = null;
-            this.x = null;
-            this.y = null;
+            this.DoGetValues();
+        }
+
+        private void DoGetValues()
+        {
+            if (!this.offsetMax.IsNone)
+            {
+                this.offsetMax.Value = this._rt.offsetMax;
+            }
+            if (!this.x.IsNone)
+            {
+                this.x.Value = this._rt.offsetMax.x;
+            }
+            if (!this.y.IsNone)
+            {
+                this.y.Value = this._rt.offsetMax.y;
+            }
         }
     }
 }
-

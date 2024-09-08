@@ -1,16 +1,30 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animation), HutongGames.PlayMaker.Tooltip("Stops all playing Animations on a Game Object. Optionally, specify a single Animation to Stop.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animation)]
+    [Tooltip("Stops all playing Animations on a Game Object. Optionally, specify a single Animation to Stop.")]
     public class StopAnimation : BaseAnimationAction
     {
-        [RequiredField, CheckForComponent(typeof(Animation))]
+        [RequiredField]
+        [CheckForComponent(typeof(Animation))]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("Leave empty to stop all playing animations."), UIHint(UIHint.Animation)]
+
+        [Tooltip("Leave empty to stop all playing animations.")]
+        [UIHint(UIHint.Animation)]
         public FsmString animName;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.animName = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoStopAnimation();
+            base.Finish();
+        }
 
         private void DoStopAnimation()
         {
@@ -27,18 +41,5 @@
                 }
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoStopAnimation();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.animName = null;
-        }
     }
 }
-

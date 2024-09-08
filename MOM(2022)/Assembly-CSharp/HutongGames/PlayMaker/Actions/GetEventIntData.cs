@@ -1,24 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.StateMachine), Tooltip("Gets the Int data from the last Event.")]
+    [ActionCategory(ActionCategory.StateMachine)]
+    [Tooltip("Gets the Int data from the last Event.")]
     public class GetEventIntData : FsmStateAction
     {
-        [UIHint(UIHint.Variable), Tooltip("Store the int data in a variable.")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the int data in a variable.")]
         public FsmInt getIntData;
+
+        public override void Reset()
+        {
+            this.getIntData = null;
+        }
 
         public override void OnEnter()
         {
             this.getIntData.Value = Fsm.EventData.IntData;
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.getIntData = null;
-        }
     }
 }
-

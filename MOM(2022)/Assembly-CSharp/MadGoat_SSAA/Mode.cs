@@ -1,14 +1,11 @@
-﻿namespace MadGoat_SSAA
+namespace MadGoat_SSAA
 {
-    using System;
-
     public enum Mode
     {
-        SSAA,
-        ResolutionScale,
-        PerAxisScale,
-        AdaptiveResolution,
-        Custom
+        SSAA = 0,
+        ResolutionScale = 1,
+        PerAxisScale = 2,
+        AdaptiveResolution = 3,
+        Custom = 4
     }
 }
-

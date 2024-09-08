@@ -1,29 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Input), HutongGames.PlayMaker.Tooltip("Sends an Event when the specified Mouse Button is released. Optionally store the button state in a bool variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Input)]
+    [Tooltip("Sends an Event when the specified Mouse Button is released. Optionally store the button state in a bool variable.")]
     public class GetMouseButtonUp : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The mouse button to test.")]
+        [RequiredField]
+        [Tooltip("The mouse button to test.")]
         public MouseButton button;
-        [HutongGames.PlayMaker.Tooltip("Event to send if the mouse button is down.")]
+
+        [Tooltip("Event to send if the mouse button is down.")]
         public FsmEvent sendEvent;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the pressed state in a Bool Variable.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the pressed state in a Bool Variable.")]
         public FsmBool storeResult;
-        [HutongGames.PlayMaker.Tooltip("Uncheck to run when entering the state.")]
+
+        [Tooltip("Uncheck to run when entering the state.")]
         public bool inUpdateOnly;
 
-        public void DoGetMouseButtonUp()
+        public override void Reset()
         {
-            bool mouseButtonUp = Input.GetMouseButtonUp((int) this.button);
-            if (mouseButtonUp)
-            {
-                base.Fsm.Event(this.sendEvent);
-            }
-            this.storeResult.Value = mouseButtonUp;
+            this.button = MouseButton.Left;
+            this.sendEvent = null;
+            this.storeResult = null;
+            this.inUpdateOnly = true;
         }
 
         public override void OnEnter()
@@ -39,13 +41,14 @@
             this.DoGetMouseButtonUp();
         }
 
-        public override void Reset()
+        public void DoGetMouseButtonUp()
         {
-            this.button = MouseButton.Left;
-            this.sendEvent = null;
-            this.storeResult = null;
-            this.inUpdateOnly = true;
+            bool mouseButtonUp = Input.GetMouseButtonUp((int)this.button);
+            if (mouseButtonUp)
+            {
+                base.Fsm.Event(this.sendEvent);
+            }
+            this.storeResult.Value = mouseButtonUp;
         }
     }
 }
-

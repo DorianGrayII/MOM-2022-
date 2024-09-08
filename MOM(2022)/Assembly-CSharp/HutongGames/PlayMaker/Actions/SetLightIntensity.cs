@@ -1,24 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Sets the Intensity of a Light.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Sets the Intensity of a Light.")]
     public class SetLightIntensity : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         public FsmFloat lightIntensity;
+
         public bool everyFrame;
 
-        private void DoSetLightIntensity()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.light.intensity = this.lightIntensity.Value;
-            }
+            this.gameObject = null;
+            this.lightIntensity = 1f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -35,12 +35,13 @@
             this.DoSetLightIntensity();
         }
 
-        public override void Reset()
+        private void DoSetLightIntensity()
         {
-            this.gameObject = null;
-            this.lightIntensity = 1f;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.light.intensity = this.lightIntensity.Value;
+            }
         }
     }
 }
-

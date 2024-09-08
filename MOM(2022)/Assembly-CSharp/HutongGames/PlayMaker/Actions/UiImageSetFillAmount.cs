@@ -1,27 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Set The Fill Amount on a UI Image")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Set The Fill Amount on a UI Image")]
     public class UiImageSetFillAmount : ComponentAction<Image>
     {
-        [RequiredField, CheckForComponent(typeof(Image)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Image component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Image))]
+        [Tooltip("The GameObject with the UI Image component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("The fill amount.")]
+
+        [RequiredField]
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("The fill amount.")]
         public FsmFloat ImageFillAmount;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Image image;
 
-        private void DoSetFillAmount()
+        public override void Reset()
         {
-            if (this.image != null)
-            {
-                this.image.fillAmount = this.ImageFillAmount.Value;
-            }
+            this.gameObject = null;
+            this.ImageFillAmount = 1f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,12 +48,12 @@
             this.DoSetFillAmount();
         }
 
-        public override void Reset()
+        private void DoSetFillAmount()
         {
-            this.gameObject = null;
-            this.ImageFillAmount = 1f;
-            this.everyFrame = false;
+            if (this.image != null)
+            {
+                this.image.fillAmount = this.ImageFillAmount.Value;
+            }
         }
     }
 }
-

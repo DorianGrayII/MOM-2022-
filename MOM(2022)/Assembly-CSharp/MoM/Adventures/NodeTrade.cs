@@ -1,26 +1,46 @@
-﻿namespace MOM.Adventures
-{
-    using MHUtils.UI;
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Xml.Serialization;
+using MHUtils.UI;
 
+namespace MOM.Adventures
+{
     public class NodeTrade : BaseNode
     {
-        [XmlAttribute, DefaultValue((string) null)]
+        public enum TradeCurrency
+        {
+            None = 0,
+            Gold = 1,
+            Mana = 2,
+            Both = 3
+        }
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string playerWares;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptTypeParameter;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptStringParameter;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string traderWares;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptTraderTypeParameter;
-        [XmlAttribute, DefaultValue((string) null)]
+
+        [XmlAttribute]
+        [DefaultValue(null)]
         public string scriptTraderStringParameter;
-        [XmlAttribute, DefaultValue(0)]
+
+        [XmlAttribute]
+        [DefaultValue(TradeCurrency.None)]
         public TradeCurrency tradeCurrency;
 
         public override void InitializeOutputs()
@@ -33,25 +53,16 @@
         public override void UpdateVisuals(EditorNode editorNode)
         {
             List<string> avaliableListsOf = editorNode.GetAvaliableListsOf();
-            List<string> list1 = new List<string>();
-            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownPlayersWares", "playerWares", avaliableListsOf, null, false);
-            UIComponentFill.LinkDropdownEnum<TradeCurrency>(editorNode.gameObject, this, "DropdownPlayersWaresParameter", "tradeCurrency", null);
-            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputPlayersWaresParameter", "scriptStringParameter", null, null);
+            new List<string>();
+            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownPlayersWares", "playerWares", avaliableListsOf);
+            UIComponentFill.LinkDropdownEnum<TradeCurrency>(editorNode.gameObject, this, "DropdownPlayersWaresParameter", "tradeCurrency");
+            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputPlayersWaresParameter", "scriptStringParameter");
             List<string> options = new List<string>();
-            List<string> list3 = new List<string>();
-            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownTradersWares", "traderWares", options, null, false);
-            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownTradersWaresParameter", "scriptTraderTypeParameter", list3, null, false);
-            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputTradersWaresParameter", "scriptTraderStringParameter", null, null);
+            List<string> options2 = new List<string>();
+            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownTradersWares", "traderWares", options);
+            UIComponentFill.LinkDropdown(editorNode.gameObject, this, "DropdownTradersWaresParameter", "scriptTraderTypeParameter", options2);
+            UIComponentFill.LinkInputField<string>(editorNode.gameObject, this, "InputTradersWaresParameter", "scriptTraderStringParameter");
             editorNode.UpdateOutputs();
-        }
-
-        public enum TradeCurrency
-        {
-            None,
-            Gold,
-            Mana,
-            Both
         }
     }
 }
-

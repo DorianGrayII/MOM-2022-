@@ -1,7 +1,7 @@
-﻿namespace UnrealByte.EasyJira
-{
-    using System;
+using System;
 
+namespace UnrealByte.EasyJira
+{
     [Serializable]
     public class JProject
     {
@@ -13,4 +13,3 @@
         }
     }
 }
-

@@ -1,39 +1,39 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.FSMAdventure
 using System.Collections;
 using HutongGames.PlayMaker;
-using MOM;
 
-[ActionCategory(ActionCategory.GameLogic)]
-public class FSMAdventure : FSMStateBase
+namespace MOM
 {
-    public static FSMAdventure instance;
-
-    private bool advBusy;
-
-    public override void OnEnter()
+    [ActionCategory(ActionCategory.GameLogic)]
+    public class FSMAdventure : FSMStateBase
     {
-        FSMAdventure.instance = this;
-        this.advBusy = false;
-    }
+        public static FSMAdventure instance;
 
-    public static bool IsRunning()
-    {
-        if (FSMAdventure.instance == null)
+        private bool advBusy;
+
+        public override void OnEnter()
         {
-            return false;
+            FSMAdventure.instance = this;
+            this.advBusy = false;
         }
-        return FSMAdventure.instance.advBusy;
-    }
 
-    public static IEnumerator QueueOne(IEnumerator adventureHandler)
-    {
-        while (FSMAdventure.instance.advBusy)
+        public static bool IsRunning()
         {
-            yield return null;
+            if (FSMAdventure.instance == null)
+            {
+                return false;
+            }
+            return FSMAdventure.instance.advBusy;
         }
-        FSMAdventure.instance.advBusy = true;
-        yield return adventureHandler;
-        FSMAdventure.instance.advBusy = false;
+
+        public static IEnumerator QueueOne(IEnumerator adventureHandler)
+        {
+            while (FSMAdventure.instance.advBusy)
+            {
+                yield return null;
+            }
+            FSMAdventure.instance.advBusy = true;
+            yield return adventureHandler;
+            FSMAdventure.instance.advBusy = false;
+        }
     }
 }

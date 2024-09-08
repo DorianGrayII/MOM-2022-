@@ -1,30 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Convert), Tooltip("Converts an Integer value to a String value with an optional format.")]
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts an Integer value to a String value with an optional format.")]
     public class ConvertIntToString : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Int variable to convert.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Int variable to convert.")]
         public FsmInt intVariable;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("A String variable to store the converted value.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("A String variable to store the converted value.")]
         public FsmString stringVariable;
+
         [Tooltip("Optional Format, allows for leading zeros. E.g., 0000")]
         public FsmString format;
+
         [Tooltip("Repeat every frame. Useful if the Int variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertIntToString()
+        public override void Reset()
         {
-            if (!this.format.IsNone && !string.IsNullOrEmpty(this.format.Value))
-            {
-                this.stringVariable.Value = this.intVariable.Value.ToString(this.format.Value);
-            }
-            else
-            {
-                this.stringVariable.Value = this.intVariable.Value.ToString();
-            }
+            this.intVariable = null;
+            this.stringVariable = null;
+            this.everyFrame = false;
+            this.format = null;
         }
 
         public override void OnEnter()
@@ -41,13 +42,16 @@
             this.DoConvertIntToString();
         }
 
-        public override void Reset()
+        private void DoConvertIntToString()
         {
-            this.intVariable = null;
-            this.stringVariable = null;
-            this.everyFrame = false;
-            this.format = null;
+            if (this.format.IsNone || string.IsNullOrEmpty(this.format.Value))
+            {
+                this.stringVariable.Value = this.intVariable.Value.ToString();
+            }
+            else
+            {
+                this.stringVariable.Value = this.intVariable.Value.ToString(this.format.Value);
+            }
         }
     }
 }
-

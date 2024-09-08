@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,54 +7,51 @@ public class ActorToLandingSpotLink : MonoBehaviour
 
     private void OnTriggerEnter(Collider c)
     {
-        if (c != null)
+        if (!(c != null))
         {
-            LandingSpotController component = c.gameObject.GetComponent<LandingSpotController>();
-            if (component == null)
-            {
-                Debug.LogError("[ERROR]Missing Landing Spot controller");
-            }
-            else
-            {
-                List<LandingSpotController> landingSpotControllers = this.flockScareScript.landingSpotControllers;
-                if (landingSpotControllers == null)
-                {
-                    this.flockScareScript.landingSpotControllers = new List<LandingSpotController>();
-                    landingSpotControllers = this.flockScareScript.landingSpotControllers;
-                }
-                if (!landingSpotControllers.Contains(component))
-                {
-                    landingSpotControllers.Add(component);
-                }
-            }
+            return;
+        }
+        LandingSpotController component = c.gameObject.GetComponent<LandingSpotController>();
+        if (component == null)
+        {
+            Debug.LogError("[ERROR]Missing Landing Spot controller");
+            return;
+        }
+        List<LandingSpotController> landingSpotControllers = this.flockScareScript.landingSpotControllers;
+        if (landingSpotControllers == null)
+        {
+            this.flockScareScript.landingSpotControllers = new List<LandingSpotController>();
+            landingSpotControllers = this.flockScareScript.landingSpotControllers;
+        }
+        if (!landingSpotControllers.Contains(component))
+        {
+            landingSpotControllers.Add(component);
         }
     }
 
     private void OnTriggerExit(Collider c)
     {
-        if (c != null)
+        if (!(c != null))
         {
-            LandingSpotController component = c.gameObject.GetComponent<LandingSpotController>();
-            if (component == null)
+            return;
+        }
+        LandingSpotController component = c.gameObject.GetComponent<LandingSpotController>();
+        if (component == null)
+        {
+            Debug.LogError("[ERROR]Missing Landing Spot controller");
+            return;
+        }
+        List<LandingSpotController> landingSpotControllers = this.flockScareScript.landingSpotControllers;
+        if (landingSpotControllers != null && landingSpotControllers.Contains(component))
+        {
+            if (landingSpotControllers.Count == 1)
             {
-                Debug.LogError("[ERROR]Missing Landing Spot controller");
+                this.flockScareScript.landingSpotControllers = null;
             }
             else
             {
-                List<LandingSpotController> landingSpotControllers = this.flockScareScript.landingSpotControllers;
-                if ((landingSpotControllers != null) && landingSpotControllers.Contains(component))
-                {
-                    if (landingSpotControllers.Count == 1)
-                    {
-                        this.flockScareScript.landingSpotControllers = null;
-                    }
-                    else
-                    {
-                        landingSpotControllers.Remove(component);
-                    }
-                }
+                landingSpotControllers.Remove(component);
             }
         }
     }
 }
-

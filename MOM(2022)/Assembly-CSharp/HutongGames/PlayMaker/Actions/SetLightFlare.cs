@@ -1,15 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Sets the Flare effect used by a Light.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Sets the Flare effect used by a Light.")]
     public class SetLightFlare : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         public Flare lightFlare;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.lightFlare = null;
+        }
+
+        public override void OnEnter()
+        {
+            this.DoSetLightRange();
+            base.Finish();
+        }
 
         private void DoSetLightRange()
         {
@@ -19,18 +32,5 @@
                 base.light.flare = this.lightFlare;
             }
         }
-
-        public override void OnEnter()
-        {
-            this.DoSetLightRange();
-            base.Finish();
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.lightFlare = null;
-        }
     }
 }
-

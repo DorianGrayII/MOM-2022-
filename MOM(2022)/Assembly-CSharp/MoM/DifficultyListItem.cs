@@ -1,13 +1,13 @@
-﻿namespace MOM
-{
-    using MHUtils.UI;
-    using TMPro;
-    using UnityEngine;
+using MHUtils.UI;
+using TMPro;
+using UnityEngine;
 
+namespace MOM
+{
     public class DifficultyListItem : MonoBehaviour
     {
         public TextMeshProUGUI label;
+
         public DropDownFilters dropdown;
     }
 }
-

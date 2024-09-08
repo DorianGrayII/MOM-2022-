@@ -1,15 +1,12 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum ARTEFACT_SLOT
     {
-        MELEE,
-        RANGED,
-        SPELLCASTER,
-        MELEE_SPELLCASTER,
-        ARMOUR,
-        MISC
+        MELEE = 0,
+        RANGED = 1,
+        SPELLCASTER = 2,
+        MELEE_SPELLCASTER = 3,
+        ARMOUR = 4,
+        MISC = 5
     }
 }
-

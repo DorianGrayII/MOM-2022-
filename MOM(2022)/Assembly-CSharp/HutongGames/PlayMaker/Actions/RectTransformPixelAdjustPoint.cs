@@ -1,32 +1,45 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Convert a given point in screen space into a pixel correct point.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Convert a given point in screen space into a pixel correct point.")]
     public class RectTransformPixelAdjustPoint : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, CheckForComponent(typeof(Canvas)), HutongGames.PlayMaker.Tooltip("The canvas. Leave to none to use the canvas of the gameObject")]
+
+        [RequiredField]
+        [CheckForComponent(typeof(Canvas))]
+        [Tooltip("The canvas. Leave to none to use the canvas of the gameObject")]
         public FsmGameObject canvas;
-        [HutongGames.PlayMaker.Tooltip("The screen position.")]
+
+        [Tooltip("The screen position.")]
         public FsmVector2 screenPoint;
-        [ActionSection("Result"), RequiredField, HutongGames.PlayMaker.Tooltip("Pixel adjusted point from the screen position."), UIHint(UIHint.Variable)]
+
+        [ActionSection("Result")]
+        [RequiredField]
+        [Tooltip("Pixel adjusted point from the screen position.")]
+        [UIHint(UIHint.Variable)]
         public FsmVector2 pixelPoint;
+
         private RectTransform _rt;
+
         private Canvas _canvas;
 
-        private void DoAction()
+        public override void Reset()
         {
-            this.pixelPoint.set_Value(RectTransformUtility.PixelAdjustPoint(this.screenPoint.get_Value(), this._rt, this._canvas));
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoAction();
+            base.Reset();
+            this.gameObject = null;
+            this.canvas = new FsmGameObject
+            {
+                UseVariable = true
+            };
+            this.screenPoint = null;
+            this.pixelPoint = null;
         }
 
         public override void OnEnter()
@@ -36,12 +49,12 @@
             {
                 this._rt = ownerDefaultTarget.GetComponent<RectTransform>();
             }
-            GameObject obj3 = this.canvas.get_Value();
-            if (obj3 != null)
+            GameObject value = this.canvas.Value;
+            if (value != null)
             {
-                this._canvas = obj3.GetComponent<Canvas>();
+                this._canvas = value.GetComponent<Canvas>();
             }
-            if ((this._canvas == null) && (ownerDefaultTarget != null))
+            if (this._canvas == null && ownerDefaultTarget != null)
             {
                 Graphic component = ownerDefaultTarget.GetComponent<Graphic>();
                 if (component != null)
@@ -56,16 +69,14 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            FsmGameObject obj1 = new FsmGameObject();
-            obj1.UseVariable = true;
-            this.canvas = obj1;
-            this.screenPoint = null;
-            this.pixelPoint = null;
+            this.DoAction();
+        }
+
+        private void DoAction()
+        {
+            this.pixelPoint.Value = RectTransformUtility.PixelAdjustPoint(this.screenPoint.Value, this._rt, this._canvas);
         }
     }
 }
-

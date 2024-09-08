@@ -1,33 +1,35 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics2D), HutongGames.PlayMaker.Tooltip("Sets the gravity vector, or individual axis.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics2D)]
+    [Tooltip("Sets the gravity vector, or individual axis.")]
     public class SetGravity2d : FsmStateAction
     {
-        [HutongGames.PlayMaker.Tooltip("Gravity as Vector2.")]
+        [Tooltip("Gravity as Vector2.")]
         public FsmVector2 vector;
-        [HutongGames.PlayMaker.Tooltip("Override the x value of the gravity")]
+
+        [Tooltip("Override the x value of the gravity")]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("Override the y value of the gravity")]
+
+        [Tooltip("Override the y value of the gravity")]
         public FsmFloat y;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame")]
+
+        [Tooltip("Repeat every frame")]
         public bool everyFrame;
 
-        private void DoSetGravity()
+        public override void Reset()
         {
-            Vector2 vector = this.vector.get_Value();
-            if (!this.x.IsNone)
+            this.vector = null;
+            this.x = new FsmFloat
             {
-                vector.x = this.x.Value;
-            }
-            if (!this.y.IsNone)
+                UseVariable = true
+            };
+            this.y = new FsmFloat
             {
-                vector.y = this.y.Value;
-            }
-            Physics2D.gravity = vector;
+                UseVariable = true
+            };
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -44,17 +46,18 @@
             this.DoSetGravity();
         }
 
-        public override void Reset()
+        private void DoSetGravity()
         {
-            this.vector = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
-            this.everyFrame = false;
+            Vector2 value = this.vector.Value;
+            if (!this.x.IsNone)
+            {
+                value.x = this.x.Value;
+            }
+            if (!this.y.IsNone)
+            {
+                value.y = this.y.Value;
+            }
+            Physics2D.gravity = value;
         }
     }
 }
-

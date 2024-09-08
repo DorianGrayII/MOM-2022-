@@ -1,45 +1,53 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("RectTransforms position from world space into screen space. Leave the camera to none for default behavior")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("RectTransforms position from world space into screen space. Leave the camera to none for default behavior")]
     public class RectTransformWorldToScreenPoint : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [CheckForComponent(typeof(Camera)), HutongGames.PlayMaker.Tooltip("The camera to perform the calculation. Leave to none for default behavior")]
+
+        [CheckForComponent(typeof(Camera))]
+        [Tooltip("The camera to perform the calculation. Leave to none for default behavior")]
         public FsmOwnerDefault camera;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the screen position in a Vector3 Variable. Z will equal zero.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the screen position in a Vector3 Variable. Z will equal zero.")]
         public FsmVector3 screenPoint;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the screen X position in a Float Variable.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the screen X position in a Float Variable.")]
         public FsmFloat screenX;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the screen Y position in a Float Variable.")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the screen Y position in a Float Variable.")]
         public FsmFloat screenY;
-        [HutongGames.PlayMaker.Tooltip("Normalize screen coordinates (0-1). Otherwise coordinates are in pixels.")]
+
+        [Tooltip("Normalize screen coordinates (0-1). Otherwise coordinates are in pixels.")]
         public FsmBool normalize;
+
         private RectTransform _rt;
+
         private Camera _cam;
 
-        private unsafe void DoWorldToScreenPoint()
+        public override void Reset()
         {
-            Vector2 vector = RectTransformUtility.WorldToScreenPoint(this._cam, this._rt.position);
-            if (this.normalize.Value)
+            base.Reset();
+            this.gameObject = null;
+            this.camera = new FsmOwnerDefault();
+            this.camera.OwnerOption = OwnerDefaultOption.SpecifyGameObject;
+            this.camera.GameObject = new FsmGameObject
             {
-                float* singlePtr1 = &vector.x;
-                singlePtr1[0] /= (float) Screen.width;
-                float* singlePtr2 = &vector.y;
-                singlePtr2[0] /= (float) Screen.height;
-            }
-            this.screenPoint.set_Value((Vector3) vector);
-            this.screenX.Value = vector.x;
-            this.screenY.Value = vector.y;
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoWorldToScreenPoint();
+                UseVariable = true
+            };
+            this.screenPoint = null;
+            this.screenX = null;
+            this.screenY = null;
+            base.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -60,20 +68,22 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.camera = new FsmOwnerDefault();
-            this.camera.OwnerOption = OwnerDefaultOption.SpecifyGameObject;
-            FsmGameObject obj1 = new FsmGameObject();
-            obj1.UseVariable = true;
-            this.camera.GameObject = obj1;
-            this.screenPoint = null;
-            this.screenX = null;
-            this.screenY = null;
-            base.everyFrame = false;
+            this.DoWorldToScreenPoint();
+        }
+
+        private void DoWorldToScreenPoint()
+        {
+            Vector2 vector = RectTransformUtility.WorldToScreenPoint(this._cam, this._rt.position);
+            if (this.normalize.Value)
+            {
+                vector.x /= Screen.width;
+                vector.y /= Screen.height;
+            }
+            this.screenPoint.Value = vector;
+            this.screenX.Value = vector.x;
+            this.screenY.Value = vector.y;
         }
     }
 }
-

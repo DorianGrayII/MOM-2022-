@@ -1,88 +1,24 @@
-﻿using DBEnum;
+using System.Collections.Generic;
+using DBEnum;
 using MHUtils;
 using MOM;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using WorldCode;
 
-[Extension]
 public static class PlanePositionExtension
 {
-    public const int MaxDistance = 0x2710;
+    public const int MaxDistance = 10000;
 
-    [Extension]
-    public static int GetDistanceTo(IPlanePosition obj, IPlanePosition ipp)
+    public static List<Vector3i> GetSurroundingArea(this IPlanePosition obj, int range = 1)
     {
-        return (((obj == null) || (ipp == null)) ? 0x2710 : (ReferenceEquals(obj.GetPlane(), ipp.GetPlane()) ? GetDistanceTo(obj, ipp.GetPosition()) : 0x2710));
-    }
-
-    [Extension]
-    public static int GetDistanceTo(IPlanePosition obj, Vector3i pos)
-    {
-        return obj.GetPlane().GetDistanceWrapping(obj.GetPosition(), pos);
-    }
-
-    [Extension]
-    public static int GetDistanceTo(IPlanePosition obj, Vector3i pos, Plane plane)
-    {
-        Location location = obj as Location;
-        return (((location == null) || (location.otherPlaneLocation == null)) ? (!ReferenceEquals(obj.GetPlane(), plane) ? 0x2710 : obj.GetPlane().GetDistanceWrapping(obj.GetPosition(), pos)) : obj.GetPlane().GetDistanceWrapping(obj.GetPosition(), pos));
-    }
-
-    [Extension]
-    public static int GetMultiPlanarDistanceTo(IPlanePosition obj, IPlanePosition ipp, int seekerWizard)
-    {
-        if ((obj == null) || (ipp == null))
-        {
-            return 0x2710;
-        }
-        if (ReferenceEquals(obj.GetPlane(), ipp.GetPlane()))
-        {
-            return GetDistanceTo(obj, ipp);
-        }
-        int num = 0x2710;
-        foreach (Location location in GameManager.GetLocationsOfThePlane(true))
-        {
-            if ((location.otherPlaneLocation != null) && ((location.GetOwnerID() == seekerWizard) || (location.GetUnits().Count == 0)))
-            {
-                int num2 = GetDistanceTo(obj, location.GetPosition()) + GetDistanceTo(ipp, location.GetPosition());
-                if (num2 < num)
-                {
-                    num = num2;
-                }
-            }
-        }
-        return num;
-    }
-
-    [Extension]
-    public static List<Vector3i> GetSurroundingArea(IPlanePosition obj, int range)
-    {
-        List<Vector3i> pos = HexNeighbors.GetRange(obj.GetPosition(), range);
+        List<Vector3i> list = HexNeighbors.GetRange(obj.GetPosition(), range);
         if (obj.GetPlane().area.horizontalWrap)
         {
-            pos = obj.GetPlane().GetPositionWrapping(pos);
+            list = obj.GetPlane().GetPositionWrapping(list);
         }
-        return pos.FindAll(o => obj.GetPlane().area.IsInside(o, false));
+        return list.FindAll((Vector3i o) => obj.GetPlane().area.IsInside(o));
     }
 
-    [Extension]
-    public static bool IsDistanceTo_Zero(IPlanePosition obj, Vector3i pos, Plane plane)
-    {
-        Location location = obj as Location;
-        return (((location == null) || (location.otherPlaneLocation == null)) ? (ReferenceEquals(obj.GetPlane(), plane) && (obj.GetPosition() == pos)) : (obj.GetPosition() == pos));
-    }
-
-    [Extension]
-    public static bool IsHumanPlayerFocusedOnPlane(IPlanePosition obj)
-    {
-        return ReferenceEquals(World.GetActivePlane(), obj.GetPlane());
-    }
-
-    [Extension]
-    public static bool IsSwitchPlaneDestinationValid(IPlanePosition obj, List<Unit> selectedUnits)
+    public static bool IsSwitchPlaneDestinationValid(this IPlanePosition obj, List<Unit> selectedUnits = null)
     {
         if (!(obj is Group))
         {
@@ -96,20 +32,65 @@ public static class PlanePositionExtension
         {
             if (!(wizard is PlayerWizardAI))
             {
-                PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_UNAVAILABLE", "UI_OKAY", null, null, null, null, null, null);
+                PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_UNAVAILABLE", "UI_OKAY");
             }
             return false;
         }
-        Group group = GameManager.GetGroupsOfPlane(otherPlane).Find(o => o.GetPosition() == group.GetPosition());
-        if ((group != null) && (group.GetOwnerID() != group.GetOwnerID()))
+        Group group2 = GameManager.GetGroupsOfPlane(otherPlane).Find((Group o) => o.GetPosition() == group.GetPosition());
+        if (group2 != null && group2.GetOwnerID() != group.GetOwnerID())
         {
             if (!(wizard is PlayerWizardAI))
             {
-                PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_OCCUPIED", "UI_OKAY", null, null, null, null, null, null);
+                PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_OCCUPIED", "UI_OKAY");
             }
             return false;
         }
-        if ((selectedUnits == null) || (selectedUnits.Count >= group.GetUnits().Count))
+        if (selectedUnits != null && selectedUnits.Count < group.GetUnits().Count)
+        {
+            if (!hexAt.IsLand())
+            {
+                foreach (Unit selectedUnit in selectedUnits)
+                {
+                    if (selectedUnit.GetAttributes().Contains(TAG.TRANSPORTER) && (selectedUnit.GetAttributes().GetFinal(TAG.CAN_SWIM) > 0 || selectedUnit.GetAttributes().GetFinal(TAG.CAN_FLY) > 0))
+                    {
+                        return true;
+                    }
+                }
+                foreach (Unit selectedUnit2 in selectedUnits)
+                {
+                    if (selectedUnit2.GetAttributes().GetFinal(TAG.CAN_SWIM) <= 0 && selectedUnit2.GetAttributes().GetFinal(TAG.CAN_FLY) <= 0)
+                    {
+                        if (!(wizard is PlayerWizardAI))
+                        {
+                            PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY");
+                        }
+                        return false;
+                    }
+                }
+            }
+            else if (hexAt.IsLand())
+            {
+                foreach (Unit selectedUnit3 in selectedUnits)
+                {
+                    if (selectedUnit3.GetAttributes().Contains(TAG.TRANSPORTER) && (selectedUnit3.GetAttributes().GetFinal(TAG.CAN_WALK) > 0 || selectedUnit3.GetAttributes().GetFinal(TAG.CAN_FLY) > 0))
+                    {
+                        return true;
+                    }
+                }
+                foreach (Unit selectedUnit4 in selectedUnits)
+                {
+                    if (selectedUnit4.GetAttributes().GetFinal(TAG.CAN_WALK) <= 0 && selectedUnit4.GetAttributes().GetFinal(TAG.CAN_FLY) <= 0)
+                    {
+                        if (!(wizard is PlayerWizardAI))
+                        {
+                            PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY");
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        else
         {
             if (group.locationHost != null)
             {
@@ -119,7 +100,7 @@ public static class PlanePositionExtension
             {
                 if (!(wizard is PlayerWizardAI))
                 {
-                    PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY", null, null, null, null, null, null);
+                    PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY");
                 }
                 return false;
             }
@@ -127,110 +108,90 @@ public static class PlanePositionExtension
             {
                 if (!(wizard is PlayerWizardAI))
                 {
-                    PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY", null, null, null, null, null, null);
+                    PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY");
                 }
                 return false;
             }
         }
-        else
-        {
-            List<Unit>.Enumerator enumerator;
-            bool flag;
-            if (hexAt.IsLand())
-            {
-                if (!hexAt.IsLand())
-                {
-                    goto TR_0009;
-                }
-                else
-                {
-                    using (enumerator = selectedUnits.GetEnumerator())
-                    {
-                        while (true)
-                        {
-                            if (!enumerator.MoveNext())
-                            {
-                                break;
-                            }
-                            Unit current = enumerator.Current;
-                            if (current.GetAttributes().Contains(TAG.TRANSPORTER) && ((current.GetAttributes().GetFinal(TAG.CAN_WALK) > 0) || (current.GetAttributes().GetFinal(TAG.CAN_FLY) > 0)))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    using (enumerator = selectedUnits.GetEnumerator())
-                    {
-                        while (true)
-                        {
-                            if (enumerator.MoveNext())
-                            {
-                                Unit current = enumerator.Current;
-                                if ((current.GetAttributes().GetFinal(TAG.CAN_WALK) > 0) || (current.GetAttributes().GetFinal(TAG.CAN_FLY) > 0))
-                                {
-                                    continue;
-                                }
-                                if (!(wizard is PlayerWizardAI))
-                                {
-                                    PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY", null, null, null, null, null, null);
-                                }
-                                flag = false;
-                            }
-                            else
-                            {
-                                goto TR_0009;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                using (enumerator = selectedUnits.GetEnumerator())
-                {
-                    while (true)
-                    {
-                        if (!enumerator.MoveNext())
-                        {
-                            break;
-                        }
-                        Unit current = enumerator.Current;
-                        if (current.GetAttributes().Contains(TAG.TRANSPORTER) && ((current.GetAttributes().GetFinal(TAG.CAN_SWIM) > 0) || (current.GetAttributes().GetFinal(TAG.CAN_FLY) > 0)))
-                        {
-                            return true;
-                        }
-                    }
-                }
-                using (enumerator = selectedUnits.GetEnumerator())
-                {
-                    while (true)
-                    {
-                        if (enumerator.MoveNext())
-                        {
-                            Unit current = enumerator.Current;
-                            if ((current.GetAttributes().GetFinal(TAG.CAN_SWIM) > 0) || (current.GetAttributes().GetFinal(TAG.CAN_FLY) > 0))
-                            {
-                                continue;
-                            }
-                            if (!(wizard is PlayerWizardAI))
-                            {
-                                PopupGeneral.OpenPopup(HUD.Get(), "UI_SHIFT_FAILED", "UI_DESTINATION_INVALID", "UI_OKAY", null, null, null, null, null, null);
-                            }
-                            flag = false;
-                        }
-                        else
-                        {
-                            goto TR_0009;
-                        }
-                        break;
-                    }
-                }
-            }
-            return flag;
-        }
-    TR_0009:
         return true;
     }
-}
 
+    public static bool IsHumanPlayerFocusedOnPlane(this IPlanePosition obj)
+    {
+        if (World.GetActivePlane() != obj.GetPlane())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public static int GetDistanceTo(this IPlanePosition obj, Vector3i pos)
+    {
+        return obj.GetPlane().GetDistanceWrapping(obj.GetPosition(), pos);
+    }
+
+    public static int GetDistanceTo(this IPlanePosition obj, Vector3i pos, Plane plane)
+    {
+        if (obj is Location location && location.otherPlaneLocation != null)
+        {
+            return obj.GetPlane().GetDistanceWrapping(obj.GetPosition(), pos);
+        }
+        if (obj.GetPlane() == plane)
+        {
+            return obj.GetPlane().GetDistanceWrapping(obj.GetPosition(), pos);
+        }
+        return 10000;
+    }
+
+    public static bool IsDistanceTo_Zero(this IPlanePosition obj, Vector3i pos, Plane plane)
+    {
+        if (obj is Location location && location.otherPlaneLocation != null)
+        {
+            return obj.GetPosition() == pos;
+        }
+        if (obj.GetPlane() == plane)
+        {
+            return obj.GetPosition() == pos;
+        }
+        return false;
+    }
+
+    public static int GetDistanceTo(this IPlanePosition obj, IPlanePosition ipp)
+    {
+        if (obj == null || ipp == null)
+        {
+            return 10000;
+        }
+        if (obj.GetPlane() != ipp.GetPlane())
+        {
+            return 10000;
+        }
+        return obj.GetDistanceTo(ipp.GetPosition());
+    }
+
+    public static int GetMultiPlanarDistanceTo(this IPlanePosition obj, IPlanePosition ipp, int seekerWizard)
+    {
+        if (obj == null || ipp == null)
+        {
+            return 10000;
+        }
+        if (obj.GetPlane() == ipp.GetPlane())
+        {
+            return obj.GetDistanceTo(ipp);
+        }
+        List<Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(arcanus: true);
+        int num = 10000;
+        foreach (Location item in locationsOfThePlane)
+        {
+            if (item.otherPlaneLocation != null && (item.GetOwnerID() == seekerWizard || item.GetUnits().Count == 0))
+            {
+                int num2 = obj.GetDistanceTo(item.GetPosition()) + ipp.GetDistanceTo(item.GetPosition());
+                if (num2 < num)
+                {
+                    num = num2;
+                }
+            }
+        }
+        return num;
+    }
+}

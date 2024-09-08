@@ -1,26 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HelpUrl("http://hutonggames.com/playmakerforum/index.php?topic=4734.0"), HutongGames.PlayMaker.Tooltip("Sets the Drag of a Game Object's Rigid Body.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [HelpUrl("http://hutonggames.com/playmakerforum/index.php?topic=4734.0")]
+    [Tooltip("Sets the Drag of a Game Object's Rigid Body.")]
     public class SetDrag : ComponentAction<Rigidbody>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody))]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody))]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HasFloatSlider(0f, 10f)]
+
+        [RequiredField]
+        [HasFloatSlider(0f, 10f)]
         public FsmFloat drag;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Typically this would be set to True.")]
+
+        [Tooltip("Repeat every frame. Typically this would be set to True.")]
         public bool everyFrame;
 
-        private void DoSetDrag()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.rigidbody.drag = this.drag.Value;
-            }
+            this.gameObject = null;
+            this.drag = 1f;
         }
 
         public override void OnEnter()
@@ -37,11 +38,13 @@
             this.DoSetDrag();
         }
 
-        public override void Reset()
+        private void DoSetDrag()
         {
-            this.gameObject = null;
-            this.drag = 1f;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.rigidbody.drag = this.drag.Value;
+            }
         }
     }
 }
-

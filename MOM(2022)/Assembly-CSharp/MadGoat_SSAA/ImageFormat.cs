@@ -1,12 +1,9 @@
-﻿namespace MadGoat_SSAA
+namespace MadGoat_SSAA
 {
-    using System;
-
     public enum ImageFormat
     {
-        JPG,
-        PNG,
-        EXR
+        JPG = 0,
+        PNG = 1,
+        EXR = 2
     }
 }
-

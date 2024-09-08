@@ -1,24 +1,36 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.AnimateVariables), Tooltip("Easing Animation - Float")]
+    [ActionCategory(ActionCategory.AnimateVariables)]
+    [Tooltip("Easing Animation - Float")]
     public class EaseFloat : EaseFsmAction
     {
         [RequiredField]
         public FsmFloat fromValue;
+
         [RequiredField]
         public FsmFloat toValue;
+
         [UIHint(UIHint.Variable)]
         public FsmFloat floatVariable;
+
         private bool finishInNextStep;
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.floatVariable = null;
+            this.fromValue = null;
+            this.toValue = null;
+            this.finishInNextStep = false;
+        }
 
         public override void OnEnter()
         {
             base.OnEnter();
-            base.fromFloats = new float[] { this.fromValue.Value };
-            base.toFloats = new float[] { this.toValue.Value };
+            base.fromFloats = new float[1];
+            base.fromFloats[0] = this.fromValue.Value;
+            base.toFloats = new float[1];
+            base.toFloats[0] = this.toValue.Value;
             base.resultFloats = new float[1];
             this.finishInNextStep = false;
             this.floatVariable.Value = this.fromValue.Value;
@@ -48,20 +60,10 @@
             {
                 if (!this.floatVariable.IsNone)
                 {
-                    this.floatVariable.Value = base.reverse.IsNone ? this.toValue.Value : (base.reverse.Value ? this.fromValue.Value : this.toValue.Value);
+                    this.floatVariable.Value = (base.reverse.IsNone ? this.toValue.Value : (base.reverse.Value ? this.fromValue.Value : this.toValue.Value));
                 }
                 this.finishInNextStep = true;
             }
         }
-
-        public override void Reset()
-        {
-            base.Reset();
-            this.floatVariable = null;
-            this.fromValue = null;
-            this.toValue = null;
-            this.finishInNextStep = false;
-        }
     }
 }
-

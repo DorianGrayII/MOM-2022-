@@ -1,20 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Device), HutongGames.PlayMaker.Tooltip("Gets the number of Touches.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Device)]
+    [Tooltip("Gets the number of Touches.")]
     public class GetTouchCount : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the current number of touches in an Int Variable.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the current number of touches in an Int Variable.")]
         public FsmInt storeCount;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoGetTouchCount()
+        public override void Reset()
         {
-            this.storeCount.Value = Input.touchCount;
+            this.storeCount = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -31,11 +34,9 @@
             this.DoGetTouchCount();
         }
 
-        public override void Reset()
+        private void DoGetTouchCount()
         {
-            this.storeCount = null;
-            this.everyFrame = false;
+            this.storeCount.Value = Input.touchCount;
         }
     }
 }
-

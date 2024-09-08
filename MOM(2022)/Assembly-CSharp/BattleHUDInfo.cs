@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// BattleHUDInfo
 using System.Collections.Generic;
 using DBDef;
 using DBEnum;

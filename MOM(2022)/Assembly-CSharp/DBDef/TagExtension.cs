@@ -1,64 +1,54 @@
-﻿namespace DBDef
-{
-    using MHUtils;
-    using MOM;
-    using System;
-    using System.Runtime.CompilerServices;
+using MHUtils;
+using MOM;
 
-    [Extension]
+namespace DBDef
+{
     public static class TagExtension
     {
-        [Extension]
-        public static void AddFinal(NetDictionary<DBReference<Tag>, FInt> dict, Tag t, FInt val)
+        public static void AddFinal(this NetDictionary<DBReference<Tag>, FInt> dict, Tag t, int val)
+        {
+            dict.AddFinal(t, new FInt(val));
+        }
+
+        public static void AddFinal(this NetDictionary<DBReference<Tag>, FInt> dict, Tag t, FInt val)
         {
             if (t.parent == null)
             {
-                NetDictionary<DBReference<Tag>, FInt> dictionary = dict;
-                DBReference<Tag> reference = t;
-                dictionary[reference] += val;
+                dict[t] += val;
+                return;
             }
-            else
+            FInt fInt = FInt.ZERO;
+            if (dict.ContainsKey(t))
             {
-                FInt zERO = FInt.ZERO;
-                if (dict.ContainsKey(t))
-                {
-                    zERO = dict[t];
-                }
-                dict[t] = zERO + val;
-                AddFinal(dict, t.parent, val);
+                fInt = dict[t];
             }
+            dict[t] = fInt + val;
+            dict.AddFinal(t.parent, val);
         }
 
-        [Extension]
-        public static void AddFinal(NetDictionary<DBReference<Tag>, FInt> dict, Tag t, int val)
-        {
-            AddFinal(dict, t, new FInt(val));
-        }
-
-        [Extension]
-        public static FInt GetFinal(NetDictionary<DBReference<Tag>, FInt> dict, Tag t)
-        {
-            return (!dict.ContainsKey(t) ? FInt.ZERO : dict[t]);
-        }
-
-        [Extension]
-        public static void SetFinal(NetDictionary<DBReference<Tag>, FInt> dict, Tag t, FInt val)
+        public static void SetFinal(this NetDictionary<DBReference<Tag>, FInt> dict, Tag t, FInt val)
         {
             if (t.parent == null)
             {
                 dict[t] = val;
+                return;
             }
-            else
+            FInt fInt = FInt.ZERO;
+            if (dict.ContainsKey(t))
             {
-                FInt zERO = FInt.ZERO;
-                if (dict.ContainsKey(t))
-                {
-                    zERO = dict[t];
-                }
-                dict[t] = val;
-                AddFinal(dict, t.parent, val - zERO);
+                fInt = dict[t];
             }
+            dict[t] = val;
+            dict.AddFinal(t.parent, val - fInt);
+        }
+
+        public static FInt GetFinal(this NetDictionary<DBReference<Tag>, FInt> dict, Tag t)
+        {
+            if (dict.ContainsKey(t))
+            {
+                return dict[t];
+            }
+            return FInt.ZERO;
         }
     }
 }
-

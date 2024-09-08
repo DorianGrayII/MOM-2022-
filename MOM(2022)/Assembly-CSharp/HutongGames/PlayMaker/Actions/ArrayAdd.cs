@@ -1,21 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Array), Tooltip("Add an item to the end of an Array.")]
+    [ActionCategory(ActionCategory.Array)]
+    [Tooltip("Add an item to the end of an Array.")]
     public class ArrayAdd : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Array Variable to use.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Array Variable to use.")]
         public FsmArray array;
-        [RequiredField, MatchElementType("array"), Tooltip("Item to add.")]
+
+        [RequiredField]
+        [MatchElementType("array")]
+        [Tooltip("Item to add.")]
         public FsmVar value;
 
-        private void DoAddValue()
+        public override void Reset()
         {
-            this.array.Resize(this.array.Length + 1);
-            this.value.UpdateValue();
-            this.array.Set(this.array.Length - 1, this.value.GetValue());
+            this.array = null;
+            this.value = null;
         }
 
         public override void OnEnter()
@@ -24,11 +26,11 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoAddValue()
         {
-            this.array = null;
-            this.value = null;
+            this.array.Resize(this.array.Length + 1);
+            this.value.UpdateValue();
+            this.array.Set(this.array.Length - 1, this.value.GetValue());
         }
     }
 }
-

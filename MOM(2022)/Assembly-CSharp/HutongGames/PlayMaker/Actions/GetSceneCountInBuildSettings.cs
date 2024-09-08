@@ -1,18 +1,19 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine.SceneManagement;
+using UnityEngine.SceneManagement;
 
-    [ActionCategory(ActionCategory.Scene), Tooltip("Get the number of scenes in Build Settings.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Scene)]
+    [Tooltip("Get the number of scenes in Build Settings.")]
     public class GetSceneCountInBuildSettings : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The number of scenes in Build Settings.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The number of scenes in Build Settings.")]
         public FsmInt sceneCountInBuildSettings;
 
-        private void DoGetSceneCountInBuildSettings()
+        public override void Reset()
         {
-            this.sceneCountInBuildSettings.Value = SceneManager.sceneCountInBuildSettings;
+            this.sceneCountInBuildSettings = null;
         }
 
         public override void OnEnter()
@@ -21,10 +22,9 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoGetSceneCountInBuildSettings()
         {
-            this.sceneCountInBuildSettings = null;
+            this.sceneCountInBuildSettings.Value = SceneManager.sceneCountInBuildSettings;
         }
     }
 }
-

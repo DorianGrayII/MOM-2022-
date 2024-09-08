@@ -1,13 +1,10 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum ESkillDamagePool
     {
-        None,
-        Normal,
-        Undead,
-        Irreversible
+        None = 0,
+        Normal = 1,
+        Undead = 2,
+        Irreversible = 3
     }
 }
-

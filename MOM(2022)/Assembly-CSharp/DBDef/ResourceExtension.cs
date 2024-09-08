@@ -1,16 +1,14 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-    using System.Runtime.CompilerServices;
-
-    [Extension]
     public static class ResourceExtension
     {
-        [Extension]
-        public static string GetModel3dName(Resource r)
+        public static string GetModel3dName(this Resource r)
         {
-            return ((r.model3d == null) ? r.GetDescriptionInfo().graphic : r.model3d);
+            if (r.model3d != null)
+            {
+                return r.model3d;
+            }
+            return r.GetDescriptionInfo().graphic;
         }
     }
 }
-

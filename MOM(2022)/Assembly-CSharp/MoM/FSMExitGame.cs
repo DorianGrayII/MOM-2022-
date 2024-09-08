@@ -1,9 +1,8 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using HutongGames.PlayMaker;
+using UnityEngine;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMExitGame : FSMStateBase
     {
@@ -14,4 +13,3 @@
         }
     }
 }
-

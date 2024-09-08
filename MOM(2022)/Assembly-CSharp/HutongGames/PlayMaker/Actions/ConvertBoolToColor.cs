@@ -1,26 +1,37 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Convert), HutongGames.PlayMaker.Tooltip("Converts a Bool value to a Color.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts a Bool value to a Color.")]
     public class ConvertBoolToColor : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Bool variable to test.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Bool variable to test.")]
         public FsmBool boolVariable;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The Color variable to set based on the bool variable value.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Color variable to set based on the bool variable value.")]
         public FsmColor colorVariable;
-        [HutongGames.PlayMaker.Tooltip("Color if Bool variable is false.")]
+
+        [Tooltip("Color if Bool variable is false.")]
         public FsmColor falseColor;
-        [HutongGames.PlayMaker.Tooltip("Color if Bool variable is true.")]
+
+        [Tooltip("Color if Bool variable is true.")]
         public FsmColor trueColor;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful if the Bool variable is changing.")]
+
+        [Tooltip("Repeat every frame. Useful if the Bool variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertBoolToColor()
+        public override void Reset()
         {
-            this.colorVariable.set_Value(this.boolVariable.Value ? this.trueColor.get_Value() : this.falseColor.get_Value());
+            this.boolVariable = null;
+            this.colorVariable = null;
+            this.falseColor = Color.black;
+            this.trueColor = Color.white;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -37,14 +48,9 @@
             this.DoConvertBoolToColor();
         }
 
-        public override void Reset()
+        private void DoConvertBoolToColor()
         {
-            this.boolVariable = null;
-            this.colorVariable = null;
-            this.falseColor = (FsmColor) Color.black;
-            this.trueColor = (FsmColor) Color.white;
-            this.everyFrame = false;
+            this.colorVariable.Value = (this.boolVariable.Value ? this.trueColor.Value : this.falseColor.Value);
         }
     }
 }
-

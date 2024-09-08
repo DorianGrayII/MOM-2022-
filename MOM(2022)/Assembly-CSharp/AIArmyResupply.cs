@@ -1,7 +1,6 @@
-﻿using MHUtils;
+using MHUtils;
 using MOM;
 using ProtoBuf;
-using System;
 using UnityEngine;
 using WorldCode;
 
@@ -10,60 +9,55 @@ public class AIArmyResupply : IPlanePosition
 {
     [ProtoMember(1)]
     public Reference<PlayerWizard> owner;
+
     [ProtoMember(2)]
     public AIWarArmy target;
+
     [ProtoMember(2)]
     public Reference<Group> group;
+
     [ProtoMember(3)]
     public AIWarArmy.Mobility armyMobilityDesignation;
 
-    public void ActAfterTargetIsObsolete()
+    public bool Valid()
     {
-    }
-
-    public Vector3 GetPhysicalPosition()
-    {
-        if (this.GetPlane() == null)
+        if (this.group == null || this.group.Get() == null || !this.group.Get().alive)
         {
-            return Vector3.zero;
+            return false;
         }
-        Vector3 vector = HexCoordinates.HexToWorld3D(this.GetPosition());
-        return (this.GetPlane().GetChunkFor(this.GetPosition()).go.transform.position + vector);
-    }
-
-    public WorldCode.Plane GetPlane()
-    {
-        Group local2;
-        if (this.group != null)
-        {
-            local2 = this.group.Get();
-        }
-        else
-        {
-            Reference<Group> group = this.group;
-            local2 = null;
-        }
-        return ((local2 == null) ? null : this.group.Get().GetPlane());
+        return true;
     }
 
     public Vector3i GetPosition()
     {
-        Group local2;
-        if (this.group != null)
+        if (this.group?.Get() != null)
         {
-            local2 = this.group.Get();
+            return this.group.Get().GetPosition();
         }
-        else
-        {
-            Reference<Group> group = this.group;
-            local2 = null;
-        }
-        return ((local2 == null) ? Vector3i.invalid : this.group.Get().GetPosition());
+        return Vector3i.invalid;
     }
 
-    public bool Valid()
+    public Vector3 GetPhysicalPosition()
     {
-        return ((this.group != null) && ((this.group.Get() != null) && this.group.Get().alive));
+        if (this.GetPlane() != null)
+        {
+            Chunk chunkFor = this.GetPlane().GetChunkFor(this.GetPosition());
+            Vector3 vector = HexCoordinates.HexToWorld3D(this.GetPosition());
+            return chunkFor.go.transform.position + vector;
+        }
+        return Vector3.zero;
+    }
+
+    public global::WorldCode.Plane GetPlane()
+    {
+        if (this.group?.Get() != null)
+        {
+            return this.group.Get().GetPlane();
+        }
+        return null;
+    }
+
+    public void ActAfterTargetIsObsolete()
+    {
     }
 }
-

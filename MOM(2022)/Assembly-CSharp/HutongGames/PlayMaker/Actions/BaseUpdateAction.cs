@@ -1,41 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
     public abstract class BaseUpdateAction : FsmStateAction
     {
-        [ActionSection("Update type"), Tooltip("Repeat every frame.")]
+        public enum UpdateType
+        {
+            OnUpdate = 0,
+            OnLateUpdate = 1,
+            OnFixedUpdate = 2
+        }
+
+        [ActionSection("Update type")]
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
+
         public UpdateType updateType;
 
-        protected BaseUpdateAction()
-        {
-        }
-
         public abstract void OnActionUpdate();
-        public override void OnFixedUpdate()
-        {
-            if (this.updateType == UpdateType.OnFixedUpdate)
-            {
-                this.OnActionUpdate();
-            }
-            if (!this.everyFrame)
-            {
-                base.Finish();
-            }
-        }
 
-        public override void OnLateUpdate()
+        public override void Reset()
         {
-            if (this.updateType == UpdateType.OnLateUpdate)
-            {
-                this.OnActionUpdate();
-            }
-            if (!this.everyFrame)
-            {
-                base.Finish();
-            }
+            this.everyFrame = false;
+            this.updateType = UpdateType.OnUpdate;
         }
 
         public override void OnPreprocess()
@@ -62,18 +47,28 @@
             }
         }
 
-        public override void Reset()
+        public override void OnLateUpdate()
         {
-            this.everyFrame = false;
-            this.updateType = UpdateType.OnUpdate;
+            if (this.updateType == UpdateType.OnLateUpdate)
+            {
+                this.OnActionUpdate();
+            }
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
         }
 
-        public enum UpdateType
+        public override void OnFixedUpdate()
         {
-            OnUpdate,
-            OnLateUpdate,
-            OnFixedUpdate
+            if (this.updateType == UpdateType.OnFixedUpdate)
+            {
+                this.OnActionUpdate();
+            }
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
         }
     }
 }
-

@@ -1,16 +1,13 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum TAX
     {
-        NONE,
-        L1,
-        L2,
-        L3,
-        L4,
-        L5,
-        L6
+        NONE = 0,
+        L1 = 1,
+        L2 = 2,
+        L3 = 3,
+        L4 = 4,
+        L5 = 5,
+        L6 = 6
     }
 }
-

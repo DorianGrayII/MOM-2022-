@@ -1,22 +1,18 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Forces a Game Object's Rigid Body to wake up.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Physics)]
+    [Tooltip("Forces a Game Object's Rigid Body to wake up.")]
     public class WakeUp : ComponentAction<Rigidbody>
     {
-        [RequiredField, CheckForComponent(typeof(Rigidbody))]
+        [RequiredField]
+        [CheckForComponent(typeof(Rigidbody))]
         public FsmOwnerDefault gameObject;
 
-        private void DoWakeUp()
+        public override void Reset()
         {
-            GameObject go = (this.gameObject.OwnerOption == OwnerDefaultOption.UseOwner) ? base.get_Owner() : this.gameObject.GameObject.get_Value();
-            if (base.UpdateCache(go))
-            {
-                base.rigidbody.WakeUp();
-            }
+            this.gameObject = null;
         }
 
         public override void OnEnter()
@@ -25,10 +21,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoWakeUp()
         {
-            this.gameObject = null;
+            GameObject go = ((this.gameObject.OwnerOption == OwnerDefaultOption.UseOwner) ? base.Owner : this.gameObject.GameObject.Value);
+            if (base.UpdateCache(go))
+            {
+                base.rigidbody.WakeUp();
+            }
         }
     }
 }
-

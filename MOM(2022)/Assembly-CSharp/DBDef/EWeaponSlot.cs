@@ -1,16 +1,13 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum EWeaponSlot
     {
-        None,
-        Melee,
-        Ranged,
-        SpellCaster,
-        Melee_SpellCaster,
-        Armour,
-        Miscellaneous
+        None = 0,
+        Melee = 1,
+        Ranged = 2,
+        SpellCaster = 3,
+        Melee_SpellCaster = 4,
+        Armour = 5,
+        Miscellaneous = 6
     }
 }
-

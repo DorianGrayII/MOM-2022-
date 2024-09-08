@@ -1,46 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Finds a Game Object by Name and/or Tag.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Finds a Game Object by Name and/or Tag.")]
     public class FindGameObject : FsmStateAction
     {
-        [HutongGames.PlayMaker.Tooltip("The name of the GameObject to find. You can leave this empty if you specify a Tag.")]
+        [Tooltip("The name of the GameObject to find. You can leave this empty if you specify a Tag.")]
         public FsmString objectName;
-        [UIHint(UIHint.Tag), HutongGames.PlayMaker.Tooltip("Find a GameObject with this tag. If Object Name is specified then both name and Tag must match.")]
+
+        [UIHint(UIHint.Tag)]
+        [Tooltip("Find a GameObject with this tag. If Object Name is specified then both name and Tag must match.")]
         public FsmString withTag;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the result in a GameObject variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in a GameObject variable.")]
         public FsmGameObject store;
 
-        public override string ErrorCheck()
+        public override void Reset()
         {
-            return ((!string.IsNullOrEmpty(this.objectName.Value) || !string.IsNullOrEmpty(this.withTag.Value)) ? null : "Specify Name, Tag, or both.");
-        }
-
-        private void Find()
-        {
-            if (this.withTag.Value == "Untagged")
-            {
-                this.store.set_Value(GameObject.Find(this.objectName.Value));
-            }
-            else if (string.IsNullOrEmpty(this.objectName.Value))
-            {
-                this.store.set_Value(GameObject.FindGameObjectWithTag(this.withTag.Value));
-            }
-            else
-            {
-                foreach (GameObject obj2 in GameObject.FindGameObjectsWithTag(this.withTag.Value))
-                {
-                    if (obj2.name == this.objectName.Value)
-                    {
-                        this.store.set_Value(obj2);
-                        return;
-                    }
-                }
-                this.store.set_Value((GameObject) null);
-            }
+            this.objectName = "";
+            this.withTag = "Untagged";
+            this.store = null;
         }
 
         public override void OnEnter()
@@ -49,12 +31,41 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void Find()
         {
-            this.objectName = "";
-            this.withTag = "Untagged";
-            this.store = null;
+            if (this.withTag.Value != "Untagged")
+            {
+                if (!string.IsNullOrEmpty(this.objectName.Value))
+                {
+                    GameObject[] array = GameObject.FindGameObjectsWithTag(this.withTag.Value);
+                    foreach (GameObject gameObject in array)
+                    {
+                        if (gameObject.name == this.objectName.Value)
+                        {
+                            this.store.Value = gameObject;
+                            return;
+                        }
+                    }
+                    this.store.Value = null;
+                }
+                else
+                {
+                    this.store.Value = GameObject.FindGameObjectWithTag(this.withTag.Value);
+                }
+            }
+            else
+            {
+                this.store.Value = GameObject.Find(this.objectName.Value);
+            }
+        }
+
+        public override string ErrorCheck()
+        {
+            if (string.IsNullOrEmpty(this.objectName.Value) && string.IsNullOrEmpty(this.withTag.Value))
+            {
+                return "Specify Name, Tag, or both.";
+            }
+            return null;
         }
     }
 }
-

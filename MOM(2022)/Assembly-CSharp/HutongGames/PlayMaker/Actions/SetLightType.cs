@@ -1,24 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Set Spot, Directional, or Point Light type.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Set Spot, Directional, or Point Light type.")]
     public class SetLightType : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         [ObjectType(typeof(LightType))]
         public FsmEnum lightType;
 
-        private void DoSetLightType()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.light.type = (LightType) this.lightType.Value;
-            }
+            this.gameObject = null;
+            this.lightType = LightType.Point;
         }
 
         public override void OnEnter()
@@ -27,11 +25,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetLightType()
         {
-            this.gameObject = null;
-            this.lightType = LightType.Point;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.light.type = (LightType)(object)this.lightType.Value;
+            }
         }
     }
 }
-

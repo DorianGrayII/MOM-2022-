@@ -1,72 +1,12 @@
-﻿using MHUtils;
-using MOM;
-using System;
 using System.Collections.Generic;
+using MHUtils;
+using MOM;
 
 public class AIBattleTactics
 {
     public List<AIBattleUnitPlan> attackerUnitPlans = new List<AIBattleUnitPlan>();
+
     public List<AIBattleUnitPlan> defenderUnitPlans = new List<AIBattleUnitPlan>();
-
-    public List<BattleUnit> FilterByOption(List<BattleUnit> targets, AIAttackOption option)
-    {
-        return targets.FindAll(o => o.currentlyVisible && ReferenceEquals(this.GetPlan(o), option.target));
-    }
-
-    public AIAttackOption GetAttackOption(BattleUnit attacker, BattleUnit defender, Battle b, bool melee)
-    {
-        AIBattleUnitPlan plan = this.GetPlan(attacker);
-        AIBattleUnitPlan dPlan = this.GetPlan(defender);
-        AIAttackOption item = plan.attacknOptions.Find(o => (o.melee == melee) && ReferenceEquals(o.target, dPlan));
-        if (item == null)
-        {
-            Multitype<int, int> multitype = attacker.GetStrategicAttackGain(defender, b, melee);
-            item = new AIAttackOption {
-                melee = melee,
-                target = dPlan
-            };
-            if ((multitype == null) || !defender.IsAlive())
-            {
-                item.attackValid = false;
-            }
-            else
-            {
-                item.attackValid = true;
-                item.ownValueChange = multitype.t0;
-                item.targetValueChange = multitype.t1;
-            }
-            plan.attacknOptions.Add(item);
-        }
-        return item;
-    }
-
-    public List<AIAttackOption> GetOptions(BattleUnit attacker, List<BattleUnit> defender, Battle b)
-    {
-        List<AIAttackOption> list = new List<AIAttackOption>();
-        if (attacker.Mp > 0)
-        {
-            if (attacker.GetCurentFigure().rangedAmmo > 0)
-            {
-                foreach (BattleUnit unit in defender)
-                {
-                    AIAttackOption item = this.GetAttackOption(attacker, unit, b, false);
-                    if (!list.Contains(item))
-                    {
-                        list.Add(item);
-                    }
-                }
-            }
-            foreach (BattleUnit unit2 in defender)
-            {
-                AIAttackOption item = this.GetAttackOption(attacker, unit2, b, true);
-                if (!list.Contains(item))
-                {
-                    list.Add(item);
-                }
-            }
-        }
-        return list;
-    }
 
     public AIBattleUnitPlan GetPlan(BattleUnit b)
     {
@@ -75,24 +15,82 @@ public class AIBattleTactics
             return null;
         }
         int value = b.GetBattleUnitValue();
-        List<AIBattleUnitPlan> list = b.attackingSide ? this.attackerUnitPlans : this.defenderUnitPlans;
-        int attCount = b.attributes.GetFinalDictionary(false).Count;
-        AIBattleUnitPlan item = list.Find(o => !o.obsolete && ((o.source == b.dbSource.Get()) && ((o.sourceValue == value) && (o.attributeCount == attCount))));
-        if (item == null)
+        List<AIBattleUnitPlan> list = (b.attackingSide ? this.attackerUnitPlans : this.defenderUnitPlans);
+        int attCount = b.attributes.GetFinalDictionary().Count;
+        AIBattleUnitPlan aIBattleUnitPlan = list.Find((AIBattleUnitPlan o) => !o.obsolete && o.source == b.dbSource.Get() && o.sourceValue == value && o.attributeCount == attCount);
+        if (aIBattleUnitPlan == null)
         {
-            item = new AIBattleUnitPlan {
-                source = b.dbSource.Get(),
-                sourceValue = value,
-                attributeCount = attCount
-            };
-            list.Add(item);
+            aIBattleUnitPlan = new AIBattleUnitPlan();
+            aIBattleUnitPlan.source = b.dbSource.Get();
+            aIBattleUnitPlan.sourceValue = value;
+            aIBattleUnitPlan.attributeCount = attCount;
+            list.Add(aIBattleUnitPlan);
         }
-        return item;
+        return aIBattleUnitPlan;
+    }
+
+    public List<AIAttackOption> GetOptions(BattleUnit attacker, List<BattleUnit> defender, Battle b)
+    {
+        List<AIAttackOption> list = new List<AIAttackOption>();
+        if (attacker.Mp <= 0)
+        {
+            return list;
+        }
+        if (attacker.GetCurentFigure().rangedAmmo > 0)
+        {
+            foreach (BattleUnit item in defender)
+            {
+                AIAttackOption attackOption = this.GetAttackOption(attacker, item, b, melee: false);
+                if (!list.Contains(attackOption))
+                {
+                    list.Add(attackOption);
+                }
+            }
+        }
+        foreach (BattleUnit item2 in defender)
+        {
+            AIAttackOption attackOption2 = this.GetAttackOption(attacker, item2, b, melee: true);
+            if (!list.Contains(attackOption2))
+            {
+                list.Add(attackOption2);
+            }
+        }
+        return list;
+    }
+
+    public AIAttackOption GetAttackOption(BattleUnit attacker, BattleUnit defender, Battle b, bool melee)
+    {
+        AIBattleUnitPlan plan = this.GetPlan(attacker);
+        AIBattleUnitPlan dPlan = this.GetPlan(defender);
+        AIAttackOption aIAttackOption = plan.attacknOptions.Find((AIAttackOption o) => o.melee == melee && o.target == dPlan);
+        if (aIAttackOption == null)
+        {
+            Multitype<int, int> strategicAttackGain = attacker.GetStrategicAttackGain(defender, b, melee);
+            aIAttackOption = new AIAttackOption();
+            aIAttackOption.melee = melee;
+            aIAttackOption.target = dPlan;
+            if (strategicAttackGain == null || !defender.IsAlive())
+            {
+                aIAttackOption.attackValid = false;
+            }
+            else
+            {
+                aIAttackOption.attackValid = true;
+                aIAttackOption.ownValueChange = strategicAttackGain.t0;
+                aIAttackOption.targetValueChange = strategicAttackGain.t1;
+            }
+            plan.attacknOptions.Add(aIAttackOption);
+        }
+        return aIAttackOption;
     }
 
     public bool IsFromOptionType(AIAttackOption option, BattleUnit target)
     {
-        return ReferenceEquals(this.GetPlan(target), option.target);
+        return this.GetPlan(target) == option.target;
+    }
+
+    public List<BattleUnit> FilterByOption(List<BattleUnit> targets, AIAttackOption option)
+    {
+        return targets.FindAll((BattleUnit o) => o.currentlyVisible && this.GetPlan(o) == option.target);
     }
 }
-

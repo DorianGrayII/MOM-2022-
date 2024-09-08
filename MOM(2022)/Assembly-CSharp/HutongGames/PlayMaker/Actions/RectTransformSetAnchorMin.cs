@@ -1,43 +1,42 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("The normalized position in the parent RectTransform that the lower left corner is anchored to. This is relative screen space, values ranges from 0 to 1")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("The normalized position in the parent RectTransform that the lower left corner is anchored to. This is relative screen space, values ranges from 0 to 1")]
     public class RectTransformSetAnchorMin : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The Vector2 anchor. Set to none for no effect, and/or set individual axis below.")]
+
+        [Tooltip("The Vector2 anchor. Set to none for no effect, and/or set individual axis below.")]
         public FsmVector2 anchorMin;
-        [HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
+
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
         public FsmFloat x;
-        [HasFloatSlider(0f, 1f), HutongGames.PlayMaker.Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
+
+        [HasFloatSlider(0f, 1f)]
+        [Tooltip("Setting only the x value. Overrides anchorMin x value if set. Set to none for no effect")]
         public FsmFloat y;
+
         private RectTransform _rt;
 
-        private void DoSetAnchorMin()
+        public override void Reset()
         {
-            Vector2 anchorMin = this._rt.anchorMin;
-            if (!this.anchorMin.IsNone)
+            base.Reset();
+            this.gameObject = null;
+            this.anchorMin = null;
+            this.x = new FsmFloat
             {
-                anchorMin = this.anchorMin.get_Value();
-            }
-            if (!this.x.IsNone)
+                UseVariable = true
+            };
+            this.y = new FsmFloat
             {
-                anchorMin.x = this.x.Value;
-            }
-            if (!this.y.IsNone)
-            {
-                anchorMin.y = this.y.Value;
-            }
-            this._rt.anchorMin = anchorMin;
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoSetAnchorMin();
+                UseVariable = true
+            };
         }
 
         public override void OnEnter()
@@ -54,18 +53,27 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.anchorMin = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
+            this.DoSetAnchorMin();
+        }
+
+        private void DoSetAnchorMin()
+        {
+            Vector2 value = this._rt.anchorMin;
+            if (!this.anchorMin.IsNone)
+            {
+                value = this.anchorMin.Value;
+            }
+            if (!this.x.IsNone)
+            {
+                value.x = this.x.Value;
+            }
+            if (!this.y.IsNone)
+            {
+                value.y = this.y.Value;
+            }
+            this._rt.anchorMin = value;
         }
     }
 }
-

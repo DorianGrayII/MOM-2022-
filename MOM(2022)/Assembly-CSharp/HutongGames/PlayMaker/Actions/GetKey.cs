@@ -1,22 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Input), HutongGames.PlayMaker.Tooltip("Gets the pressed state of a Key.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Input)]
+    [Tooltip("Gets the pressed state of a Key.")]
     public class GetKey : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The key to test.")]
+        [RequiredField]
+        [Tooltip("The key to test.")]
         public KeyCode key;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store if the key is down (True) or up (False).")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store if the key is down (True) or up (False).")]
         public FsmBool storeResult;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful if you're waiting for a key press/release.")]
+
+        [Tooltip("Repeat every frame. Useful if you're waiting for a key press/release.")]
         public bool everyFrame;
 
-        private void DoGetKey()
+        public override void Reset()
         {
-            this.storeResult.Value = Input.GetKey(this.key);
+            this.key = KeyCode.None;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -33,12 +39,9 @@
             this.DoGetKey();
         }
 
-        public override void Reset()
+        private void DoGetKey()
         {
-            this.key = KeyCode.None;
-            this.storeResult = null;
-            this.everyFrame = false;
+            this.storeResult.Value = Input.GetKey(this.key);
         }
     }
 }
-

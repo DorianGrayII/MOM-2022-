@@ -1,59 +1,85 @@
-﻿using DBDef;
+using DBDef;
 using DBUtils;
 using MHUtils;
-using System;
 using UnityEngine;
 
 public class RolloverSimpleTooltip : RolloverBase
 {
     public string sourceAsDbName;
+
     public string title;
+
     public string description;
+
     public string imageName;
+
     public string data;
+
     public Texture2D image;
+
     public object[] descriptionParams;
+
+    public string GetTitle()
+    {
+        if (!string.IsNullOrEmpty(this.sourceAsDbName) && string.IsNullOrEmpty(this.title))
+        {
+            DBClass dBClass = DataBase.Get(this.sourceAsDbName, reportMissing: true);
+            if (dBClass == null)
+            {
+                return null;
+            }
+            DescriptionInfo descriptionInfo = dBClass as DescriptionInfo;
+            if (descriptionInfo == null && dBClass is IDescriptionInfoType)
+            {
+                descriptionInfo = (dBClass as IDescriptionInfoType).GetDescriptionInfo();
+            }
+            if (descriptionInfo != null)
+            {
+                return descriptionInfo.GetLocalizedName();
+            }
+        }
+        return this.title;
+    }
 
     public string GetDescription()
     {
         if (!string.IsNullOrEmpty(this.sourceAsDbName))
         {
-            DBClass class2 = DataBase.Get(this.sourceAsDbName, true);
-            if (class2 == null)
+            DBClass dBClass = DataBase.Get(this.sourceAsDbName, reportMissing: true);
+            if (dBClass == null)
             {
                 return null;
             }
-            DescriptionInfo descriptionInfo = class2 as DescriptionInfo;
-            if ((descriptionInfo == null) && (class2 is IDescriptionInfoType))
+            DescriptionInfo descriptionInfo = dBClass as DescriptionInfo;
+            if (descriptionInfo == null && dBClass is IDescriptionInfoType)
             {
-                descriptionInfo = (class2 as IDescriptionInfoType).GetDescriptionInfo();
+                descriptionInfo = (dBClass as IDescriptionInfoType).GetDescriptionInfo();
             }
             if (descriptionInfo != null)
             {
                 return descriptionInfo.GetLocalizedDescription();
             }
         }
-        return ((this.descriptionParams == null) ? this.description : DBUtils.Localization.Get(this.description, true, this.descriptionParams));
-    }
-
-    public Texture2D GetIcon()
-    {
-        return ((this.image == null) ? AssetManager.Get<Texture2D>(this.GetIconName(), true) : this.image);
+        if (this.descriptionParams != null)
+        {
+            return global::DBUtils.Localization.Get(this.description, symbolParse: true, this.descriptionParams);
+        }
+        return this.description;
     }
 
     public string GetIconName()
     {
         if (!string.IsNullOrEmpty(this.sourceAsDbName))
         {
-            DBClass class2 = DataBase.Get(this.sourceAsDbName, true);
-            if (class2 == null)
+            DBClass dBClass = DataBase.Get(this.sourceAsDbName, reportMissing: true);
+            if (dBClass == null)
             {
                 return null;
             }
-            DescriptionInfo descriptionInfo = class2 as DescriptionInfo;
-            if ((descriptionInfo == null) && (class2 is IDescriptionInfoType))
+            DescriptionInfo descriptionInfo = dBClass as DescriptionInfo;
+            if (descriptionInfo == null && dBClass is IDescriptionInfoType)
             {
-                descriptionInfo = (class2 as IDescriptionInfoType).GetDescriptionInfo();
+                descriptionInfo = (dBClass as IDescriptionInfoType).GetDescriptionInfo();
             }
             if (descriptionInfo != null)
             {
@@ -63,26 +89,12 @@ public class RolloverSimpleTooltip : RolloverBase
         return this.imageName;
     }
 
-    public string GetTitle()
+    public Texture2D GetIcon()
     {
-        if (!string.IsNullOrEmpty(this.sourceAsDbName) && string.IsNullOrEmpty(this.title))
+        if (this.image != null)
         {
-            DBClass class2 = DataBase.Get(this.sourceAsDbName, true);
-            if (class2 == null)
-            {
-                return null;
-            }
-            DescriptionInfo descriptionInfo = class2 as DescriptionInfo;
-            if ((descriptionInfo == null) && (class2 is IDescriptionInfoType))
-            {
-                descriptionInfo = (class2 as IDescriptionInfoType).GetDescriptionInfo();
-            }
-            if (descriptionInfo != null)
-            {
-                return descriptionInfo.GetLocalizedName();
-            }
+            return this.image;
         }
-        return this.title;
+        return AssetManager.Get<Texture2D>(this.GetIconName());
     }
 }
-

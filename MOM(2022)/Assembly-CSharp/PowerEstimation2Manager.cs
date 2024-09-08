@@ -1,193 +1,40 @@
-﻿using MHUtils;
+using System;
+using System.IO;
+using System.Text;
+using MHUtils;
 using MHUtils.NeuralNetwork;
 using MHUtils.NeuralNetwork.PowerEstimation2;
 using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using UnityEngine;
 
 public class PowerEstimation2Manager : MonoBehaviour
 {
     public string sourceNetwork;
+
     public string startGen;
+
     private NNEnvironment environment;
+
     public int threadCount = 10;
+
     public float evoShare = 0.05f;
+
     public float evoStrength = 0.3f;
-    public int generationSize = 0x3e8;
+
+    public int generationSize = 1000;
+
     public Neuron.NeuronType newNetworkNeuronType = Neuron.NeuronType.TanH;
-    public MHUtils.NeuralNetwork.NeuralNetwork.Model newNetworkModel = MHUtils.NeuralNetwork.NeuralNetwork.Model.DFF_Lerp_4;
 
-    private void EvolveNetwork(int x)
-    {
-        if (this.environment == null)
-        {
-            NNEnvironment environment = this.environment;
-        }
-        else
-        {
-            int? nullable;
-            int? nullable3;
-            if (this.environment == null)
-            {
-                NNEnvironment environment = this.environment;
-                nullable = null;
-                nullable3 = nullable;
-            }
-            else
-            {
-                int? nullable2;
-                int? nullable1;
-                if (this.environment.network != null)
-                {
-                    nullable1 = new int?(this.environment.network.generation);
-                }
-                else
-                {
-                    MHUtils.NeuralNetwork.NeuralNetwork network = this.environment.network;
-                    nullable2 = null;
-                    nullable1 = nullable2;
-                }
-                nullable = nullable1;
-                int num = x;
-                if (nullable != null)
-                {
-                    nullable3 = new int?(nullable.GetValueOrDefault() + num);
-                }
-                else
-                {
-                    nullable2 = null;
-                    nullable3 = nullable2;
-                }
-            }
-            this.environment.StopAtGeneration(nullable3.GetValueOrDefault());
-        }
-    }
-
-    private void GenerateNewNetwork()
-    {
-        MHUtils.NeuralNetwork.NeuralNetwork network = new MHUtils.NeuralNetwork.NeuralNetwork();
-        network.InitializeBlank(NNUnit.GetInputDataSize(), 1, this.newNetworkModel, this.newNetworkNeuronType);
-        network.uniqueID = UnityEngine.Random.Range(0, 0x7fffffff);
-        this.environment.network = network;
-        this.environment.ResetEnvironment(this);
-    }
-
-    private void LoadSourceNetwork()
-    {
-        try
-        {
-            string path = Path.Combine(Path.Combine(MHApplication.EXTERNAL_ASSETS, "NN"), this.sourceNetwork);
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            int num = 0;
-            string str2 = "";
-            string[] strArray = Directory.GetFiles(path, "*.nn", SearchOption.AllDirectories);
-            int index = 0;
-            while (true)
-            {
-                if (index >= strArray.Length)
-                {
-                    string str3 = str2;
-                    if (File.Exists(str3))
-                    {
-                        byte[] buffer = File.ReadAllBytes(str3);
-                        using (MemoryStream stream = new MemoryStream(buffer))
-                        {
-                            stream.Write(buffer, 0, buffer.Length);
-                            stream.Position = 0L;
-                            this.environment.network = Serializer.Deserialize<MHUtils.NeuralNetwork.NeuralNetwork>(stream);
-                            this.environment.ResetEnvironment(this);
-                            Debug.Log("Loaded " + str3 + " where latest generation is " + num.ToString());
-                        }
-                    }
-                    break;
-                }
-                string str4 = strArray[index];
-                int num3 = Convert.ToInt32(Path.GetFileName(str4).Split(".", StringSplitOptions.None)[0]);
-                if (num3 > num)
-                {
-                    num = num3;
-                    str2 = str4;
-                }
-                index++;
-            }
-        }
-        catch (Exception exception1)
-        {
-            Debug.LogError(exception1);
-        }
-    }
-
-    private void LogCurentNetwork()
-    {
-        if ((this.environment != null) && ((this.environment.logResults.Count >= 1) || (this.environment.network != null)))
-        {
-            StringBuilder builder = new StringBuilder();
-            using (List<LogResults>.Enumerator enumerator = this.environment.logResults.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    foreach (double num in enumerator.Current.logs)
-                    {
-                        builder.Append(num);
-                        builder.Append(",");
-                    }
-                    builder.AppendLine();
-                }
-            }
-            string path = Path.Combine(MHApplication.EXTERNAL_ASSETS, this.environment.network.GetID() + ".log");
-            File.WriteAllText(path, builder.ToString());
-            Debug.Log("Saved " + path);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        this.environment.Destroy();
-    }
-
-    public static void SaveCurentNetwork(MHUtils.NeuralNetwork.NeuralNetwork nn)
-    {
-        if (nn != null)
-        {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                Serializer.Serialize<MHUtils.NeuralNetwork.NeuralNetwork>(stream, nn);
-                stream.Position = 0L;
-                int uniqueID = nn.uniqueID;
-                int generation = nn.generation;
-                string path = Path.Combine(Path.Combine(MHApplication.EXTERNAL_ASSETS, "NN"), uniqueID.ToString());
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string str3 = Path.Combine(path, generation.ToString() + "." + nn.GetErrorValue().ToString() + ".nn");
-                File.WriteAllBytes(str3, stream.ToArray());
-                Debug.Log("Saved " + str3);
-            }
-        }
-    }
+    public NeuralNetwork.Model newNetworkModel = NeuralNetwork.Model.DFF_Lerp_4;
 
     private void Start()
     {
         this.environment = new NNEnvironment();
     }
 
-    private void StopEvolution()
+    private void OnDestroy()
     {
-        if (this.environment == null)
-        {
-            NNEnvironment environment = this.environment;
-        }
-        else
-        {
-            this.environment.StopAtGeneration(-1);
-        }
+        this.environment.Destroy();
     }
 
     private void Update()
@@ -197,29 +44,22 @@ public class PowerEstimation2Manager : MonoBehaviour
             if (Input.GetKey(KeyCode.Alpha1))
             {
                 this.environment.StopProcessing();
-                SaveCurentNetwork(this.environment.network);
+                PowerEstimation2Manager.SaveCurentNetwork(this.environment.network);
                 this.LoadSourceNetwork();
             }
             else if (Input.GetKey(KeyCode.Alpha2))
             {
                 this.environment.StopProcessing();
-                SaveCurentNetwork(this.environment.network);
+                PowerEstimation2Manager.SaveCurentNetwork(this.environment.network);
                 this.GenerateNewNetwork();
             }
             else if (Input.GetKey(KeyCode.Alpha3))
             {
                 this.environment.StopProcessing();
-                SaveCurentNetwork(this.environment.network);
+                PowerEstimation2Manager.SaveCurentNetwork(this.environment.network);
             }
         }
-        else if (!Input.GetKeyUp(KeyCode.F3))
-        {
-            if (Input.GetKeyUp(KeyCode.F4))
-            {
-                this.LogCurentNetwork();
-            }
-        }
-        else
+        else if (Input.GetKeyUp(KeyCode.F3))
         {
             this.StopEvolution();
             if (Input.GetKey(KeyCode.Alpha1))
@@ -235,9 +75,128 @@ public class PowerEstimation2Manager : MonoBehaviour
             else if (Input.GetKey(KeyCode.Alpha3))
             {
                 Debug.Log("EvolutionStart Continues");
-                this.EvolveNetwork(0xf4240);
+                this.EvolveNetwork(1000000);
             }
+        }
+        else if (Input.GetKeyUp(KeyCode.F4))
+        {
+            this.LogCurentNetwork();
+        }
+    }
+
+    private void LogCurentNetwork()
+    {
+        if (this.environment == null || (this.environment.logResults.Count < 1 && this.environment.network == null))
+        {
+            return;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        foreach (LogResults logResult in this.environment.logResults)
+        {
+            foreach (double log in logResult.logs)
+            {
+                stringBuilder.Append(log);
+                stringBuilder.Append(",");
+            }
+            stringBuilder.AppendLine();
+        }
+        string text = Path.Combine(MHApplication.EXTERNAL_ASSETS, this.environment.network.GetID() + ".log");
+        File.WriteAllText(text, stringBuilder.ToString());
+        Debug.Log("Saved " + text);
+    }
+
+    private void EvolveNetwork(int x)
+    {
+        NNEnvironment nNEnvironment = this.environment;
+        if (nNEnvironment != null)
+        {
+            NNEnvironment nNEnvironment2 = this.environment;
+            nNEnvironment.StopAtGeneration(((nNEnvironment2 == null) ? null : (nNEnvironment2.network?.generation + x)).GetValueOrDefault());
+        }
+    }
+
+    private void StopEvolution()
+    {
+        this.environment?.StopAtGeneration(-1);
+    }
+
+    private void GenerateNewNetwork()
+    {
+        NeuralNetwork neuralNetwork = new NeuralNetwork();
+        int inputDataSize = NNUnit.GetInputDataSize();
+        neuralNetwork.InitializeBlank(inputDataSize, 1, this.newNetworkModel, this.newNetworkNeuronType);
+        neuralNetwork.uniqueID = global::UnityEngine.Random.Range(0, int.MaxValue);
+        this.environment.network = neuralNetwork;
+        this.environment.ResetEnvironment(this);
+    }
+
+    private void LoadSourceNetwork()
+    {
+        try
+        {
+            string path = Path.Combine(MHApplication.EXTERNAL_ASSETS, "NN");
+            path = Path.Combine(path, this.sourceNetwork);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string[] files = Directory.GetFiles(path, "*.nn", SearchOption.AllDirectories);
+            int num = 0;
+            string text = "";
+            string[] array = files;
+            foreach (string text2 in array)
+            {
+                int num2 = Convert.ToInt32(Path.GetFileName(text2).Split('.')); //, StringSplitOptions.None)[0]);
+                if (num2 > num)
+                {
+                    num = num2;
+                    text = text2;
+                }
+            }
+            string text3 = text;
+            if (!File.Exists(text3))
+            {
+                return;
+            }
+            byte[] array2 = File.ReadAllBytes(text3);
+            using (MemoryStream memoryStream = new MemoryStream(array2))
+            {
+                memoryStream.Write(array2, 0, array2.Length);
+                memoryStream.Position = 0L;
+                this.environment.network = Serializer.Deserialize<NeuralNetwork>(memoryStream);
+                this.environment.ResetEnvironment(this);
+                Debug.Log("Loaded " + text3 + " where latest generation is " + num);
+            }
+        }
+        catch (Exception message)
+        {
+            Debug.LogError(message);
+        }
+    }
+
+    public static void SaveCurentNetwork(NeuralNetwork nn)
+    {
+        if (nn == null)
+        {
+            return;
+        }
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+            Serializer.Serialize(memoryStream, nn);
+            memoryStream.Position = 0L;
+            int uniqueID = nn.uniqueID;
+            int generation = nn.generation;
+            string path = Path.Combine(MHApplication.EXTERNAL_ASSETS, "NN");
+            path = Path.Combine(path, uniqueID.ToString());
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string text = nn.GetErrorValue().ToString();
+            string text2 = Path.Combine(path, generation + "." + text + ".nn");
+            byte[] bytes = memoryStream.ToArray();
+            File.WriteAllBytes(text2, bytes);
+            Debug.Log("Saved " + text2);
         }
     }
 }
-

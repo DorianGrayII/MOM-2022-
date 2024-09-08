@@ -1,14 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets the animator in playback mode.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets the animator in playback mode.")]
     public class AnimatorStartPlayback : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+        }
 
         public override void OnEnter()
         {
@@ -16,22 +22,14 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            Animator component = ownerDefaultTarget.GetComponent<Animator>();
+            if (component != null)
             {
-                Animator component = ownerDefaultTarget.GetComponent<Animator>();
-                if (component != null)
-                {
-                    component.StartPlayback();
-                }
-                base.Finish();
+                component.StartPlayback();
             }
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
+            base.Finish();
         }
     }
 }
-

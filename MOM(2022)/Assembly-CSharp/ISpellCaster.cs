@@ -1,14 +1,18 @@
-﻿using MOM;
-using System;
+using MOM;
 
 public interface ISpellCaster
 {
-    int GetMana();
-    string GetName();
     SpellManager GetSpellManager();
-    int GetTotalCastingSkill();
-    PlayerWizard GetWizardOwner();
-    int GetWizardOwnerID();
-    void SetMana(int m);
-}
 
+    PlayerWizard GetWizardOwner();
+
+    int GetWizardOwnerID();
+
+    int GetTotalCastingSkill();
+
+    int GetMana();
+
+    void SetMana(int m);
+
+    string GetName();
+}

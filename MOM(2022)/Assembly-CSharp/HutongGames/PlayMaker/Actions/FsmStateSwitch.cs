@@ -1,47 +1,39 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Logic), ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false), HutongGames.PlayMaker.Tooltip("Sends Events based on the current State of an FSM.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Logic)]
+    [ActionTarget(typeof(PlayMakerFSM), "gameObject,fsmName", false)]
+    [Tooltip("Sends Events based on the current State of an FSM.")]
     public class FsmStateSwitch : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The GameObject that owns the FSM.")]
+        [RequiredField]
+        [Tooltip("The GameObject that owns the FSM.")]
         public FsmGameObject gameObject;
-        [UIHint(UIHint.FsmName), HutongGames.PlayMaker.Tooltip("Optional name of Fsm on GameObject. Useful if there is more than one FSM on the GameObject.")]
+
+        [UIHint(UIHint.FsmName)]
+        [Tooltip("Optional name of Fsm on GameObject. Useful if there is more than one FSM on the GameObject.")]
         public FsmString fsmName;
+
         [CompoundArray("State Switches", "Compare State", "Send Event")]
         public FsmString[] compareTo;
+
         public FsmEvent[] sendEvent;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame. Useful if you're waiting for a particular result.")]
+
+        [Tooltip("Repeat every frame. Useful if you're waiting for a particular result.")]
         public bool everyFrame;
+
         private GameObject previousGo;
+
         private PlayMakerFSM fsm;
 
-        private void DoFsmStateSwitch()
+        public override void Reset()
         {
-            GameObject go = this.gameObject.get_Value();
-            if (go != null)
-            {
-                if (go != this.previousGo)
-                {
-                    this.fsm = ActionHelpers.GetGameObjectFsm(go, this.fsmName.Value);
-                    this.previousGo = go;
-                }
-                if (this.fsm != null)
-                {
-                    string activeStateName = this.fsm.ActiveStateName;
-                    for (int i = 0; i < this.compareTo.Length; i++)
-                    {
-                        if (activeStateName == this.compareTo[i].Value)
-                        {
-                            base.Fsm.Event(this.sendEvent[i]);
-                            return;
-                        }
-                    }
-                }
-            }
+            this.gameObject = null;
+            this.fsmName = null;
+            this.compareTo = new FsmString[1];
+            this.sendEvent = new FsmEvent[1];
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -58,14 +50,31 @@
             this.DoFsmStateSwitch();
         }
 
-        public override void Reset()
+        private void DoFsmStateSwitch()
         {
-            this.gameObject = null;
-            this.fsmName = null;
-            this.compareTo = new FsmString[1];
-            this.sendEvent = new FsmEvent[1];
-            this.everyFrame = false;
+            GameObject value = this.gameObject.Value;
+            if (value == null)
+            {
+                return;
+            }
+            if (value != this.previousGo)
+            {
+                this.fsm = ActionHelpers.GetGameObjectFsm(value, this.fsmName.Value);
+                this.previousGo = value;
+            }
+            if (this.fsm == null)
+            {
+                return;
+            }
+            string activeStateName = this.fsm.ActiveStateName;
+            for (int i = 0; i < this.compareTo.Length; i++)
+            {
+                if (activeStateName == this.compareTo[i].Value)
+                {
+                    base.Fsm.Event(this.sendEvent[i]);
+                    break;
+                }
+            }
         }
     }
 }
-

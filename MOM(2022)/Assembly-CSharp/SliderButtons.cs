@@ -1,15 +1,16 @@
-﻿using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Slider))]
 public class SliderButtons : MonoBehaviour
 {
     public Button LessButton;
+
     public Button MoreButton;
+
     [Tooltip("The amount to incremen / decrement by when pressing the buttons")]
     public float delta = 1f;
+
     private Slider slider;
 
     private void Awake()
@@ -17,9 +18,12 @@ public class SliderButtons : MonoBehaviour
         this.slider = base.GetComponent<Slider>();
     }
 
-    private void Less()
+    private void OnEnable()
     {
-        this.slider.value -= this.delta;
+        this.LessButton.onClick.AddListener(Less);
+        this.MoreButton.onClick.AddListener(More);
+        this.slider.onValueChanged.AddListener(OnValueChanged);
+        this.OnValueChanged(this.slider.value);
     }
 
     private void More()
@@ -27,19 +31,16 @@ public class SliderButtons : MonoBehaviour
         this.slider.value += this.delta;
     }
 
-    private void OnDisable()
+    private void Less()
     {
-        this.LessButton.onClick.RemoveListener(new UnityAction(this.Less));
-        this.MoreButton.onClick.RemoveListener(new UnityAction(this.More));
-        this.slider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnValueChanged));
+        this.slider.value -= this.delta;
     }
 
-    private void OnEnable()
+    private void OnDisable()
     {
-        this.LessButton.onClick.AddListener(new UnityAction(this.Less));
-        this.MoreButton.onClick.AddListener(new UnityAction(this.More));
-        this.slider.onValueChanged.AddListener(new UnityAction<float>(this.OnValueChanged));
-        this.OnValueChanged(this.slider.value);
+        this.LessButton.onClick.RemoveListener(Less);
+        this.MoreButton.onClick.RemoveListener(More);
+        this.slider.onValueChanged.RemoveListener(OnValueChanged);
     }
 
     private void OnValueChanged(float value)
@@ -48,4 +49,3 @@ public class SliderButtons : MonoBehaviour
         this.MoreButton.interactable = value < this.slider.maxValue;
     }
 }
-

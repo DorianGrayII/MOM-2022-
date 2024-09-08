@@ -1,27 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Transform), HutongGames.PlayMaker.Tooltip("Transforms a Position from a Game Object's local space to world space.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Transform)]
+    [Tooltip("Transforms a Position from a Game Object's local space to world space.")]
     public class TransformPoint : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmVector3 localPosition;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmVector3 storeResult;
+
         public bool everyFrame;
 
-        private void DoTransformPoint()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                this.storeResult.set_Value(ownerDefaultTarget.transform.TransformPoint(this.localPosition.get_Value()));
-            }
+            this.gameObject = null;
+            this.localPosition = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,13 +40,13 @@
             this.DoTransformPoint();
         }
 
-        public override void Reset()
+        private void DoTransformPoint()
         {
-            this.gameObject = null;
-            this.localPosition = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                this.storeResult.Value = ownerDefaultTarget.transform.TransformPoint(this.localPosition.Value);
+            }
         }
     }
 }
-

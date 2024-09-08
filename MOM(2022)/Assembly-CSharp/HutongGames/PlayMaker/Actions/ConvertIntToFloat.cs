@@ -1,21 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Convert), Tooltip("Converts an Integer value to a Float value.")]
+    [ActionCategory(ActionCategory.Convert)]
+    [Tooltip("Converts an Integer value to a Float value.")]
     public class ConvertIntToFloat : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Integer variable to convert to a float.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Integer variable to convert to a float.")]
         public FsmInt intVariable;
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("Store the result in a Float variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the result in a Float variable.")]
         public FsmFloat floatVariable;
+
         [Tooltip("Repeat every frame. Useful if the Integer variable is changing.")]
         public bool everyFrame;
 
-        private void DoConvertIntToFloat()
+        public override void Reset()
         {
-            this.floatVariable.Value = this.intVariable.Value;
+            this.intVariable = null;
+            this.floatVariable = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -32,12 +38,9 @@
             this.DoConvertIntToFloat();
         }
 
-        public override void Reset()
+        private void DoConvertIntToFloat()
         {
-            this.intVariable = null;
-            this.floatVariable = null;
-            this.everyFrame = false;
+            this.floatVariable.Value = this.intVariable.Value;
         }
     }
 }
-

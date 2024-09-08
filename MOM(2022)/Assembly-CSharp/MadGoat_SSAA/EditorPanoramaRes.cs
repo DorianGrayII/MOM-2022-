@@ -1,7 +1,5 @@
-﻿namespace MadGoat_SSAA
+namespace MadGoat_SSAA
 {
-    using System;
-
     public enum EditorPanoramaRes
     {
         Square128 = 0x80,
@@ -12,4 +10,3 @@
         Square4096 = 0x1000
     }
 }
-

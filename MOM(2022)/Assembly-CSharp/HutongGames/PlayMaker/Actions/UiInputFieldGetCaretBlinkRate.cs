@@ -1,27 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Gets the caret's blink rate of a UI InputField component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Gets the caret's blink rate of a UI InputField component.")]
     public class UiInputFieldGetCaretBlinkRate : ComponentAction<InputField>
     {
-        [RequiredField, CheckForComponent(typeof(InputField)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI InputField component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(InputField))]
+        [Tooltip("The GameObject with the UI InputField component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The caret's blink rate for the UI InputField component.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The caret's blink rate for the UI InputField component.")]
         public FsmFloat caretBlinkRate;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame, useful for animation")]
+
+        [Tooltip("Repeats every frame, useful for animation")]
         public bool everyFrame;
+
         private InputField inputField;
 
-        private void DoGetValue()
+        public override void Reset()
         {
-            if (this.inputField != null)
-            {
-                this.caretBlinkRate.Value = this.inputField.caretBlinkRate;
-            }
+            this.caretBlinkRate = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -43,11 +47,12 @@
             this.DoGetValue();
         }
 
-        public override void Reset()
+        private void DoGetValue()
         {
-            this.caretBlinkRate = null;
-            this.everyFrame = false;
+            if (this.inputField != null)
+            {
+                this.caretBlinkRate.Value = this.inputField.caretBlinkRate;
+            }
         }
     }
 }
-

@@ -1,19 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.GameObject), Tooltip("Sets the value of a Game Object Variable.")]
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Sets the value of a Game Object Variable.")]
     public class SetGameObject : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmGameObject variable;
+
         public FsmGameObject gameObject;
+
         public bool everyFrame;
+
+        public override void Reset()
+        {
+            this.variable = null;
+            this.gameObject = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
-            this.variable.set_Value(this.gameObject.get_Value());
+            this.variable.Value = this.gameObject.Value;
             if (!this.everyFrame)
             {
                 base.Finish();
@@ -22,15 +30,7 @@
 
         public override void OnUpdate()
         {
-            this.variable.set_Value(this.gameObject.get_Value());
-        }
-
-        public override void Reset()
-        {
-            this.variable = null;
-            this.gameObject = null;
-            this.everyFrame = false;
+            this.variable.Value = this.gameObject.Value;
         }
     }
 }
-

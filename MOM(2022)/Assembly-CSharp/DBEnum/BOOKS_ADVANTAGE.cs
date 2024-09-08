@@ -1,24 +1,21 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum BOOKS_ADVANTAGE
     {
-        BOOK1,
-        BOOK2,
-        BOOK3,
-        BOOK4,
-        BOOK5,
-        BOOK6,
-        BOOK7,
-        BOOK8,
-        BOOK9,
-        BOOK10,
-        BOOK11,
-        BOOK12,
-        BOOK13,
-        BOOK14,
-        BOOK15
+        BOOK1 = 0,
+        BOOK2 = 1,
+        BOOK3 = 2,
+        BOOK4 = 3,
+        BOOK5 = 4,
+        BOOK6 = 5,
+        BOOK7 = 6,
+        BOOK8 = 7,
+        BOOK9 = 8,
+        BOOK10 = 9,
+        BOOK11 = 10,
+        BOOK12 = 11,
+        BOOK13 = 12,
+        BOOK14 = 13,
+        BOOK15 = 14
     }
 }
-

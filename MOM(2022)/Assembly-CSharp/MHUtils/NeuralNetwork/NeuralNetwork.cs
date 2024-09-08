@@ -1,43 +1,302 @@
-﻿namespace MHUtils.NeuralNetwork
-{
-    using MHUtils;
-    using MHUtils.NeuralNetwork.PowerEstimation2;
-    using ProtoBuf;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using MHUtils.NeuralNetwork.PowerEstimation2;
+using ProtoBuf;
+using UnityEngine;
 
+namespace MHUtils.NeuralNetwork
+{
     [ProtoContract]
     public class NeuralNetwork
     {
+        public enum Model
+        {
+            FF_Lerp_1 = 1,
+            DFF_Lerp_2 = 2,
+            DFF_Lerp_3 = 3,
+            DFF_Lerp_4 = 4,
+            DFF_Flat_4 = 14,
+            DFF_Flat_5 = 15,
+            DFF_Sparse_5 = 25,
+            DFF_Sparse_7 = 27,
+            DFF_Wide_Sparse_6 = 36,
+            DFF_Wide_Sparse_8 = 38,
+            DFF_Sparse_Lerp_3 = 43,
+            DFF_Sparse_Lerp_4 = 44,
+            DFF_10x10 = 45,
+            DFF_5x7x5 = 46
+        }
+
         [ProtoMember(1)]
         public List<Neuron> neurons;
+
         [ProtoMember(2)]
         public List<NeuralLayer> neuralLayers = new List<NeuralLayer>();
+
         [ProtoMember(3)]
         public int generation;
+
         [ProtoMember(4)]
         public int uniqueID;
+
         [ProtoMember(5)]
         public double avError;
+
         [ProtoMember(6)]
         public double maxError;
+
         [ProtoMember(7)]
         public Model model;
+
         [ProtoMember(8)]
         public Neuron.NeuronType nType;
 
-        private static double CalculateError(double aE, double mE)
+        public bool IsValid()
         {
-            return (aE + (0.5 * mE));
+            if (this.neurons != null && this.neurons.Count > 0)
+            {
+                return this.neuralLayers.Count > 2;
+            }
+            return false;
         }
 
-        private double Clamp(double val)
+        public NeuralLayer GetFirsLayer()
         {
-            return ((val <= 1.0) ? ((val >= -1.0) ? val : -1.0) : 1.0);
+            return this.neuralLayers[0];
         }
 
-        internal void CopyFrom(MHUtils.NeuralNetwork.NeuralNetwork nn)
+        public NeuralLayer GetFinalLayer()
+        {
+            return this.neuralLayers[this.neuralLayers.Count - 1];
+        }
+
+        public void Process(NeuralProcessor data)
+        {
+            for (int i = 1; i < this.neuralLayers.Count; i++)
+            {
+                NeuralLayer neuralLayer = this.neuralLayers[i];
+                for (int j = 0; j < neuralLayer.neurons.Count; j++)
+                {
+                    this.GetNeuron(neuralLayer.neurons[j]).CalculateValue(data);
+                }
+            }
+        }
+
+        public void InitializeBlank(int inputSize, int outputSize, Model model, Neuron.NeuronType nType)
+        {
+            int[] array;
+            switch (model)
+            {
+            case Model.FF_Lerp_1:
+            case Model.DFF_Lerp_2:
+            case Model.DFF_Lerp_3:
+            case Model.DFF_Lerp_4:
+            {
+                array = new int[(int)model];
+                for (int j = 0; j < (int)model; j++)
+                {
+                    float t2 = (float)(j + 1) / (float)(model + 1);
+                    array[j] = Mathf.CeilToInt(Mathf.Lerp(inputSize, outputSize, t2));
+                }
+                break;
+            }
+            case Model.DFF_Flat_4:
+            case Model.DFF_Flat_5:
+            {
+                int num3 = (int)(model - 10);
+                array = new int[num3];
+                for (int l = 0; l < num3; l++)
+                {
+                    array[l] = inputSize;
+                }
+                break;
+            }
+            case Model.DFF_Sparse_5:
+            case Model.DFF_Sparse_7:
+            {
+                int num4 = (int)(model - 20);
+                array = new int[num4];
+                for (int m = 0; m < num4; m++)
+                {
+                    array[m] = Mathf.RoundToInt((float)inputSize * 1.3f);
+                }
+                break;
+            }
+            case Model.DFF_Wide_Sparse_6:
+            case Model.DFF_Wide_Sparse_8:
+            {
+                int num2 = (int)(model - 30);
+                array = new int[num2];
+                for (int k = 0; k < num2; k++)
+                {
+                    array[k] = Mathf.RoundToInt((float)inputSize * 1.5f);
+                }
+                break;
+            }
+            case Model.DFF_Sparse_Lerp_3:
+            case Model.DFF_Sparse_Lerp_4:
+            {
+                int num = (int)(model - 40);
+                array = new int[num];
+                for (int i = 0; i < num; i++)
+                {
+                    float t = (float)(i + 1) / (float)(num + 1);
+                    array[i] = Mathf.CeilToInt(Mathf.Lerp((int)((float)inputSize * 1.3f), outputSize, t));
+                }
+                break;
+            }
+            case Model.DFF_10x10:
+                array = new int[2] { 10, 10 };
+                break;
+            case Model.DFF_5x7x5:
+                array = new int[3] { 5, 7, 5 };
+                break;
+            default:
+                array = new int[1] { 5 };
+                break;
+            }
+            this.InitializeBlank(inputSize, outputSize, array, nType);
+            this.model = model;
+            this.nType = nType;
+        }
+
+        public void InitializeBlank(int inputSize, int outputSize, int[] hiddenLayers, Neuron.NeuronType nType)
+        {
+            int num = 0;
+            MHRandom random = MHRandom.Get();
+            this.neurons = new List<Neuron>();
+            NeuralLayer neuralLayer = new NeuralLayer(inputSize);
+            this.neuralLayers.Add(neuralLayer);
+            for (int i = 0; i < inputSize; i++)
+            {
+                Neuron neuron = new Neuron(nType, random);
+                neuron.neuronID = num;
+                num++;
+                this.neurons.Add(neuron);
+                neuralLayer.neurons.Add(neuron.neuronID);
+            }
+            NeuralLayer layer;
+            for (int j = 1; j <= hiddenLayers.Length; j++)
+            {
+                layer = neuralLayer;
+                neuralLayer = new NeuralLayer(hiddenLayers[j - 1]);
+                this.neuralLayers.Add(neuralLayer);
+                for (int k = 0; k < hiddenLayers[j - 1]; k++)
+                {
+                    Neuron neuron2 = new Neuron(nType, random);
+                    neuron2.neuronID = num;
+                    num++;
+                    this.neurons.Add(neuron2);
+                    neuralLayer.neurons.Add(neuron2.neuronID);
+                    neuron2.InitializeConnection(layer, random);
+                }
+            }
+            layer = neuralLayer;
+            neuralLayer = new NeuralLayer(outputSize);
+            this.neuralLayers.Add(neuralLayer);
+            for (int l = 0; l < outputSize; l++)
+            {
+                Neuron neuron3 = new Neuron(nType, random);
+                neuron3.neuronID = num;
+                num++;
+                this.neurons.Add(neuron3);
+                neuralLayer.neurons.Add(neuron3.neuronID);
+                neuron3.InitializeConnection(layer, random);
+            }
+        }
+
+        public void Evolve(double strength, MHRandom random)
+        {
+            foreach (Neuron neuron in this.neurons)
+            {
+                if (neuron.inputs != null)
+                {
+                    NeuralInputLink[] inputs = neuron.inputs;
+                    for (int i = 0; i < inputs.Length; i++)
+                    {
+                        inputs[i].Evolve(strength, random);
+                    }
+                    neuron.Evolve(strength, random);
+                }
+            }
+        }
+
+        public bool MutateOnce(NeuralProcessor processor, NNUnit[] units, MHRandom random)
+        {
+            INeuralMutagen neuralMutagen = null;
+            for (int i = 0; i < 10; i++)
+            {
+                int @int = random.GetInt(1, this.neuralLayers.Count);
+                NeuralLayer neuralLayer = this.neuralLayers[@int];
+                int int2 = random.GetInt(0, neuralLayer.neurons.Count);
+                Neuron neuron = this.GetNeuron(neuralLayer.neurons[int2]);
+                if (random.GetDouble01() < 0.8)
+                {
+                    int int3 = random.GetInt(0, neuron.inputs.Length);
+                    NeuralInputLink neuralInputLink = neuron.inputs[int3];
+                    if (neuralMutagen == null || neuralMutagen.GetLastMutationGeneration() > neuralInputLink.GetLastMutationGeneration())
+                    {
+                        neuralMutagen = neuralInputLink;
+                    }
+                }
+                else if (neuralMutagen == null || neuralMutagen.GetLastMutationGeneration() > neuron.GetLastMutationGeneration())
+                {
+                    neuralMutagen = neuron;
+                }
+            }
+            neuralMutagen.SetLastMutationGeneration(this.generation);
+            return this.Mutation(neuralMutagen, processor, units);
+        }
+
+        public double ProcessViaNetwork(NeuralProcessor processor, NNUnit[] units, bool recordResults)
+        {
+            double num = 0.0;
+            double num2 = 0.0;
+            foreach (NNUnit nNUnit in units)
+            {
+                processor.ProcessViaNetwork(this, nNUnit);
+                double num3 = (double)Mathf.Abs((float)(processor.GetResultSingle() - nNUnit.targetValue)) / nNUnit.targetValue;
+                num2 += num3;
+                if (num3 > num)
+                {
+                    num = num3;
+                }
+            }
+            double num4 = num2 / (double)units.Length;
+            if (recordResults)
+            {
+                this.avError = num4;
+                this.maxError = num;
+            }
+            return NeuralNetwork.CalculateError(this.avError, num);
+        }
+
+        private bool Mutation(INeuralMutagen mutant, NeuralProcessor processor, NNUnit[] units)
+        {
+            double num = 10.0;
+            for (int i = 0; i < 10; i++)
+            {
+                mutant.Mutate(num);
+                double num2 = this.ProcessViaNetwork(processor, units, recordResults: false);
+                mutant.RestoreFromMutation();
+                if (num2 < this.GetErrorValue())
+                {
+                    mutant.ApplyMutation(num);
+                    return true;
+                }
+                mutant.Mutate(0.0 - num);
+                double num3 = this.ProcessViaNetwork(processor, units, recordResults: false);
+                mutant.RestoreFromMutation();
+                if (num3 < this.GetErrorValue())
+                {
+                    mutant.ApplyMutation(0.0 - num);
+                    return true;
+                }
+                num *= 0.1;
+            }
+            return false;
+        }
+
+        internal void CopyFrom(NeuralNetwork nn)
         {
             for (int i = 0; i < this.neurons.Count; i++)
             {
@@ -49,46 +308,27 @@
             this.maxError = nn.maxError;
         }
 
-        public void Evolve(double strength, MHRandom random)
+        private double GetRandom(MHRandom r)
         {
-            foreach (Neuron neuron in this.neurons)
+            return r.GetDouble01() * 2.0 - 1.0;
+        }
+
+        private double Clamp(double val)
+        {
+            if (val > 1.0)
             {
-                if (neuron.inputs != null)
-                {
-                    NeuralInputLink[] inputs = neuron.inputs;
-                    int index = 0;
-                    while (true)
-                    {
-                        if (index >= inputs.Length)
-                        {
-                            neuron.Evolve(strength, random);
-                            break;
-                        }
-                        inputs[index].Evolve(strength, random);
-                        index++;
-                    }
-                }
+                return 1.0;
             }
-        }
-
-        public double GetErrorValue()
-        {
-            return CalculateError(this.avError, this.maxError);
-        }
-
-        public NeuralLayer GetFinalLayer()
-        {
-            return this.neuralLayers[this.neuralLayers.Count - 1];
-        }
-
-        public NeuralLayer GetFirsLayer()
-        {
-            return this.neuralLayers[0];
+            if (val < -1.0)
+            {
+                return -1.0;
+            }
+            return val;
         }
 
         public string GetID()
         {
-            return (this.uniqueID.ToString() + "." + this.generation.ToString());
+            return this.uniqueID + "." + this.generation;
         }
 
         public Neuron GetNeuron(int id)
@@ -96,275 +336,19 @@
             return this.neurons[id];
         }
 
-        private double GetRandom(MHRandom r)
-        {
-            return ((r.GetDouble01() * 2.0) - 1.0);
-        }
-
         public int GetTotalNeuron()
         {
             return this.neurons.Count;
         }
 
-        public void InitializeBlank(int inputSize, int outputSize, Model model, Neuron.NeuronType nType)
+        public double GetErrorValue()
         {
-            int[] numArray;
-            if (model > Model.DFF_Flat_5)
-            {
-                if ((model == Model.DFF_Sparse_5) || (model == Model.DFF_Sparse_7))
-                {
-                    int num6 = (int) (model - ((Model) 20));
-                    numArray = new int[num6];
-                    for (int i = 0; i < num6; i++)
-                    {
-                        numArray[i] = Mathf.RoundToInt(inputSize * 1.3f);
-                    }
-                    goto TR_0000;
-                }
-                else
-                {
-                    switch (model)
-                    {
-                        case Model.DFF_Wide_Sparse_6:
-                        case Model.DFF_Wide_Sparse_8:
-                        {
-                            int num8 = (int) (model - ((Model) 30));
-                            numArray = new int[num8];
-                            for (int i = 0; i < num8; i++)
-                            {
-                                numArray[i] = Mathf.RoundToInt(inputSize * 1.5f);
-                            }
-                            goto TR_0000;
-                        }
-                        case Model.DFF_Sparse_Lerp_3:
-                        case Model.DFF_Sparse_Lerp_4:
-                        {
-                            int num10 = (int) (model - ((Model) 40));
-                            numArray = new int[num10];
-                            for (int i = 0; i < num10; i++)
-                            {
-                                float t = ((float) (i + 1)) / ((float) (num10 + 1));
-                                numArray[i] = Mathf.CeilToInt(Mathf.Lerp((float) ((int) (inputSize * 1.3f)), (float) outputSize, t));
-                            }
-                            goto TR_0000;
-                        }
-                        case Model.DFF_10x10:
-                            numArray = new int[] { 10, 10 };
-                            goto TR_0000;
-
-                        case Model.DFF_5x7x5:
-                            numArray = new int[] { 5, 7, 5 };
-                            goto TR_0000;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-            else if ((model - 1) <= Model.DFF_Lerp_3)
-            {
-                int num = (int) model;
-                numArray = new int[num];
-                for (int i = 0; i < num; i++)
-                {
-                    float t = ((float) (i + 1)) / ((float) (num + 1));
-                    numArray[i] = Mathf.CeilToInt(Mathf.Lerp((float) inputSize, (float) outputSize, t));
-                }
-                goto TR_0000;
-            }
-            else if ((model - Model.DFF_Flat_4) <= Model.FF_Lerp_1)
-            {
-                int num4 = (int) (model - ((Model) 10));
-                numArray = new int[num4];
-                for (int i = 0; i < num4; i++)
-                {
-                    numArray[i] = inputSize;
-                }
-                goto TR_0000;
-            }
-            numArray = new int[] { 5 };
-        TR_0000:
-            this.InitializeBlank(inputSize, outputSize, numArray, nType);
-            this.model = model;
-            this.nType = nType;
+            return NeuralNetwork.CalculateError(this.avError, this.maxError);
         }
 
-        public void InitializeBlank(int inputSize, int outputSize, int[] hiddenLayers, Neuron.NeuronType nType)
+        private static double CalculateError(double aE, double mE)
         {
-            NeuralLayer layer2;
-            int num = 0;
-            MHRandom random = MHRandom.Get();
-            this.neurons = new List<Neuron>();
-            NeuralLayer item = new NeuralLayer(inputSize);
-            this.neuralLayers.Add(item);
-            for (int i = 0; i < inputSize; i++)
-            {
-                Neuron neuron = new Neuron(nType, random) {
-                    neuronID = num
-                };
-                num++;
-                this.neurons.Add(neuron);
-                item.neurons.Add(neuron.neuronID);
-            }
-            int num3 = 1;
-            while (num3 <= hiddenLayers.Length)
-            {
-                layer2 = item;
-                item = new NeuralLayer(hiddenLayers[num3 - 1]);
-                this.neuralLayers.Add(item);
-                int num4 = 0;
-                while (true)
-                {
-                    if (num4 >= hiddenLayers[num3 - 1])
-                    {
-                        num3++;
-                        break;
-                    }
-                    Neuron neuron2 = new Neuron(nType, random) {
-                        neuronID = num
-                    };
-                    num++;
-                    this.neurons.Add(neuron2);
-                    item.neurons.Add(neuron2.neuronID);
-                    neuron2.InitializeConnection(layer2, random);
-                    num4++;
-                }
-            }
-            layer2 = item;
-            item = new NeuralLayer(outputSize);
-            this.neuralLayers.Add(item);
-            for (int j = 0; j < outputSize; j++)
-            {
-                Neuron neuron3 = new Neuron(nType, random) {
-                    neuronID = num
-                };
-                num++;
-                this.neurons.Add(neuron3);
-                item.neurons.Add(neuron3.neuronID);
-                neuron3.InitializeConnection(layer2, random);
-            }
-        }
-
-        public bool IsValid()
-        {
-            return ((this.neurons != null) && ((this.neurons.Count > 0) && (this.neuralLayers.Count > 2)));
-        }
-
-        public bool MutateOnce(NeuralProcessor processor, NNUnit[] units, MHRandom random)
-        {
-            INeuralMutagen mutant = null;
-            for (int i = 0; i < 10; i++)
-            {
-                int @int = random.GetInt(1, this.neuralLayers.Count);
-                NeuralLayer layer = this.neuralLayers[@int];
-                int num3 = random.GetInt(0, layer.neurons.Count);
-                Neuron neuron = this.GetNeuron(layer.neurons[num3]);
-                if (random.GetDouble01() >= 0.8)
-                {
-                    if ((mutant == null) || (mutant.GetLastMutationGeneration() > neuron.GetLastMutationGeneration()))
-                    {
-                        mutant = neuron;
-                    }
-                }
-                else
-                {
-                    int index = random.GetInt(0, neuron.inputs.Length);
-                    NeuralInputLink link = neuron.inputs[index];
-                    if ((mutant == null) || (mutant.GetLastMutationGeneration() > link.GetLastMutationGeneration()))
-                    {
-                        mutant = link;
-                    }
-                }
-            }
-            mutant.SetLastMutationGeneration(this.generation);
-            return this.Mutation(mutant, processor, units);
-        }
-
-        private bool Mutation(INeuralMutagen mutant, NeuralProcessor processor, NNUnit[] units)
-        {
-            double num = 10.0;
-            for (int i = 0; i < 10; i++)
-            {
-                mutant.Mutate(num);
-                mutant.RestoreFromMutation();
-                if (this.ProcessViaNetwork(processor, units, false) < this.GetErrorValue())
-                {
-                    mutant.ApplyMutation(num);
-                    return true;
-                }
-                mutant.Mutate(-num);
-                mutant.RestoreFromMutation();
-                if (this.ProcessViaNetwork(processor, units, false) < this.GetErrorValue())
-                {
-                    mutant.ApplyMutation(-num);
-                    return true;
-                }
-                num *= 0.1;
-            }
-            return false;
-        }
-
-        public void Process(NeuralProcessor data)
-        {
-            int num = 1;
-            while (num < this.neuralLayers.Count)
-            {
-                NeuralLayer layer = this.neuralLayers[num];
-                int num2 = 0;
-                while (true)
-                {
-                    if (num2 >= layer.neurons.Count)
-                    {
-                        num++;
-                        break;
-                    }
-                    this.GetNeuron(layer.neurons[num2]).CalculateValue(data);
-                    num2++;
-                }
-            }
-        }
-
-        public double ProcessViaNetwork(NeuralProcessor processor, NNUnit[] units, bool recordResults)
-        {
-            double mE = 0.0;
-            double num2 = 0.0;
-            for (int i = 0; i < units.Length; i++)
-            {
-                NNUnit data = units[i];
-                processor.ProcessViaNetwork(this, data);
-                double num5 = ((double) Mathf.Abs((float) (processor.GetResultSingle() - data.targetValue))) / data.targetValue;
-                num2 += num5;
-                if (num5 > mE)
-                {
-                    mE = num5;
-                }
-            }
-            double num3 = num2 / ((double) units.Length);
-            if (recordResults)
-            {
-                this.avError = num3;
-                this.maxError = mE;
-            }
-            return CalculateError(this.avError, mE);
-        }
-
-        public enum Model
-        {
-            FF_Lerp_1 = 1,
-            DFF_Lerp_2 = 2,
-            DFF_Lerp_3 = 3,
-            DFF_Lerp_4 = 4,
-            DFF_Flat_4 = 14,
-            DFF_Flat_5 = 15,
-            DFF_Sparse_5 = 0x19,
-            DFF_Sparse_7 = 0x1b,
-            DFF_Wide_Sparse_6 = 0x24,
-            DFF_Wide_Sparse_8 = 0x26,
-            DFF_Sparse_Lerp_3 = 0x2b,
-            DFF_Sparse_Lerp_4 = 0x2c,
-            DFF_10x10 = 0x2d,
-            DFF_5x7x5 = 0x2e
+            return aE + 0.5 * mE;
         }
     }
 }
-

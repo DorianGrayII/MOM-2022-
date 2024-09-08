@@ -1,28 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the transition type of a UI Selectable component.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the transition type of a UI Selectable component.")]
     public class UiTransitionSetType : ComponentAction<Selectable>
     {
-        [RequiredField, CheckForComponent(typeof(Selectable)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Selectable component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Selectable))]
+        [Tooltip("The GameObject with the UI Selectable component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The transition value")]
+
+        [Tooltip("The transition value")]
         public Selectable.Transition transition;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
+
         private Selectable selectable;
+
         private Selectable.Transition originalTransition;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.selectable != null)
-            {
-                this.selectable.transition = this.transition;
-            }
+            this.gameObject = null;
+            this.transition = Selectable.Transition.ColorTint;
+            this.resetOnExit = false;
         }
 
         public override void OnEnter()
@@ -32,7 +36,7 @@
             {
                 this.selectable = base.cachedComponent;
             }
-            if ((this.selectable != null) && this.resetOnExit.Value)
+            if (this.selectable != null && this.resetOnExit.Value)
             {
                 this.originalTransition = this.selectable.transition;
             }
@@ -40,20 +44,20 @@
             base.Finish();
         }
 
+        private void DoSetValue()
+        {
+            if (this.selectable != null)
+            {
+                this.selectable.transition = this.transition;
+            }
+        }
+
         public override void OnExit()
         {
-            if ((this.selectable != null) && this.resetOnExit.Value)
+            if (!(this.selectable == null) && this.resetOnExit.Value)
             {
                 this.selectable.transition = this.originalTransition;
             }
         }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.transition = Selectable.Transition.ColorTint;
-            this.resetOnExit = false;
-        }
     }
 }
-

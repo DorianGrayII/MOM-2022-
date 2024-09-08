@@ -1,14 +1,11 @@
-﻿namespace MHUtils.NeuralNetwork.PowerEstimation2
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
-    [StructLayout(LayoutKind.Sequential)]
+namespace MHUtils.NeuralNetwork.PowerEstimation2
+{
     public struct LogResults
     {
         public int generation;
+
         public List<double> logs;
     }
 }
-

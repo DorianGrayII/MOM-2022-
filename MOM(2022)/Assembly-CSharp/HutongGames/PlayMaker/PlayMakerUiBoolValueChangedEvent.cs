@@ -1,10 +1,8 @@
-﻿namespace HutongGames.PlayMaker
-{
-    using System;
-    using UnityEngine;
-    using UnityEngine.Events;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
+namespace HutongGames.PlayMaker
+{
     [AddComponentMenu("PlayMaker/UI/UI Bool Value Changed Event")]
     public class PlayMakerUiBoolValueChangedEvent : PlayMakerUiEventBase
     {
@@ -21,7 +19,7 @@
                 }
                 if (this.toggle != null)
                 {
-                    this.toggle.onValueChanged.AddListener(new UnityAction<bool>(this.OnValueChanged));
+                    this.toggle.onValueChanged.AddListener(OnValueChanged);
                 }
             }
         }
@@ -31,7 +29,7 @@
             base.initialized = false;
             if (this.toggle != null)
             {
-                this.toggle.onValueChanged.RemoveListener(new UnityAction<bool>(this.OnValueChanged));
+                this.toggle.onValueChanged.RemoveListener(OnValueChanged);
             }
         }
 
@@ -42,4 +40,3 @@
         }
     }
 }
-

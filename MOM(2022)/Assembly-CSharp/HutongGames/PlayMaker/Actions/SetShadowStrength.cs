@@ -1,24 +1,24 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Lights), HutongGames.PlayMaker.Tooltip("Sets the strength of the shadows cast by a Light.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Lights)]
+    [Tooltip("Sets the strength of the shadows cast by a Light.")]
     public class SetShadowStrength : ComponentAction<Light>
     {
-        [RequiredField, CheckForComponent(typeof(Light))]
+        [RequiredField]
+        [CheckForComponent(typeof(Light))]
         public FsmOwnerDefault gameObject;
+
         public FsmFloat shadowStrength;
+
         public bool everyFrame;
 
-        private void DoSetShadowStrength()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (base.UpdateCache(ownerDefaultTarget))
-            {
-                base.light.shadowStrength = this.shadowStrength.Value;
-            }
+            this.gameObject = null;
+            this.shadowStrength = 0.8f;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -35,12 +35,13 @@
             this.DoSetShadowStrength();
         }
 
-        public override void Reset()
+        private void DoSetShadowStrength()
         {
-            this.gameObject = null;
-            this.shadowStrength = 0.8f;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                base.light.shadowStrength = this.shadowStrength.Value;
+            }
         }
     }
 }
-

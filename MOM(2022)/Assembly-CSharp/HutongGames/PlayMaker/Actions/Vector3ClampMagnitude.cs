@@ -1,21 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Vector3), HutongGames.PlayMaker.Tooltip("Clamps the Magnitude of Vector3 Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Vector3)]
+    [Tooltip("Clamps the Magnitude of Vector3 Variable.")]
     public class Vector3ClampMagnitude : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmVector3 vector3Variable;
+
         [RequiredField]
         public FsmFloat maxLength;
+
         public bool everyFrame;
 
-        private void DoVector3ClampMagnitude()
+        public override void Reset()
         {
-            this.vector3Variable.set_Value(Vector3.ClampMagnitude(this.vector3Variable.get_Value(), this.maxLength.Value));
+            this.vector3Variable = null;
+            this.maxLength = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -32,12 +36,9 @@
             this.DoVector3ClampMagnitude();
         }
 
-        public override void Reset()
+        private void DoVector3ClampMagnitude()
         {
-            this.vector3Variable = null;
-            this.maxLength = null;
-            this.everyFrame = false;
+            this.vector3Variable.Value = Vector3.ClampMagnitude(this.vector3Variable.Value, this.maxLength.Value);
         }
     }
 }
-

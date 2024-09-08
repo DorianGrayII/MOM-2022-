@@ -1,194 +1,138 @@
-﻿namespace WorldCode
-{
-    using DBDef;
-    using MHUtils;
-    using MOM;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System;
+using System.Collections.Generic;
+using DBDef;
+using MHUtils;
+using MOM;
+using UnityEngine;
 
+namespace WorldCode
+{
     public class SearcherDataV2
     {
         public const int neighbourDataStep = 12;
+
         public const int neighbourStep = 2;
+
         public const int neighbourIndexOffset = 0;
+
         public const int neighbourVRiverOffset = 1;
+
         public int width;
+
         public int height;
+
         public bool wrapping;
+
         public PathNode[] nodes;
+
         public int[] nodeNeighbours;
+
         public bool[] locations;
+
         public int[] units;
+
         public bool[] walls;
+
         public int gateIndex;
+
         public FInt maxTerrainCost;
+
         public int iteration;
 
-        public static FInt ClampMPCost(SearcherDataV2 data, FInt cost)
-        {
-            return ((data != null) ? ((cost <= data.maxTerrainCost) ? cost : data.maxTerrainCost) : cost);
-        }
-
-        public void ClearUnitPosition(Vector3i pos)
-        {
-            if (pos != Vector3i.invalid)
-            {
-                int index = this.GetIndex(pos);
-                this.units[index] = 0;
-            }
-        }
-
-        public static int GetCDOwnerID(int comboData)
-        {
-            return ((comboData >= 0) ? (comboData & 15) : (((comboData == -1) || (comboData == -11)) ? -1 : (((comboData == -2) || (comboData == -12)) ? -2 : -1)));
-        }
-
-        public static int GetCDUnitCount(int comboData)
-        {
-            return ((comboData >= 0) ? ((comboData >> 0x10) & 15) : -1);
-        }
-
-        public int GetColumn(Vector3i pos)
-        {
-            int num = (-this.width / 2) + 1;
-            return (pos.x - num);
-        }
-
-        public int GetGroupSizeOwnerCombo(MOM.Group g)
-        {
-            IPlanePosition selectedGroup;
-            int ownerID = g.GetOwnerID();
-            if (ownerID > 15)
-            {
-                Debug.LogError("Wizard ID larger than 0xF !!!");
-            }
-            int count = g.GetUnits().Count;
-            FSMSelectionManager manager1 = FSMSelectionManager.Get();
-            if (manager1 != null)
-            {
-                selectedGroup = manager1.GetSelectedGroup();
-            }
-            else
-            {
-                FSMSelectionManager local1 = manager1;
-                selectedGroup = null;
-            }
-            if (ReferenceEquals(selectedGroup, g) && ((FSMSelectionManager.Get().selectedUnits != null) && (FSMSelectionManager.Get().selectedUnits.Count > 0)))
-            {
-                count = FSMSelectionManager.Get().selectedUnits.Count;
-            }
-            int num3 = g.IsGroupInvisible() ? 1 : 0;
-            bool flag = (g.transporter != null) && g.waterMovement;
-            return ((((((((g.transporter != null) && g.landMovement) ? 0x200000 : 0) | (flag ? 0x100000 : 0)) | (count << 0x10)) | (num3 << 15)) | 0x4000) | ownerID);
-        }
-
-        public int GetIndex(Vector3i p)
-        {
-            return ((this.width * this.GetRow(p)) + this.GetColumn(p));
-        }
-
-        public int GetRow(Vector3i pos)
-        {
-            int num = -((this.height / 2) - 1);
-            int num3 = ((this.width / 4) + num) + (-(this.GetColumn(pos) + 1) / 2);
-            return (pos.y - num3);
-        }
-
-        public static bool HasTransporter(int comboData, bool water)
-        {
-            return ((comboData >= 0) ? ((!water || ((comboData & 0x100000) <= 0)) ? (!water && ((comboData & 0x200000) > 0)) : true) : false);
-        }
-
-        public void InitializeData(WorldCode.Plane p)
+        public void InitializeData(Plane p)
         {
             V3iRect pathfindingArea = p.pathfindingArea;
             this.width = pathfindingArea.AreaWidth;
             this.height = pathfindingArea.AreaHeight;
             this.wrapping = p.pathfindingArea.horizontalWrap;
             this.nodes = new PathNode[this.width * this.height];
-            this.nodeNeighbours = new int[(12 * this.width) * this.height];
-            if (!p.battlePlane)
+            this.nodeNeighbours = new int[12 * this.width * this.height];
+            if (p.battlePlane)
+            {
+                switch (DifficultySettingsData.GetSetting("UI_BATTLE_MP_TERRAIN_COSTS").value)
+                {
+                case "1":
+                    this.maxTerrainCost = FInt.ONE;
+                    break;
+                case "2":
+                    this.maxTerrainCost = new FInt(2);
+                    break;
+                case "3":
+                    this.maxTerrainCost = new FInt(100);
+                    break;
+                default:
+                    this.maxTerrainCost = new FInt(100);
+                    break;
+                }
+            }
+            else
             {
                 this.maxTerrainCost = new FInt(100);
             }
-            else
+            foreach (KeyValuePair<Vector3i, Hex> hex in p.GetHexes())
             {
-                string str = DifficultySettingsData.GetSetting("UI_BATTLE_MP_TERRAIN_COSTS").value;
-                this.maxTerrainCost = (str == "1") ? FInt.ONE : ((str == "2") ? new FInt(2) : ((str == "3") ? new FInt(100) : new FInt(100)));
-            }
-            foreach (KeyValuePair<Vector3i, Hex> pair in p.GetHexes())
-            {
-                PathNode node = new PathNode();
-                node.UpdateBaseData(pair.Key, this);
-                node.UpdateTerrainData(pair.Value, pair.Value.MovementCost());
-                this.nodes[node.index] = node;
-                this.PrepareNeighbours(p.pathfindingArea, pair.Value, node.index);
+                PathNode pathNode = default(PathNode);
+                pathNode.UpdateBaseData(hex.Key, this);
+                pathNode.UpdateTerrainData(hex.Value, hex.Value.MovementCost());
+                this.nodes[pathNode.index] = pathNode;
+                this.PrepareNeighbours(p.pathfindingArea, hex.Value, pathNode.index);
             }
         }
 
-        public void InitializeLocationsAndUnits(Battle b)
+        public void PrepareNeighbours(V3iRect area, Hex h, int hIndex)
         {
-            int num = b.plane.searcherIteration + 1;
-            b.plane.searcherIteration = num;
-            this.iteration = num;
-            if (this.locations == null)
-                this.locations = new bool[this.nodes.Length];
-            if ((this.units != null) && (this.units.Length == this.nodes.Length))
+            for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
             {
-                Array.Clear(this.units, 0, this.units.Length);
-            }
-            else
-            {
-                this.units = new int[this.nodes.Length];
-            }
-            foreach (BattleUnit unit in b.GetUnits(true))
-            {
-                int index = this.GetIndex(unit.GetPosition());
-                if (unit.IsAlive())
+                Vector3i vector3i = HexNeighbors.neighbours[i];
+                int num = hIndex * 12;
+                num += i * 2;
+                Vector3i vector3i2 = h.Position + vector3i;
+                if (this.wrapping)
                 {
-                    this.units[index] = (unit.currentlyVisible || !unit.IsInvisibleUnit()) ? -1 : -11;
+                    int num2 = this.width / 2;
+                    if (vector3i2.x <= -num2 || vector3i2.x > num2)
+                    {
+                        vector3i2 = Vector3i.WrapByWidth(vector3i2, this.width);
+                    }
                 }
-            }
-            foreach (BattleUnit unit2 in b.GetUnits(false))
-            {
-                int index = this.GetIndex(unit2.GetPosition());
-                if (unit2.IsAlive())
+                if (area.IsInside(vector3i2))
                 {
-                    this.units[index] = (unit2.currentlyVisible || !unit2.IsInvisibleUnit()) ? -2 : -12;
-                }
-            }
-            if ((b.battleWalls == null) || (b.battleWalls.Count <= 0))
-            {
-                this.walls = null;
-            }
-            else
-            {
-                if ((this.walls != null) && (this.walls.Length == this.nodes.Length))
-                {
-                    Array.Clear(this.walls, 0, this.walls.Length);
+                    this.nodeNeighbours[num] = this.GetIndex(vector3i2);
+                    if (h.viaRiver != null && h.viaRiver[i])
+                    {
+                        this.nodeNeighbours[num + 1] = 1;
+                    }
                 }
                 else
                 {
-                    this.walls = new bool[this.nodes.Length];
-                }
-                this.gateIndex = this.GetIndex(b.battleWalls[0].position);
-                for (int i = 0; i < b.battleWalls.Count; i++)
-                {
-                    if (b.battleWalls[i].standing)
-                    {
-                        int index = this.GetIndex(b.battleWalls[i].position);
-                        this.walls[index] = true;
-                    }
+                    this.nodeNeighbours[num] = -1;
                 }
             }
         }
 
-        public void InitializeLocationsAndUnits(WorldCode.Plane p)
+        public int GetColumn(Vector3i pos)
         {
-            int num = p.searcherIteration + 1;
-            p.searcherIteration = num;
-            this.iteration = num;
+            int num = -this.width / 2 + 1;
+            return pos.x - num;
+        }
+
+        public int GetRow(Vector3i pos)
+        {
+            int num = -(this.height / 2 - 1);
+            int num2 = this.width / 4 + num;
+            int num3 = -(this.GetColumn(pos) + 1) / 2;
+            int num4 = num2 + num3;
+            return pos.y - num4;
+        }
+
+        public int GetIndex(Vector3i p)
+        {
+            return this.width * this.GetRow(p) + this.GetColumn(p);
+        }
+
+        public void InitializeLocationsAndUnits(Plane p)
+        {
+            this.iteration = ++p.searcherIteration;
             if (this.locations == null)
             {
                 this.locations = new bool[this.nodes.Length];
@@ -205,85 +149,225 @@
             {
                 Array.Clear(this.units, 0, this.units.Length);
             }
-            List<MOM.Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(p);
+            List<global::MOM.Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(p);
             if (locationsOfThePlane != null)
             {
                 for (int i = 0; i < locationsOfThePlane.Count; i++)
                 {
-                    MOM.Location location = locationsOfThePlane[i];
+                    global::MOM.Location location = locationsOfThePlane[i];
                     int index = this.GetIndex(location.Position);
                     this.locations[index] = true;
-                    if ((location.locationType == ELocationType.PlaneTower) && !ReferenceEquals(location.GetGroup().GetPlane(), p))
+                    if (location.locationType == ELocationType.PlaneTower && location.GetGroup().GetPlane() != p)
                     {
                         this.units[index] = this.GetGroupSizeOwnerCombo(location.GetGroup());
                     }
                 }
             }
-            List<MOM.Group> groupsOfPlane = GameManager.GetGroupsOfPlane(p);
+            List<global::MOM.Group> groupsOfPlane = GameManager.GetGroupsOfPlane(p);
             if (groupsOfPlane != null)
             {
-                for (int i = 0; i < groupsOfPlane.Count; i++)
+                for (int j = 0; j < groupsOfPlane.Count; j++)
                 {
-                    MOM.Group g = groupsOfPlane[i];
-                    int index = this.GetIndex(g.GetPosition());
-                    this.units[index] = this.GetGroupSizeOwnerCombo(g);
+                    global::MOM.Group group = groupsOfPlane[j];
+                    int index2 = this.GetIndex(group.GetPosition());
+                    this.units[index2] = this.GetGroupSizeOwnerCombo(group);
                 }
             }
+        }
+
+        public void InitializeLocationsAndUnits(Battle b)
+        {
+            this.iteration = ++b.plane.searcherIteration;
+            if (this.locations == null)
+            {
+                this.locations = new bool[this.nodes.Length];
+            }
+            if (this.units == null || this.units.Length != this.nodes.Length)
+            {
+                this.units = new int[this.nodes.Length];
+            }
+            else
+            {
+                Array.Clear(this.units, 0, this.units.Length);
+            }
+            foreach (BattleUnit unit in b.GetUnits(attacker: true))
+            {
+                int index = this.GetIndex(unit.GetPosition());
+                if (unit.IsAlive())
+                {
+                    this.units[index] = ((!unit.currentlyVisible && unit.IsInvisibleUnit()) ? (-11) : (-1));
+                }
+            }
+            foreach (BattleUnit unit2 in b.GetUnits(attacker: false))
+            {
+                int index2 = this.GetIndex(unit2.GetPosition());
+                if (unit2.IsAlive())
+                {
+                    this.units[index2] = ((!unit2.currentlyVisible && unit2.IsInvisibleUnit()) ? (-12) : (-2));
+                }
+            }
+            if (b.battleWalls != null && b.battleWalls.Count > 0)
+            {
+                if (this.walls == null || this.walls.Length != this.nodes.Length)
+                {
+                    this.walls = new bool[this.nodes.Length];
+                }
+                else
+                {
+                    Array.Clear(this.walls, 0, this.walls.Length);
+                }
+                this.gateIndex = this.GetIndex(b.battleWalls[0].position);
+                for (int i = 0; i < b.battleWalls.Count; i++)
+                {
+                    if (b.battleWalls[i].standing)
+                    {
+                        int index3 = this.GetIndex(b.battleWalls[i].position);
+                        this.walls[index3] = true;
+                    }
+                }
+            }
+            else
+            {
+                this.walls = null;
+            }
+        }
+
+        public int GetGroupSizeOwnerCombo(global::MOM.Group g)
+        {
+            int ownerID = g.GetOwnerID();
+            if (ownerID > 15)
+            {
+                Debug.LogError("Wizard ID larger than 0xF !!!");
+            }
+            int count = g.GetUnits().Count;
+            if (FSMSelectionManager.Get()?.GetSelectedGroup() == g && FSMSelectionManager.Get().selectedUnits != null && FSMSelectionManager.Get().selectedUnits.Count > 0)
+            {
+                count = FSMSelectionManager.Get().selectedUnits.Count;
+            }
+            int num = (g.IsGroupInvisible() ? 1 : 0);
+            bool flag = g.transporter != null && g.waterMovement;
+            return ((g.transporter != null && g.landMovement) ? 2097152 : 0) | (flag ? 1048576 : 0) | (count << 16) | (num << 15) | 0x4000 | ownerID;
         }
 
         public static bool IsCDVisible(int comboData, bool attackerSide)
         {
-            return ((comboData >= 0) ? ((comboData & 0x8000) == 0) : ((comboData < -2) ? (!((comboData == -11) & attackerSide) ? ((comboData == -12) && !attackerSide) : true) : true));
-        }
-
-        public bool IsUnitAt(Vector3i pos)
-        {
-            int index = this.GetIndex(pos);
-            return (((this.locations == null) || !this.locations[index]) ? ((this.units != null) && (this.units[index] != 0)) : true);
-        }
-
-        public void PrepareNeighbours(V3iRect area, Hex h, int hIndex)
-        {
-            for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
+            if (comboData < 0)
             {
-                Vector3i vectori = HexNeighbors.neighbours[i];
-                int index = (hIndex * 12) + (i * 2);
-                Vector3i pos = h.Position + vectori;
-                if (this.wrapping)
+                if (comboData >= -2)
                 {
-                    int num3 = this.width / 2;
-                    if ((pos.x <= -num3) || (pos.x > num3))
-                    {
-                        pos = Vector3i.WrapByWidth(pos, this.width);
-                    }
+                    return true;
                 }
-                if (!area.IsInside(pos, false))
+                if (comboData == -11 && attackerSide)
                 {
-                    this.nodeNeighbours[index] = -1;
+                    return true;
+                }
+                if (comboData == -12 && !attackerSide)
+                {
+                    return true;
+                }
+                return false;
+            }
+            return (comboData & 0x8000) == 0;
+        }
+
+        public static int GetCDOwnerID(int comboData)
+        {
+            if (comboData < 0)
+            {
+                switch (comboData)
+                {
+                case -11:
+                case -1:
+                    return -1;
+                case -12:
+                case -2:
+                    return -2;
+                default:
+                    return -1;
+                }
+            }
+            return comboData & 0xF;
+        }
+
+        public static int GetCDUnitCount(int comboData)
+        {
+            if (comboData < 0)
+            {
+                return -1;
+            }
+            return (comboData >> 16) & 0xF;
+        }
+
+        public static bool HasTransporter(int comboData, bool water)
+        {
+            if (comboData < 0)
+            {
+                return false;
+            }
+            if (water && (comboData & 0x100000) > 0)
+            {
+                return true;
+            }
+            if (!water && (comboData & 0x200000) > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void UpdateUnitPosition(Vector3i from, Vector3i to, IPlanePosition ipp)
+        {
+            int num = 0;
+            if (from != Vector3i.invalid)
+            {
+                int index = this.GetIndex(from);
+                num = this.units[index];
+                global::MOM.Location location = GameManager.GetLocationsOfThePlane(ipp.GetPlane())?.Find((global::MOM.Location o) => o.GetPosition() == ipp.GetPosition());
+                if (location != null)
+                {
+                    this.units[index] = this.GetGroupSizeOwnerCombo(location.GetGroup());
                 }
                 else
                 {
-                    this.nodeNeighbours[index] = this.GetIndex(pos);
-                    if ((h.viaRiver != null) && h.viaRiver[i])
-                    {
-                        this.nodeNeighbours[index + 1] = 1;
-                    }
+                    this.units[index] = 0;
                 }
+            }
+            if (!(to != Vector3i.invalid))
+            {
+                return;
+            }
+            if (ipp is global::MOM.Group)
+            {
+                num = this.GetGroupSizeOwnerCombo(ipp as global::MOM.Group);
+            }
+            if (!(ipp is global::MOM.Group) || (ipp as global::MOM.Group).alive)
+            {
+                if (num == 0)
+                {
+                    Debug.LogError("value 0 not expected");
+                }
+                int index2 = this.GetIndex(to);
+                this.units[index2] = num;
             }
         }
 
-        public void UpdateGroupToPosition(Vector3i pos, MOM.Group g)
+        public void UpdateUnitPosition(Vector3i atPos, global::MOM.Group g)
         {
-            if ((pos != Vector3i.invalid) && g.alive)
+            if (atPos != Vector3i.invalid && g.alive)
             {
-                int index = this.GetIndex(pos);
-                this.units[index] = this.GetGroupSizeOwnerCombo(g);
+                int num = 0;
+                if (g != null)
+                {
+                    num = this.GetGroupSizeOwnerCombo(g);
+                }
+                int index = this.GetIndex(atPos);
+                this.units[index] = num;
             }
         }
 
         internal void UpdateUnitPosition(BattleUnit battleUnit)
         {
-            if ((battleUnit.GetPosition() != Vector3i.invalid) && battleUnit.IsAlive())
+            if (battleUnit.GetPosition() != Vector3i.invalid && battleUnit.IsAlive())
             {
                 int index = this.GetIndex(battleUnit.GetPosition());
                 if (battleUnit.currentlyVisible)
@@ -292,63 +376,50 @@
                 }
                 else
                 {
-                    this.units[index] = battleUnit.attackingSide ? -2 : -3;
+                    this.units[index] = (battleUnit.attackingSide ? (-2) : (-3));
                 }
             }
         }
 
-        public void UpdateUnitPosition(Vector3i atPos, MOM.Group g)
+        public void ClearUnitPosition(Vector3i pos)
         {
-            if ((atPos != Vector3i.invalid) && g.alive)
+            if (pos != Vector3i.invalid)
             {
-                int groupSizeOwnerCombo = 0;
-                if (g != null)
-                {
-                    groupSizeOwnerCombo = this.GetGroupSizeOwnerCombo(g);
-                }
-                int index = this.GetIndex(atPos);
-                this.units[index] = groupSizeOwnerCombo;
+                int index = this.GetIndex(pos);
+                this.units[index] = 0;
             }
         }
 
-        public void UpdateUnitPosition(Vector3i from, Vector3i to, IPlanePosition ipp)
+        public void UpdateGroupToPosition(Vector3i pos, global::MOM.Group g)
         {
-            int groupSizeOwnerCombo = 0;
-            if (from != Vector3i.invalid)
+            if (pos != Vector3i.invalid && g.alive)
             {
-                MOM.Location local2;
-                int index = this.GetIndex(from);
-                groupSizeOwnerCombo = this.units[index];
-                List<MOM.Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(ipp.GetPlane());
-                if (locationsOfThePlane != null)
-                {
-                    local2 = locationsOfThePlane.Find(o => o.GetPosition() == ipp.GetPosition());
-                }
-                else
-                {
-                    List<MOM.Location> local1 = locationsOfThePlane;
-                    local2 = null;
-                }
-                MOM.Location location = local2;
-                this.units[index] = (location == null) ? 0 : this.GetGroupSizeOwnerCombo(location.GetGroup());
+                int index = this.GetIndex(pos);
+                this.units[index] = this.GetGroupSizeOwnerCombo(g);
             }
-            if (to != Vector3i.invalid)
+        }
+
+        public bool IsUnitAt(Vector3i pos)
+        {
+            int index = this.GetIndex(pos);
+            if ((this.locations != null && this.locations[index]) || (this.units != null && this.units[index] != 0))
             {
-                if (ipp is MOM.Group)
-                {
-                    groupSizeOwnerCombo = this.GetGroupSizeOwnerCombo(ipp as MOM.Group);
-                }
-                if (!(ipp is MOM.Group) || (ipp as MOM.Group).alive)
-                {
-                    if (groupSizeOwnerCombo == 0)
-                    {
-                        Debug.LogError("value 0 not expected");
-                    }
-                    int index = this.GetIndex(to);
-                    this.units[index] = groupSizeOwnerCombo;
-                }
+                return true;
             }
+            return false;
+        }
+
+        public static FInt ClampMPCost(SearcherDataV2 data, FInt cost)
+        {
+            if (data == null)
+            {
+                return cost;
+            }
+            if (cost > data.maxTerrainCost)
+            {
+                return data.maxTerrainCost;
+            }
+            return cost;
         }
     }
 }
-

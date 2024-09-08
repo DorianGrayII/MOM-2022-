@@ -1,40 +1,48 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Sets the minimum and maximum limits for the value of a UI Slider component. Optionally resets on exit")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the minimum and maximum limits for the value of a UI Slider component. Optionally resets on exit")]
     public class UiSliderSetMinMax : ComponentAction<Slider>
     {
-        [RequiredField, CheckForComponent(typeof(Slider)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI Slider component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Slider))]
+        [Tooltip("The GameObject with the UI Slider component.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The minimum value of the UI Slider component. Leave as None for no effect")]
+
+        [Tooltip("The minimum value of the UI Slider component. Leave as None for no effect")]
         public FsmFloat minValue;
-        [HutongGames.PlayMaker.Tooltip("The maximum value of the UI Slider component. Leave as None for no effect")]
+
+        [Tooltip("The maximum value of the UI Slider component. Leave as None for no effect")]
         public FsmFloat maxValue;
-        [HutongGames.PlayMaker.Tooltip("Reset when exiting this state.")]
+
+        [Tooltip("Reset when exiting this state.")]
         public FsmBool resetOnExit;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Slider slider;
+
         private float originalMinValue;
+
         private float originalMaxValue;
 
-        private void DoSetValue()
+        public override void Reset()
         {
-            if (this.slider != null)
+            this.gameObject = null;
+            this.minValue = new FsmFloat
             {
-                if (!this.minValue.IsNone)
-                {
-                    this.slider.minValue = this.minValue.Value;
-                }
-                if (!this.maxValue.IsNone)
-                {
-                    this.slider.maxValue = this.maxValue.Value;
-                }
-            }
+                UseVariable = true
+            };
+            this.maxValue = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.resetOnExit = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -56,32 +64,33 @@
             }
         }
 
-        public override void OnExit()
-        {
-            if ((this.slider != null) && this.resetOnExit.Value)
-            {
-                this.slider.minValue = this.originalMinValue;
-                this.slider.maxValue = this.originalMaxValue;
-            }
-        }
-
         public override void OnUpdate()
         {
             this.DoSetValue();
         }
 
-        public override void Reset()
+        private void DoSetValue()
         {
-            this.gameObject = null;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.minValue = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.maxValue = num2;
-            this.resetOnExit = null;
-            this.everyFrame = false;
+            if (!(this.slider == null))
+            {
+                if (!this.minValue.IsNone)
+                {
+                    this.slider.minValue = this.minValue.Value;
+                }
+                if (!this.maxValue.IsNone)
+                {
+                    this.slider.maxValue = this.maxValue.Value;
+                }
+            }
+        }
+
+        public override void OnExit()
+        {
+            if (!(this.slider == null) && this.resetOnExit.Value)
+            {
+                this.slider.minValue = this.originalMinValue;
+                this.slider.maxValue = this.originalMaxValue;
+            }
         }
     }
 }
-

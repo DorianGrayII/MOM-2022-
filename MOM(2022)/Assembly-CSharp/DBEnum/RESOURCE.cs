@@ -1,25 +1,22 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum RESOURCE
     {
-        SILVER_ORE,
-        GOLD_ORE,
-        IRON_ORE,
-        COAL,
-        GEMS,
-        MITHRIL_ORE,
-        ADAMANTINE_ORE,
-        QUORK_CRYSTALS,
-        CRYSX_CRYSTALS,
-        WILD_GAME,
-        NIGHTSHADE,
-        MAMMOTH,
-        ORICHALCUM,
-        PEARLS,
-        FISH,
-        REEF
+        SILVER_ORE = 0,
+        GOLD_ORE = 1,
+        IRON_ORE = 2,
+        COAL = 3,
+        GEMS = 4,
+        MITHRIL_ORE = 5,
+        ADAMANTINE_ORE = 6,
+        QUORK_CRYSTALS = 7,
+        CRYSX_CRYSTALS = 8,
+        WILD_GAME = 9,
+        NIGHTSHADE = 10,
+        MAMMOTH = 11,
+        ORICHALCUM = 12,
+        PEARLS = 13,
+        FISH = 14,
+        REEF = 15
     }
 }
-

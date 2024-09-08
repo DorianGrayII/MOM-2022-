@@ -1,31 +1,26 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Sends an Event based on the value of a String Variable.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Sends an Event based on the value of a String Variable.")]
     public class StringSwitch : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString stringVariable;
+
         [CompoundArray("String Switches", "Compare String", "Send Event")]
         public FsmString[] compareTo;
+
         public FsmEvent[] sendEvent;
+
         public bool everyFrame;
 
-        private void DoStringSwitch()
+        public override void Reset()
         {
-            if (!this.stringVariable.IsNone)
-            {
-                for (int i = 0; i < this.compareTo.Length; i++)
-                {
-                    if (this.stringVariable.Value == this.compareTo[i].Value)
-                    {
-                        base.Fsm.Event(this.sendEvent[i]);
-                        return;
-                    }
-                }
-            }
+            this.stringVariable = null;
+            this.compareTo = new FsmString[1];
+            this.sendEvent = new FsmEvent[1];
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,13 +37,20 @@
             this.DoStringSwitch();
         }
 
-        public override void Reset()
+        private void DoStringSwitch()
         {
-            this.stringVariable = null;
-            this.compareTo = new FsmString[1];
-            this.sendEvent = new FsmEvent[1];
-            this.everyFrame = false;
+            if (this.stringVariable.IsNone)
+            {
+                return;
+            }
+            for (int i = 0; i < this.compareTo.Length; i++)
+            {
+                if (this.stringVariable.Value == this.compareTo[i].Value)
+                {
+                    base.Fsm.Event(this.sendEvent[i]);
+                    break;
+                }
+            }
         }
     }
 }
-

@@ -1,31 +1,39 @@
-﻿namespace MOM
-{
-    using DBEnum;
-    using ProtoBuf;
-    using System;
-    using UnityEngine;
+using DBEnum;
+using ProtoBuf;
+using UnityEngine;
 
+namespace MOM
+{
     [ProtoContract]
     public class BattleFigure
     {
         [ProtoMember(1)]
         public int rangedAttack;
+
         [ProtoMember(2)]
         public int attack;
+
         [ProtoMember(3)]
         public int defence;
+
         [ProtoMember(4)]
         public int maxHitPoints;
+
         [ProtoMember(5)]
         public int resist;
+
         [ProtoMember(6)]
         public int rangedAmmo;
+
         [ProtoMember(7)]
         public int movementSpeed;
+
         [ProtoMember(8)]
         public float rangedAttackChance;
+
         [ProtoMember(9)]
         public float attackChance;
+
         [ProtoMember(10)]
         public float defenceChance;
 
@@ -37,6 +45,13 @@
         {
             this.rangedAmmo = attributes.GetFinal(TAG.AMMUNITION).ToInt();
             this.UpdateFromAttributes(attributes);
+        }
+
+        public static BattleFigure From(BattleFigure bf)
+        {
+            BattleFigure battleFigure = new BattleFigure();
+            BattleFigure.Copy(bf, battleFigure);
+            return battleFigure;
         }
 
         public static void Copy(BattleFigure source, BattleFigure destination)
@@ -53,17 +68,11 @@
             destination.movementSpeed = source.movementSpeed;
         }
 
-        public static BattleFigure From(BattleFigure bf)
-        {
-            BattleFigure destination = new BattleFigure();
-            Copy(bf, destination);
-            return destination;
-        }
-
         public float GetFakePower()
         {
-            float num = Mathf.Pow((Mathf.Pow((float) this.defence, 0.8f) - Mathf.Pow((float) this.defence, 0.6f)) + 1f, 2.2f);
-            return (((((1.8f * this.attack) + (1.6f * this.rangedAttack)) + num) + (1.4f * this.maxHitPoints)) + (1f * this.resist));
+            float f = Mathf.Pow(this.defence, 0.8f) - Mathf.Pow(this.defence, 0.6f) + 1f;
+            f = Mathf.Pow(f, 2.2f);
+            return 1.8f * (float)this.attack + 1.6f * (float)this.rangedAttack + f + 1.4f * (float)this.maxHitPoints + 1f * (float)this.resist;
         }
 
         public void UpdateFromAttributes(Attributes attributes)
@@ -80,4 +89,3 @@
         }
     }
 }
-

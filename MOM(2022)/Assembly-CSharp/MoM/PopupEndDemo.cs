@@ -1,28 +1,28 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.PopupEndDemo
 using System.Collections;
 using MHUtils.UI;
-using MOM;
 using UnityEngine.UI;
 
-public class PopupEndDemo : ScreenBase
+namespace MOM
 {
-    public Button btClose;
-
-    public GameObjectEnabler<PlayerWizard.Familiar> familiar;
-
-    public override IEnumerator PreStart()
+    public class PopupEndDemo : ScreenBase
     {
-        yield return base.PreStart();
-        this.familiar.Set(GameManager.GetHumanWizard().familiar);
-    }
+        public Button btClose;
 
-    protected override void ButtonClick(Selectable s)
-    {
-        base.ButtonClick(s);
-        if (s == this.btClose)
+        public GameObjectEnabler<PlayerWizard.Familiar> familiar;
+
+        public override IEnumerator PreStart()
         {
-            UIManager.Close(this);
+            yield return base.PreStart();
+            this.familiar.Set(GameManager.GetHumanWizard().familiar);
+        }
+
+        protected override void ButtonClick(Selectable s)
+        {
+            base.ButtonClick(s);
+            if (s == this.btClose)
+            {
+                UIManager.Close(this);
+            }
         }
     }
 }

@@ -1,33 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Vector2), Tooltip("Get the XY channels of a Vector2 Variable and store them in Float Variables.")]
+    [ActionCategory(ActionCategory.Vector2)]
+    [Tooltip("Get the XY channels of a Vector2 Variable and store them in Float Variables.")]
     public class GetVector2XY : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The vector2 source")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The vector2 source")]
         public FsmVector2 vector2Variable;
-        [UIHint(UIHint.Variable), Tooltip("The x component")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The x component")]
         public FsmFloat storeX;
-        [UIHint(UIHint.Variable), Tooltip("The y component")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The y component")]
         public FsmFloat storeY;
+
         [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoGetVector2XYZ()
+        public override void Reset()
         {
-            if (this.vector2Variable != null)
-            {
-                if (this.storeX != null)
-                {
-                    this.storeX.Value = this.vector2Variable.get_Value().x;
-                }
-                if (this.storeY != null)
-                {
-                    this.storeY.Value = this.vector2Variable.get_Value().y;
-                }
-            }
+            this.vector2Variable = null;
+            this.storeX = null;
+            this.storeY = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -44,13 +42,19 @@
             this.DoGetVector2XYZ();
         }
 
-        public override void Reset()
+        private void DoGetVector2XYZ()
         {
-            this.vector2Variable = null;
-            this.storeX = null;
-            this.storeY = null;
-            this.everyFrame = false;
+            if (this.vector2Variable != null)
+            {
+                if (this.storeX != null)
+                {
+                    this.storeX.Value = this.vector2Variable.Value.x;
+                }
+                if (this.storeY != null)
+                {
+                    this.storeY.Value = this.vector2Variable.Value.y;
+                }
+            }
         }
     }
 }
-

@@ -1,19 +1,18 @@
-﻿namespace MHUtils
-{
-    using System;
-    using System.Runtime.InteropServices;
+using System;
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple=true)]
+namespace MHUtils
+{
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class ScriptAttribute : Attribute
     {
-        public System.Type parameterExpected;
-        public System.Type requiredTextParameter;
+        public Type parameterExpected;
 
-        public ScriptAttribute(System.Type parameterExpected, System.Type requiredTextParameter)
+        public Type requiredTextParameter;
+
+        public ScriptAttribute(Type parameterExpected, Type requiredTextParameter = null)
         {
             this.parameterExpected = parameterExpected;
             this.requiredTextParameter = requiredTextParameter;
         }
     }
 }
-

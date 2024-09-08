@@ -1,368 +1,368 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MHUtils.MHNonThread
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using MHUtils;
 using UnityEngine;
 
-public class MHNonThread
+namespace MHUtils
 {
-    public static bool DEBUG_MODE = true;
-
-    private ITask singleTask;
-
-    private ITask[] arrayOfTasks;
-
-    private List<ITask> listOfTasks;
-
-    private object result;
-
-    private object[] results;
-
-    private bool terminate;
-
-    private bool storeResults;
-
-    private int taskCount;
-
-    private int finishedCount;
-
-    private Exception firstException;
-
-    public global::MHUtils.Callback onFinish;
-
-    public global::MHUtils.Callback onError;
-
-    private MHNonThread()
+    public class MHNonThread
     {
-    }
+        public static bool DEBUG_MODE = true;
 
-    private MHNonThread(ITask singleTask)
-    {
-        this.singleTask = singleTask;
-        this.taskCount = 1;
-    }
+        private ITask singleTask;
 
-    private MHNonThread(List<ITask> listOfTasks, bool storeResults = true)
-    {
-        this.listOfTasks = listOfTasks;
-        this.storeResults = storeResults;
-        this.taskCount = listOfTasks.Count;
-        if (storeResults)
+        private ITask[] arrayOfTasks;
+
+        private List<ITask> listOfTasks;
+
+        private object result;
+
+        private object[] results;
+
+        private bool terminate;
+
+        private bool storeResults;
+
+        private int taskCount;
+
+        private int finishedCount;
+
+        private Exception firstException;
+
+        public Callback onFinish;
+
+        public Callback onError;
+
+        private MHNonThread()
         {
-            this.results = new object[this.taskCount];
         }
-    }
 
-    private MHNonThread(ITask[] arrayOfTasks, bool storeResults = true)
-    {
-        this.arrayOfTasks = arrayOfTasks;
-        this.storeResults = storeResults;
-        this.taskCount = arrayOfTasks.Length;
-        if (storeResults)
+        private MHNonThread(ITask singleTask)
         {
-            this.results = new object[this.taskCount];
+            this.singleTask = singleTask;
+            this.taskCount = 1;
         }
-    }
 
-    public static object DirectExecution(ITask task)
-    {
-        return task.Execute();
-    }
-
-    public static IEnumerator ExecuteSequence(global::MHUtils.Callback[] cbs, object data = null, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null, global::MHUtils.Callback onProgress = null)
-    {
-        if (cbs == null || cbs.Length < 1)
+        private MHNonThread(List<ITask> listOfTasks, bool storeResults = true)
         {
-            Debug.LogError("Data not provided to initialize array of the tasks");
-            yield break;
-        }
-        MHTimer t = MHTimer.StartNew();
-        _ = new object[cbs.Length];
-        float time = t.GetTime();
-        for (int i = 0; i < cbs.Length; i++)
-        {
-            cbs[i](data);
-            onProgress?.Invoke((float)i / (float)cbs.Length);
-            if (t.GetTime() - time > 50f)
+            this.listOfTasks = listOfTasks;
+            this.storeResults = storeResults;
+            this.taskCount = listOfTasks.Count;
+            if (storeResults)
             {
-                yield return null;
-                time = t.GetTime();
+                this.results = new object[this.taskCount];
             }
         }
-        onFinish?.Invoke(null);
-    }
 
-    public static IEnumerator CreateMulti<T>(CallbackRet action, List<T> data, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null, global::MHUtils.Callback onProgress = null)
-    {
-        if (data == null || data.Count < 1)
+        private MHNonThread(ITask[] arrayOfTasks, bool storeResults = true)
         {
-            Debug.LogError("Data not provided to initialize array of the tasks");
-            yield break;
-        }
-        MHTimer t = MHTimer.StartNew();
-        MHNonThread mht = new MHNonThread
-        {
-            onFinish = onFinish,
-            onError = onError,
-            results = new object[data.Count]
-        };
-        float time = t.GetTime();
-        for (int i = 0; i < data.Count; i++)
-        {
-            BasicTask basicTask = new BasicTask();
-            basicTask.ca = action;
-            basicTask.data = data[i];
-            mht.results[i] = basicTask.Execute();
-            onProgress?.Invoke((float)i / (float)data.Count);
-            if (t.GetTime() - time > 50f)
+            this.arrayOfTasks = arrayOfTasks;
+            this.storeResults = storeResults;
+            this.taskCount = arrayOfTasks.Length;
+            if (storeResults)
             {
-                yield return null;
-                time = t.GetTime();
+                this.results = new object[this.taskCount];
             }
         }
-        onFinish?.Invoke(mht.results);
-    }
 
-    public static MHNonThread Create(ITask singleTask, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null)
-    {
-        MHNonThread @object = new MHNonThread(singleTask)
+        public static object DirectExecution(ITask task)
         {
-            onFinish = onFinish,
-            onError = onError
-        };
-        if (!ThreadPool.QueueUserWorkItem(@object.ProcessSingleMode))
-        {
-            onError?.Invoke("Queue for single-task multi threading failed!");
+            return task.Execute();
         }
-        return @object;
-    }
 
-    public static MHNonThread Create(List<ITask> tasks, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null)
-    {
-        MHNonThread mHNonThread = new MHNonThread(tasks);
-        mHNonThread.onFinish = onFinish;
-        mHNonThread.onError = onError;
-        for (int i = 0; i < tasks.Count; i++)
+        public static IEnumerator ExecuteSequence(Callback[] cbs, object data = null, Callback onFinish = null, Callback onError = null, Callback onProgress = null)
         {
-            if (!ThreadPool.QueueUserWorkItem(mHNonThread.Process, i))
+            if (cbs == null || cbs.Length < 1)
             {
-                onError?.Invoke("Queue for list-task multi threading failed!");
-                break;
+                Debug.LogError("Data not provided to initialize array of the tasks");
+                yield break;
             }
+            MHTimer t = MHTimer.StartNew();
+            _ = new object[cbs.Length];
+            float time = t.GetTime();
+            for (int i = 0; i < cbs.Length; i++)
+            {
+                cbs[i](data);
+                onProgress?.Invoke((float)i / (float)cbs.Length);
+                if (t.GetTime() - time > 50f)
+                {
+                    yield return null;
+                    time = t.GetTime();
+                }
+            }
+            onFinish?.Invoke(null);
         }
-        return mHNonThread;
-    }
 
-    public static MHNonThread Create(ITask[] tasks, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null)
-    {
-        MHNonThread mHNonThread = new MHNonThread(tasks);
-        mHNonThread.onFinish = onFinish;
-        mHNonThread.onError = onError;
-        for (int i = 0; i < tasks.Length; i++)
+        public static IEnumerator CreateMulti<T>(CallbackRet action, List<T> data, Callback onFinish = null, Callback onError = null, Callback onProgress = null)
         {
-            if (!ThreadPool.QueueUserWorkItem(mHNonThread.Process, i))
+            if (data == null || data.Count < 1)
+            {
+                Debug.LogError("Data not provided to initialize array of the tasks");
+                yield break;
+            }
+            MHTimer t = MHTimer.StartNew();
+            MHNonThread mht = new MHNonThread
+            {
+                onFinish = onFinish,
+                onError = onError,
+                results = new object[data.Count]
+            };
+            float time = t.GetTime();
+            for (int i = 0; i < data.Count; i++)
+            {
+                BasicTask basicTask = new BasicTask();
+                basicTask.ca = action;
+                basicTask.data = data[i];
+                mht.results[i] = basicTask.Execute();
+                onProgress?.Invoke((float)i / (float)data.Count);
+                if (t.GetTime() - time > 50f)
+                {
+                    yield return null;
+                    time = t.GetTime();
+                }
+            }
+            onFinish?.Invoke(mht.results);
+        }
+
+        public static MHNonThread Create(ITask singleTask, Callback onFinish = null, Callback onError = null)
+        {
+            MHNonThread @object = new MHNonThread(singleTask)
+            {
+                onFinish = onFinish,
+                onError = onError
+            };
+            if (!ThreadPool.QueueUserWorkItem(@object.ProcessSingleMode))
+            {
+                onError?.Invoke("Queue for single-task multi threading failed!");
+            }
+            return @object;
+        }
+
+        public static MHNonThread Create(List<ITask> tasks, Callback onFinish = null, Callback onError = null)
+        {
+            MHNonThread mHNonThread = new MHNonThread(tasks);
+            mHNonThread.onFinish = onFinish;
+            mHNonThread.onError = onError;
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                if (!ThreadPool.QueueUserWorkItem(mHNonThread.Process, i))
+                {
+                    onError?.Invoke("Queue for list-task multi threading failed!");
+                    break;
+                }
+            }
+            return mHNonThread;
+        }
+
+        public static MHNonThread Create(ITask[] tasks, Callback onFinish = null, Callback onError = null)
+        {
+            MHNonThread mHNonThread = new MHNonThread(tasks);
+            mHNonThread.onFinish = onFinish;
+            mHNonThread.onError = onError;
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                if (!ThreadPool.QueueUserWorkItem(mHNonThread.Process, i))
+                {
+                    onError?.Invoke("Queue for array-task multi threading failed!");
+                    break;
+                }
+            }
+            return mHNonThread;
+        }
+
+        public static MHNonThread CreateSequence(ITask[] tasks, Callback onFinish = null, Callback onError = null, Callback onProgress = null)
+        {
+            MHNonThread mHNonThread = new MHNonThread(tasks);
+            mHNonThread.onFinish = onFinish;
+            mHNonThread.onError = onError;
+            if (MHNonThread.DEBUG_MODE)
+            {
+                mHNonThread.ProcessSequence(" <Fake thread> ");
+            }
+            else if (!ThreadPool.QueueUserWorkItem(mHNonThread.ProcessSequence))
             {
                 onError?.Invoke("Queue for array-task multi threading failed!");
-                break;
+            }
+            return mHNonThread;
+        }
+
+        public static IEnumerator Start(List<ITask> tasks, Callback onFinish = null, Callback onError = null)
+        {
+            MHNonThread mt = MHNonThread.Create(tasks, onFinish, onError);
+            while (!mt.IsFinished())
+            {
+                yield return null;
             }
         }
-        return mHNonThread;
-    }
 
-    public static MHNonThread CreateSequence(ITask[] tasks, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null, global::MHUtils.Callback onProgress = null)
-    {
-        MHNonThread mHNonThread = new MHNonThread(tasks);
-        mHNonThread.onFinish = onFinish;
-        mHNonThread.onError = onError;
-        if (MHNonThread.DEBUG_MODE)
+        public static IEnumerator Start(ITask[] tasks, Callback onFinish = null, Callback onError = null)
         {
-            mHNonThread.ProcessSequence(" <Fake thread> ");
-        }
-        else if (!ThreadPool.QueueUserWorkItem(mHNonThread.ProcessSequence))
-        {
-            onError?.Invoke("Queue for array-task multi threading failed!");
-        }
-        return mHNonThread;
-    }
-
-    public static IEnumerator Start(List<ITask> tasks, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null)
-    {
-        MHNonThread mt = MHNonThread.Create(tasks, onFinish, onError);
-        while (!mt.IsFinished())
-        {
-            yield return null;
-        }
-    }
-
-    public static IEnumerator Start(ITask[] tasks, global::MHUtils.Callback onFinish = null, global::MHUtils.Callback onError = null)
-    {
-        MHNonThread mt = MHNonThread.Create(tasks, onFinish, onError);
-        while (!mt.IsFinished())
-        {
-            yield return null;
-        }
-    }
-
-    public IEnumerator WaitForceFinish()
-    {
-        this.Destroy();
-        while (!this.IsFinished())
-        {
-            yield return null;
-        }
-    }
-
-    private void ProcessSingleMode(object o)
-    {
-        try
-        {
-            if (this.singleTask != null && !this.terminate)
+            MHNonThread mt = MHNonThread.Create(tasks, onFinish, onError);
+            while (!mt.IsFinished())
             {
-                this.result = this.singleTask.Execute();
-            }
-            Interlocked.Increment(ref this.finishedCount);
-        }
-        catch (Exception ex)
-        {
-            if (this.firstException == null)
-            {
-                this.firstException = ex;
-            }
-            if (this.onError != null)
-            {
-                this.onError(ex);
-            }
-            else
-            {
-                Debug.LogError(ex);
+                yield return null;
             }
         }
-        this.onFinish?.Invoke(this.result);
-    }
 
-    private void ProcessSequence(object o)
-    {
-        try
+        public IEnumerator WaitForceFinish()
         {
-            if (!this.terminate)
+            this.Destroy();
+            while (!this.IsFinished())
             {
-                for (int i = 0; i < this.taskCount; i++)
+                yield return null;
+            }
+        }
+
+        private void ProcessSingleMode(object o)
+        {
+            try
+            {
+                if (this.singleTask != null && !this.terminate)
+                {
+                    this.result = this.singleTask.Execute();
+                }
+                Interlocked.Increment(ref this.finishedCount);
+            }
+            catch (Exception ex)
+            {
+                if (this.firstException == null)
+                {
+                    this.firstException = ex;
+                }
+                if (this.onError != null)
+                {
+                    this.onError(ex);
+                }
+                else
+                {
+                    Debug.LogError(ex);
+                }
+            }
+            this.onFinish?.Invoke(this.result);
+        }
+
+        private void ProcessSequence(object o)
+        {
+            try
+            {
+                if (!this.terminate)
+                {
+                    for (int i = 0; i < this.taskCount; i++)
+                    {
+                        object obj = null;
+                        if (this.listOfTasks != null)
+                        {
+                            obj = this.listOfTasks[i].Execute();
+                        }
+                        else if (this.arrayOfTasks != null)
+                        {
+                            obj = this.arrayOfTasks[i].Execute();
+                        }
+                        if (this.results != null)
+                        {
+                            this.results[i] = obj;
+                        }
+                        Interlocked.Increment(ref this.finishedCount);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (this.firstException == null)
+                {
+                    this.firstException = ex;
+                }
+                Debug.LogError("Thread for " + o?.ToString() + " get exception\n " + ex);
+                Interlocked.Increment(ref this.finishedCount);
+                this.onError?.Invoke(ex);
+            }
+            this.onFinish?.Invoke(this.results);
+            this.onFinish = null;
+        }
+
+        private void Process(object o)
+        {
+            try
+            {
+                int num = (int)o;
+                if (!this.terminate)
                 {
                     object obj = null;
                     if (this.listOfTasks != null)
                     {
-                        obj = this.listOfTasks[i].Execute();
+                        obj = this.listOfTasks[num].Execute();
                     }
                     else if (this.arrayOfTasks != null)
                     {
-                        obj = this.arrayOfTasks[i].Execute();
+                        obj = this.arrayOfTasks[num].Execute();
                     }
                     if (this.results != null)
                     {
-                        this.results[i] = obj;
+                        this.results[num] = obj;
                     }
-                    Interlocked.Increment(ref this.finishedCount);
                 }
+                Interlocked.Increment(ref this.finishedCount);
             }
-        }
-        catch (Exception ex)
-        {
-            if (this.firstException == null)
+            catch (Exception ex)
             {
-                this.firstException = ex;
-            }
-            Debug.LogError("Thread for " + o?.ToString() + " get exception\n " + ex);
-            Interlocked.Increment(ref this.finishedCount);
-            this.onError?.Invoke(ex);
-        }
-        this.onFinish?.Invoke(this.results);
-        this.onFinish = null;
-    }
-
-    private void Process(object o)
-    {
-        try
-        {
-            int num = (int)o;
-            if (!this.terminate)
-            {
-                object obj = null;
-                if (this.listOfTasks != null)
+                if (this.firstException == null)
                 {
-                    obj = this.listOfTasks[num].Execute();
+                    this.firstException = ex;
                 }
-                else if (this.arrayOfTasks != null)
+                Debug.LogError("Thread " + o?.ToString() + " get exception\n " + ex);
+                Interlocked.Increment(ref this.finishedCount);
+                this.onError?.Invoke(ex);
+                this.Destroy();
+            }
+            if (this.finishedCount == this.taskCount && Monitor.TryEnter(this))
+            {
+                try
                 {
-                    obj = this.arrayOfTasks[num].Execute();
+                    this.onFinish?.Invoke(this.results);
+                    this.onFinish = null;
                 }
-                if (this.results != null)
+                finally
                 {
-                    this.results[num] = obj;
+                    Monitor.Exit(this);
                 }
             }
-            Interlocked.Increment(ref this.finishedCount);
         }
-        catch (Exception ex)
+
+        public float GetProgress()
         {
-            if (this.firstException == null)
+            if (this.singleTask != null)
             {
-                this.firstException = ex;
+                return this.finishedCount;
             }
-            Debug.LogError("Thread " + o?.ToString() + " get exception\n " + ex);
-            Interlocked.Increment(ref this.finishedCount);
-            this.onError?.Invoke(ex);
-            this.Destroy();
+            return (float)this.finishedCount / (float)this.taskCount;
         }
-        if (this.finishedCount == this.taskCount && Monitor.TryEnter(this))
+
+        public bool IsFinished()
         {
-            try
-            {
-                this.onFinish?.Invoke(this.results);
-                this.onFinish = null;
-            }
-            finally
-            {
-                Monitor.Exit(this);
-            }
+            return this.finishedCount == this.taskCount;
         }
-    }
 
-    public float GetProgress()
-    {
-        if (this.singleTask != null)
+        public object[] GetResults()
         {
-            return this.finishedCount;
+            return this.results;
         }
-        return (float)this.finishedCount / (float)this.taskCount;
-    }
 
-    public bool IsFinished()
-    {
-        return this.finishedCount == this.taskCount;
-    }
+        public object GetResultSingle()
+        {
+            return this.result;
+        }
 
-    public object[] GetResults()
-    {
-        return this.results;
-    }
+        public int GetTaskTotal()
+        {
+            return this.taskCount;
+        }
 
-    public object GetResultSingle()
-    {
-        return this.result;
-    }
-
-    public int GetTaskTotal()
-    {
-        return this.taskCount;
-    }
-
-    public void Destroy()
-    {
-        this.onFinish = null;
-        this.onError = null;
-        this.terminate = true;
+        public void Destroy()
+        {
+            this.onFinish = null;
+            this.onError = null;
+            this.terminate = true;
+        }
     }
 }

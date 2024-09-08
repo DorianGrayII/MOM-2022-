@@ -1,27 +1,29 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Transform), HutongGames.PlayMaker.Tooltip("Transforms a Direction from a Game Object's local space to world space.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Transform)]
+    [Tooltip("Transforms a Direction from a Game Object's local space to world space.")]
     public class TransformDirection : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmVector3 localDirection;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmVector3 storeResult;
+
         public bool everyFrame;
 
-        private void DoTransformDirection()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                this.storeResult.set_Value(ownerDefaultTarget.transform.TransformDirection(this.localDirection.get_Value()));
-            }
+            this.gameObject = null;
+            this.localDirection = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,13 +40,13 @@
             this.DoTransformDirection();
         }
 
-        public override void Reset()
+        private void DoTransformDirection()
         {
-            this.gameObject = null;
-            this.localDirection = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                this.storeResult.Value = ownerDefaultTarget.transform.TransformDirection(this.localDirection.Value);
+            }
         }
     }
 }
-

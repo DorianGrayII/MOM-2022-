@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DiplomaticStatus
 using System.Collections.Generic;
 using System.Text;
 using DBDef;
@@ -525,7 +523,7 @@ public class DiplomaticStatus
 
     public void EndTreaty(DiplomaticTreaty t)
     {
-        DiplomaticTreaty diplomaticTreaty = this.GetTreaties().Find((DiplomaticTreaty t) => t.Equal(t));
+        DiplomaticTreaty diplomaticTreaty = this.GetTreaties().Find((DiplomaticTreaty t2) => t.Equal(t2));
         if (diplomaticTreaty != null)
         {
             DiplomaticStatus reverseStatusFromTarget = this.GetReverseStatusFromTarget();
@@ -541,7 +539,7 @@ public class DiplomaticStatus
 
     public void BreakTreaty(DiplomaticTreaty t)
     {
-        DiplomaticTreaty diplomaticTreaty = this.GetTreaties().Find((DiplomaticTreaty t) => t.Equal(t));
+        DiplomaticTreaty diplomaticTreaty = this.GetTreaties().Find((DiplomaticTreaty t2) => t.Equal(t2));
         if (diplomaticTreaty != null)
         {
             string treatyBreakScript = diplomaticTreaty.source.Get().treatyBreakScript;

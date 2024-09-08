@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// DeferredSynchronizeInvoke
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

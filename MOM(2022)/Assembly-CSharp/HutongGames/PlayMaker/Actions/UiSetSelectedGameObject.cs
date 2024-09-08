@@ -1,18 +1,19 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine.EventSystems;
+using UnityEngine.EventSystems;
 
-    [ActionCategory(ActionCategory.UI), Tooltip("Sets the EventSystem's currently select GameObject.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Sets the EventSystem's currently select GameObject.")]
     public class UiSetSelectedGameObject : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The GameObject to select.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The GameObject to select.")]
         public FsmGameObject gameObject;
 
-        private void DoSetSelectedGameObject()
+        public override void Reset()
         {
-            EventSystem.current.SetSelectedGameObject(this.gameObject.get_Value());
+            this.gameObject = null;
         }
 
         public override void OnEnter()
@@ -21,10 +22,9 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetSelectedGameObject()
         {
-            this.gameObject = null;
+            EventSystem.current.SetSelectedGameObject(this.gameObject.Value);
         }
     }
 }
-

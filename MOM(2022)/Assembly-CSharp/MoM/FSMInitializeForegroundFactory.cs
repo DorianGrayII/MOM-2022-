@@ -1,10 +1,10 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
-    using MHUtils;
-    using System;
-    using UnityEngine;
+using HutongGames.PlayMaker;
+using MHUtils;
+using UnityEngine;
+using WorldCode;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMInitializeForegroundFactory : FSMStateBase
     {
@@ -22,4 +22,3 @@
         }
     }
 }
-

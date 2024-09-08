@@ -1,32 +1,33 @@
-﻿namespace MHUtils
-{
-    using System;
-    using System.Runtime.InteropServices;
+using System;
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple=true)]
+namespace MHUtils
+{
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class ScriptParameters : Attribute
     {
-        public System.Type dropdownType;
-        public System.Type variableType;
+        public Type dropdownType;
+
+        public Type variableType;
+
         public object dropdownListType;
+
         public string displayName;
 
-        public ScriptParameters(string displayName)
+        public ScriptParameters(Type dropdownType, Type variableType = null)
         {
-            this.displayName = displayName;
+            this.dropdownType = dropdownType;
+            this.variableType = variableType;
         }
 
-        public ScriptParameters(object dropdownListType, System.Type variableType)
+        public ScriptParameters(object dropdownListType, Type variableType = null)
         {
             this.dropdownListType = dropdownListType;
             this.variableType = variableType;
         }
 
-        public ScriptParameters(System.Type dropdownType, System.Type variableType)
+        public ScriptParameters(string displayName)
         {
-            this.dropdownType = dropdownType;
-            this.variableType = variableType;
+            this.displayName = displayName;
         }
     }
 }
-

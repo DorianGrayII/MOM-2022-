@@ -1,28 +1,33 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Measures the Distance betweens 2 Game Objects and stores the result in a Float Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Measures the Distance betweens 2 Game Objects and stores the result in a Float Variable.")]
     public class GetDistance : FsmStateAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Measure distance from this GameObject.")]
+        [RequiredField]
+        [Tooltip("Measure distance from this GameObject.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("Target GameObject.")]
+
+        [RequiredField]
+        [Tooltip("Target GameObject.")]
         public FsmGameObject target;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("Store the distance in a float variable.")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("Store the distance in a float variable.")]
         public FsmFloat storeResult;
-        [HutongGames.PlayMaker.Tooltip("Repeat every frame.")]
+
+        [Tooltip("Repeat every frame.")]
         public bool everyFrame;
 
-        private void DoGetDistance()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if ((ownerDefaultTarget != null) && ((this.target.get_Value() != null) && (this.storeResult != null)))
-            {
-                this.storeResult.Value = Vector3.Distance(ownerDefaultTarget.transform.position, this.target.get_Value().transform.position);
-            }
+            this.gameObject = null;
+            this.target = null;
+            this.storeResult = null;
+            this.everyFrame = true;
         }
 
         public override void OnEnter()
@@ -39,13 +44,13 @@
             this.DoGetDistance();
         }
 
-        public override void Reset()
+        private void DoGetDistance()
         {
-            this.gameObject = null;
-            this.target = null;
-            this.storeResult = null;
-            this.everyFrame = true;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null) && !(this.target.Value == null) && this.storeResult != null)
+            {
+                this.storeResult.Value = Vector3.Distance(ownerDefaultTarget.transform.position, this.target.Value.transform.position);
+            }
         }
     }
 }
-

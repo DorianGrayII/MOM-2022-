@@ -1,17 +1,12 @@
-﻿namespace DBDef
-{
-    using DBUtils;
-    using System;
-    using System.Runtime.CompilerServices;
+using DBUtils;
 
-    [Extension]
+namespace DBDef
+{
     public static class TargetTypeExtension
     {
-        [Extension]
-        public static string GetLocalizedTargetTypeDescription(string s)
+        public static string GetLocalizedTargetTypeDescription(this string s)
         {
-            return DBUtils.Localization.Get(s, true, Array.Empty<object>());
+            return global::DBUtils.Localization.Get(s, true);
         }
     }
 }
-

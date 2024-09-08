@@ -1,26 +1,23 @@
-﻿namespace DBEnum
+namespace DBEnum
 {
-    using System;
-
     public enum TOWN
     {
-        BARBARIANS,
-        GNOLLS,
-        HALFLINGS,
-        HIGH_ELVES,
-        HIGH_MEN,
-        KLACKONS,
-        LIZARDMEN,
-        NOMADS,
-        ORCS,
-        BEASTMEN,
-        DARK_ELVES,
-        DRACONIANS,
-        DWARVES,
-        TROLLS,
-        GOBLINS,
-        SOULTRAPPED,
-        BLUEORCS
+        BARBARIANS = 0,
+        GNOLLS = 1,
+        HALFLINGS = 2,
+        HIGH_ELVES = 3,
+        HIGH_MEN = 4,
+        KLACKONS = 5,
+        LIZARDMEN = 6,
+        NOMADS = 7,
+        ORCS = 8,
+        BEASTMEN = 9,
+        DARK_ELVES = 10,
+        DRACONIANS = 11,
+        DWARVES = 12,
+        TROLLS = 13,
+        GOBLINS = 14,
+        SOULTRAPPED = 15,
+        BLUEORCS = 16
     }
 }
-

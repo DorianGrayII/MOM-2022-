@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// AIRegionalWarAssignment
 using System.Collections.Generic;
 
 public class AIRegionalWarAssignment

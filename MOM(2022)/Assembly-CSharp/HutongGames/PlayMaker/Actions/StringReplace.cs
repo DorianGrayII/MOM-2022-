@@ -1,25 +1,30 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.String), Tooltip("Replace a substring with a new String.")]
+    [ActionCategory(ActionCategory.String)]
+    [Tooltip("Replace a substring with a new String.")]
     public class StringReplace : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString stringVariable;
+
         public FsmString replace;
+
         public FsmString with;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString storeResult;
+
         public bool everyFrame;
 
-        private void DoReplace()
+        public override void Reset()
         {
-            if ((this.stringVariable != null) && (this.storeResult != null))
-            {
-                this.storeResult.Value = this.stringVariable.Value.Replace(this.replace.Value, this.with.Value);
-            }
+            this.stringVariable = null;
+            this.replace = "";
+            this.with = "";
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -36,14 +41,12 @@
             this.DoReplace();
         }
 
-        public override void Reset()
+        private void DoReplace()
         {
-            this.stringVariable = null;
-            this.replace = "";
-            this.with = "";
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (this.stringVariable != null && this.storeResult != null)
+            {
+                this.storeResult.Value = this.stringVariable.Value.Replace(this.replace.Value, this.with.Value);
+            }
         }
     }
 }
-

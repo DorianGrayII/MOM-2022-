@@ -1,31 +1,30 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// HutongGames.PlayMaker.Actions.Collision2dEvent
-using HutongGames.PlayMaker;
 using UnityEngine;
 
+namespace HutongGames.PlayMaker.Actions
+{
 [ActionCategory(ActionCategory.Physics2D)]
-[global::HutongGames.PlayMaker.Tooltip("Detect collisions between Game Objects that have RigidBody2D/Collider2D components.")]
+    [Tooltip("Detect collisions between Game Objects that have RigidBody2D/Collider2D components.")]
 public class Collision2dEvent : FsmStateAction
 {
-    [global::HutongGames.PlayMaker.Tooltip("The GameObject to detect collisions on.")]
+        [Tooltip("The GameObject to detect collisions on.")]
     public FsmOwnerDefault gameObject;
 
-    [global::HutongGames.PlayMaker.Tooltip("The type of collision to detect.")]
+        [Tooltip("The type of collision to detect.")]
     public Collision2DType collision;
 
     [UIHint(UIHint.TagMenu)]
-    [global::HutongGames.PlayMaker.Tooltip("Filter by Tag.")]
+        [Tooltip("Filter by Tag.")]
     public FsmString collideTag;
 
-    [global::HutongGames.PlayMaker.Tooltip("Event to send if a collision is detected.")]
+        [Tooltip("Event to send if a collision is detected.")]
     public FsmEvent sendEvent;
 
     [UIHint(UIHint.Variable)]
-    [global::HutongGames.PlayMaker.Tooltip("Store the GameObject that collided with the Owner of this FSM.")]
+        [Tooltip("Store the GameObject that collided with the Owner of this FSM.")]
     public FsmGameObject storeCollider;
 
     [UIHint(UIHint.Variable)]
-    [global::HutongGames.PlayMaker.Tooltip("Store the force of the collision. NOTE: Use Get Collision 2D Info to get more info about the collision.")]
+        [Tooltip("Store the force of the collision. NOTE: Use Get Collision 2D Info to get more info about the collision.")]
     public FsmFloat storeForce;
 
     private PlayMakerProxyBase cachedProxy;
@@ -247,5 +246,6 @@ public class Collision2dEvent : FsmStateAction
     public override string ErrorCheck()
     {
         return ActionHelpers.CheckPhysics2dSetup(base.Fsm.GetOwnerDefaultTarget(this.gameObject));
+        }
     }
 }

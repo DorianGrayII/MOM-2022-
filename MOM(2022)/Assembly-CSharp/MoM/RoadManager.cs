@@ -1,219 +1,219 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MOM.RoadManager
 using System.Collections.Generic;
 using MHUtils;
-using MOM;
 using ProtoBuf;
 using WorldCode;
 
-[ProtoContract]
-public class RoadManager
+namespace MOM
 {
-    public enum RoadType
+    [ProtoContract]
+    public class RoadManager
     {
-        None = 0,
-        Enchanted = 1,
-        Normal = 5
-    }
-
-    [ProtoMember(1)]
-    public NetDictionary<Vector3i, FInt> roadMap;
-
-    [ProtoIgnore]
-    public List<HashSet<Vector3i>> networks;
-
-    [ProtoIgnore]
-    public Plane owner;
-
-    public RoadManager()
-    {
-    }
-
-    public RoadManager(Plane p)
-    {
-        this.owner = p;
-    }
-
-    public void SetRoadMode(Vector3i v, Plane plane)
-    {
-        if (plane.arcanusType)
+        public enum RoadType
         {
-            this.SetRoadMode(v, RoadType.Normal);
+            None = 0,
+            Enchanted = 1,
+            Normal = 5
         }
-        else
-        {
-            this.SetRoadMode(v, RoadType.Enchanted);
-        }
-        this.networks = null;
-    }
 
-    public void SetRoadMode(Vector3i v, RoadType rType)
-    {
-        this.SetRoadMode(v, new FInt((float)rType * 0.1f));
-    }
+        [ProtoMember(1)]
+        public NetDictionary<Vector3i, FInt> roadMap;
 
-    public void SetRoadMode(Vector3i v, FInt mode)
-    {
-        if (this.roadMap == null)
-        {
-            this.roadMap = new NetDictionary<Vector3i, FInt>();
-        }
-        if (mode == 0 && this.roadMap.ContainsKey(v))
-        {
-            this.roadMap.Remove(v);
-        }
-        else if (mode != 0)
-        {
-            this.roadMap[v] = mode;
-        }
-        this.UpdateAt(v);
-        this.owner.GetMarkers_().UpdateMarkers();
-        this.networks = null;
-    }
+        [ProtoIgnore]
+        public List<HashSet<Vector3i>> networks;
 
-    public FInt GetRoadAt(Vector3i v)
-    {
-        if (this.roadMap == null)
-        {
-            this.roadMap = new NetDictionary<Vector3i, FInt>();
-        }
-        if (this.roadMap.ContainsKey(v))
-        {
-            return this.roadMap[v];
-        }
-        return FInt.ZERO;
-    }
+        [ProtoIgnore]
+        public Plane owner;
 
-    public bool[] GetNeighbours(Vector3i v)
-    {
-        bool[] array = new bool[6];
-        if (this.roadMap == null)
+        public RoadManager()
         {
-            return array;
         }
-        bool flag = false;
-        for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
+
+        public RoadManager(Plane p)
         {
-            Vector3i v2 = v + HexNeighbors.neighbours[i];
-            if (this.GetRoadAt(v2) != 0)
+            this.owner = p;
+        }
+
+        public void SetRoadMode(Vector3i v, Plane plane)
+        {
+            if (plane.arcanusType)
             {
-                flag = true;
-                array[i] = true;
+                this.SetRoadMode(v, RoadType.Normal);
             }
             else
             {
-                array[i] = false;
+                this.SetRoadMode(v, RoadType.Enchanted);
             }
+            this.networks = null;
         }
-        if (!flag)
-        {
-            array[0] = true;
-        }
-        return array;
-    }
 
-    public void UpdateAt(Vector3i v)
-    {
-        if (this.GetRoadAt(v) == 0)
+        public void SetRoadMode(Vector3i v, RoadType rType)
         {
-            this.owner.GetMarkers_().SetAdvancedMarker(v, TerrainMarkers.MarkerType.Roads, visible: false);
+            this.SetRoadMode(v, new FInt((float)rType * 0.1f));
         }
-        else
+
+        public void SetRoadMode(Vector3i v, FInt mode)
         {
-            TerrainMarkers.MarkerType type = ((this.GetRoadTypeAt(v) == RoadType.Normal) ? TerrainMarkers.MarkerType.Roads : TerrainMarkers.MarkerType.Roads2);
-            this.owner.GetMarkers_().SetAdvancedMarker(v, type, visible: true, this.GetNeighbours(v));
-        }
-        for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
-        {
-            Vector3i vector3i = v + HexNeighbors.neighbours[i];
-            if (this.GetRoadAt(vector3i) != 0)
+            if (this.roadMap == null)
             {
-                TerrainMarkers.MarkerType type2 = ((this.GetRoadTypeAt(vector3i) == RoadType.Normal) ? TerrainMarkers.MarkerType.Roads : TerrainMarkers.MarkerType.Roads2);
-                this.owner.GetMarkers_().SetAdvancedMarker(vector3i, type2, visible: true, this.GetNeighbours(vector3i));
+                this.roadMap = new NetDictionary<Vector3i, FInt>();
             }
-        }
-    }
-
-    public void PostLoad(Plane owner)
-    {
-        this.owner = owner;
-        if (this.roadMap == null)
-        {
-            return;
-        }
-        foreach (KeyValuePair<Vector3i, FInt> item in this.roadMap)
-        {
-            this.UpdateAt(item.Key);
-        }
-    }
-
-    public List<HashSet<Vector3i>> GetNetworks()
-    {
-        if (this.networks == null)
-        {
-            this.networks = new List<HashSet<Vector3i>>();
-            List<Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(this.owner);
-            HashSet<Vector3i> hashSet = new HashSet<Vector3i>();
-            foreach (Location item in locationsOfThePlane)
+            if (mode == 0 && this.roadMap.ContainsKey(v))
             {
-                if (item is TownLocation townLocation && this.GetRoadNetworkForTown(townLocation) == null)
+                this.roadMap.Remove(v);
+            }
+            else if (mode != 0)
+            {
+                this.roadMap[v] = mode;
+            }
+            this.UpdateAt(v);
+            this.owner.GetMarkers_().UpdateMarkers();
+            this.networks = null;
+        }
+
+        public FInt GetRoadAt(Vector3i v)
+        {
+            if (this.roadMap == null)
+            {
+                this.roadMap = new NetDictionary<Vector3i, FInt>();
+            }
+            if (this.roadMap.ContainsKey(v))
+            {
+                return this.roadMap[v];
+            }
+            return FInt.ZERO;
+        }
+
+        public bool[] GetNeighbours(Vector3i v)
+        {
+            bool[] array = new bool[6];
+            if (this.roadMap == null)
+            {
+                return array;
+            }
+            bool flag = false;
+            for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
+            {
+                Vector3i v2 = v + HexNeighbors.neighbours[i];
+                if (this.GetRoadAt(v2) != 0)
                 {
-                    this.RecursiveSeek(townLocation.GetPosition(), hashSet);
-                    if (hashSet.Count > 5)
-                    {
-                        this.networks.Add(hashSet);
-                        hashSet = new HashSet<Vector3i>();
-                    }
-                    else
-                    {
-                        hashSet.Clear();
-                    }
+                    flag = true;
+                    array[i] = true;
+                }
+                else
+                {
+                    array[i] = false;
+                }
+            }
+            if (!flag)
+            {
+                array[0] = true;
+            }
+            return array;
+        }
+
+        public void UpdateAt(Vector3i v)
+        {
+            if (this.GetRoadAt(v) == 0)
+            {
+                this.owner.GetMarkers_().SetAdvancedMarker(v, TerrainMarkers.MarkerType.Roads, visible: false);
+            }
+            else
+            {
+                TerrainMarkers.MarkerType type = ((this.GetRoadTypeAt(v) == RoadType.Normal) ? TerrainMarkers.MarkerType.Roads : TerrainMarkers.MarkerType.Roads2);
+                this.owner.GetMarkers_().SetAdvancedMarker(v, type, visible: true, this.GetNeighbours(v));
+            }
+            for (int i = 0; i < HexNeighbors.neighbours.Length; i++)
+            {
+                Vector3i vector3i = v + HexNeighbors.neighbours[i];
+                if (this.GetRoadAt(vector3i) != 0)
+                {
+                    TerrainMarkers.MarkerType type2 = ((this.GetRoadTypeAt(vector3i) == RoadType.Normal) ? TerrainMarkers.MarkerType.Roads : TerrainMarkers.MarkerType.Roads2);
+                    this.owner.GetMarkers_().SetAdvancedMarker(vector3i, type2, visible: true, this.GetNeighbours(vector3i));
                 }
             }
         }
-        return this.networks;
-    }
 
-    private void RecursiveSeek(Vector3i pos, HashSet<Vector3i> network)
-    {
-        if (this.roadMap.ContainsKey(pos) && !network.Contains(pos))
+        public void PostLoad(Plane owner)
         {
-            network.Add(pos);
-            Vector3i[] neighbours = HexNeighbors.neighbours;
-            foreach (Vector3i vector3i in neighbours)
+            this.owner = owner;
+            if (this.roadMap == null)
             {
-                Vector3i pos2 = pos + vector3i;
-                this.RecursiveSeek(pos2, network);
+                return;
+            }
+            foreach (KeyValuePair<Vector3i, FInt> item in this.roadMap)
+            {
+                this.UpdateAt(item.Key);
             }
         }
-    }
 
-    public HashSet<Vector3i> GetRoadNetworkForTown(TownLocation tl)
-    {
-        foreach (HashSet<Vector3i> network in this.GetNetworks())
+        public List<HashSet<Vector3i>> GetNetworks()
         {
-            if (network.Contains(tl.GetPosition()))
+            if (this.networks == null)
             {
-                return network;
+                this.networks = new List<HashSet<Vector3i>>();
+                List<Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(this.owner);
+                HashSet<Vector3i> hashSet = new HashSet<Vector3i>();
+                foreach (Location item in locationsOfThePlane)
+                {
+                    if (item is TownLocation townLocation && this.GetRoadNetworkForTown(townLocation) == null)
+                    {
+                        this.RecursiveSeek(townLocation.GetPosition(), hashSet);
+                        if (hashSet.Count > 5)
+                        {
+                            this.networks.Add(hashSet);
+                            hashSet = new HashSet<Vector3i>();
+                        }
+                        else
+                        {
+                            hashSet.Clear();
+                        }
+                    }
+                }
+            }
+            return this.networks;
+        }
+
+        private void RecursiveSeek(Vector3i pos, HashSet<Vector3i> network)
+        {
+            if (this.roadMap.ContainsKey(pos) && !network.Contains(pos))
+            {
+                network.Add(pos);
+                Vector3i[] neighbours = HexNeighbors.neighbours;
+                foreach (Vector3i vector3i in neighbours)
+                {
+                    Vector3i pos2 = pos + vector3i;
+                    this.RecursiveSeek(pos2, network);
+                }
             }
         }
-        return null;
-    }
 
-    public RoadType GetRoadTypeAt(Vector3i v)
-    {
-        if (this.roadMap == null)
+        public HashSet<Vector3i> GetRoadNetworkForTown(TownLocation tl)
         {
-            this.roadMap = new NetDictionary<Vector3i, FInt>();
-        }
-        if (this.roadMap.ContainsKey(v))
-        {
-            if (!(this.roadMap[v] > 0.2f))
+            foreach (HashSet<Vector3i> network in this.GetNetworks())
             {
-                return RoadType.Enchanted;
+                if (network.Contains(tl.GetPosition()))
+                {
+                    return network;
+                }
             }
-            return RoadType.Normal;
+            return null;
         }
-        return RoadType.None;
+
+        public RoadType GetRoadTypeAt(Vector3i v)
+        {
+            if (this.roadMap == null)
+            {
+                this.roadMap = new NetDictionary<Vector3i, FInt>();
+            }
+            if (this.roadMap.ContainsKey(v))
+            {
+                if (!(this.roadMap[v] > 0.2f))
+                {
+                    return RoadType.Enchanted;
+                }
+                return RoadType.Normal;
+            }
+            return RoadType.None;
+        }
     }
 }

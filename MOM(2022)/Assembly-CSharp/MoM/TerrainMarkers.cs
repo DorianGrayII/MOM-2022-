@@ -1,264 +1,268 @@
-﻿namespace MOM
-{
-    using DBEnum;
-    using MHUtils;
-    using MHUtils.UI;
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
-    using WorldCode;
+using System;
+using System.Collections.Generic;
+using DBEnum;
+using MHUtils;
+using MHUtils.UI;
+using UnityEngine;
+using UnityEngine.UI;
+using WorldCode;
 
+namespace MOM
+{
     public class TerrainMarkers
     {
+        public enum MarkerType
+        {
+            Highlight = 5,
+            Friendly = 7,
+            HexHighlight = 6,
+            Embark = 8,
+            Path = 1,
+            Borders = 12,
+            MovementBorders = 25,
+            Roads = 38,
+            Roads2 = 51,
+            PathWithMP = 16
+        }
+
         public static bool TRUE = true;
+
         private static int atlasSizeX = 8;
+
         private static int atlasSizeY = 8;
-        private static int atlasSize = (atlasSizeX * atlasSizeY);
+
+        private static int atlasSize = TerrainMarkers.atlasSizeX * TerrainMarkers.atlasSizeY;
+
         private Dictionary<MarkerType, List<Vector3i>> typeToPosition = new Dictionary<MarkerType, List<Vector3i>>();
+
         private Vector2i size;
+
         public Texture2D dataTexture;
+
         public Vector4 merkerResolutionTexture;
+
         public int turns;
+
         public Vector3i destination;
+
         private bool dirty;
+
         private Vector2i dataSize;
-        private Dictionary<int, bool[][]> layouts;
+
+        private Dictionary<int, bool[][]> layouts = new Dictionary<int, bool[][]>
+        {
+            {
+                1,
+                new bool[1][] { new bool[6]
+                {
+                    TerrainMarkers.TRUE,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+                } }
+            },
+            {
+                2,
+                new bool[3][]
+                {
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false,
+                        false,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        false,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false
+                    }
+                }
+            },
+            {
+                3,
+                new bool[4][]
+                {
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false
+                    }
+                }
+            },
+            {
+                4,
+                new bool[3][]
+                {
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        TerrainMarkers.TRUE,
+                        false
+                    },
+                    new bool[6]
+                    {
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false,
+                        TerrainMarkers.TRUE,
+                        TerrainMarkers.TRUE,
+                        false
+                    }
+                }
+            },
+            {
+                5,
+                new bool[1][] { new bool[6]
+                {
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    false
+                } }
+            },
+            {
+                6,
+                new bool[1][] { new bool[6]
+                {
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE,
+                    TerrainMarkers.TRUE
+                } }
+            }
+        };
+
         private Dictionary<int, Multitype<int, int>> layoutsHashed;
+
         public List<Vector3i> pathLocations;
+
         private Vector3i highlightPosition;
+
         private List<Vector3i> movementAreaLocations;
-        private WorldCode.Plane plane;
-        private HashSet<MarkerType> requiredUpdate;
+
+        private global::WorldCode.Plane plane;
+
+        private HashSet<MarkerType> requiredUpdate = new HashSet<MarkerType>();
 
         public TerrainMarkers()
         {
-            Dictionary<int, bool[][]> dictionary = new Dictionary<int, bool[][]>();
-            bool[] flagArray1 = new bool[6];
-            flagArray1[0] = TRUE;
-            bool[][] flagArrayArray1 = new bool[][] { flagArray1 };
-            dictionary.Add(1, flagArrayArray1);
-            bool[] flagArray2 = new bool[6];
-            flagArray2[0] = TRUE;
-            flagArray2[1] = TRUE;
-            bool[][] flagArrayArray2 = new bool[3][];
-            flagArrayArray2[0] = flagArray2;
-            bool[] flagArray3 = new bool[6];
-            flagArray3[0] = TRUE;
-            flagArray3[2] = TRUE;
-            flagArrayArray2[1] = flagArray3;
-            bool[] flagArray4 = new bool[6];
-            flagArray4[0] = TRUE;
-            flagArray4[3] = TRUE;
-            flagArrayArray2[2] = flagArray4;
-            dictionary.Add(2, flagArrayArray2);
-            bool[] flagArray5 = new bool[6];
-            flagArray5[0] = TRUE;
-            flagArray5[1] = TRUE;
-            flagArray5[2] = TRUE;
-            bool[][] flagArrayArray3 = new bool[4][];
-            flagArrayArray3[0] = flagArray5;
-            bool[] flagArray6 = new bool[6];
-            flagArray6[0] = TRUE;
-            flagArray6[1] = TRUE;
-            flagArray6[3] = TRUE;
-            flagArrayArray3[1] = flagArray6;
-            bool[] flagArray7 = new bool[6];
-            flagArray7[0] = TRUE;
-            flagArray7[1] = TRUE;
-            flagArray7[4] = TRUE;
-            flagArrayArray3[2] = flagArray7;
-            bool[] flagArray8 = new bool[6];
-            flagArray8[0] = TRUE;
-            flagArray8[2] = TRUE;
-            flagArray8[4] = TRUE;
-            flagArrayArray3[3] = flagArray8;
-            dictionary.Add(3, flagArrayArray3);
-            bool[] flagArray9 = new bool[6];
-            flagArray9[0] = TRUE;
-            flagArray9[1] = TRUE;
-            flagArray9[2] = TRUE;
-            flagArray9[3] = TRUE;
-            bool[][] flagArrayArray4 = new bool[3][];
-            flagArrayArray4[0] = flagArray9;
-            bool[] flagArray10 = new bool[6];
-            flagArray10[0] = TRUE;
-            flagArray10[1] = TRUE;
-            flagArray10[2] = TRUE;
-            flagArray10[4] = TRUE;
-            flagArrayArray4[1] = flagArray10;
-            bool[] flagArray11 = new bool[6];
-            flagArray11[0] = TRUE;
-            flagArray11[1] = TRUE;
-            flagArray11[3] = TRUE;
-            flagArray11[4] = TRUE;
-            flagArrayArray4[2] = flagArray11;
-            dictionary.Add(4, flagArrayArray4);
-            bool[] flagArray12 = new bool[6];
-            flagArray12[0] = TRUE;
-            flagArray12[1] = TRUE;
-            flagArray12[2] = TRUE;
-            flagArray12[3] = TRUE;
-            flagArray12[4] = TRUE;
-            bool[][] flagArrayArray5 = new bool[][] { flagArray12 };
-            dictionary.Add(5, flagArrayArray5);
-            bool[] flagArray13 = new bool[] { TRUE, TRUE, TRUE, TRUE, TRUE, TRUE };
-            bool[][] flagArrayArray6 = new bool[][] { flagArray13 };
-            dictionary.Add(6, flagArrayArray6);
-            this.layouts = dictionary;
-            this.requiredUpdate = new HashSet<MarkerType>();
-            MHEventSystem.RegisterListener<FSMSelectionManager>(new EventFunction(this.AreaMarkerUpdate), this);
-            MHEventSystem.RegisterListener<FSMMapGame>(new EventFunction(this.AreaMarkerUpdate), this);
-            MHEventSystem.RegisterListener<FSMBattleTurn>(new EventFunction(this.AreaMarkerUpdate), this);
-            MHEventSystem.RegisterListener<TurnManager>(new EventFunction(this.AreaMarkerUpdate), this);
-            MHEventSystem.RegisterListener<BattleHUD>(new EventFunction(this.AreaMarkerUpdate), this);
-            MHEventSystem.RegisterListener<HUD>(new EventFunction(this.AreaMarkerUpdate), this);
-            MHEventSystem.RegisterListener<World>(new EventFunction(this.GeneralUpdateMarkers), this);
-            MHEventSystem.RegisterListener<BattleUnit>(new EventFunction(this.GeneralUpdateMarkers), this);
-            MHEventSystem.RegisterListener<Group>(new EventFunction(this.SelectionUpdated), this);
-        }
-
-        public void AreaMarkerUpdate(object sender, object e)
-        {
-            if ((e == null) && ReferenceEquals(World.GetActivePlane(), this.plane))
-            {
-                IPlanePosition unit = null;
-                if (this.plane.battlePlane)
-                {
-                    unit = BattleHUD.GetSelectedUnit();
-                }
-                else if (FSMSelectionManager.Get() != null)
-                {
-                    unit = FSMSelectionManager.Get().GetSelectedGroup();
-                }
-                if ((unit == null) || (unit is Location))
-                {
-                    this.HidePath(true);
-                    this.HideMovementArea(true);
-                    MHEventSystem.TriggerEvent<TerrainMarkers>(this, null);
-                }
-                else
-                {
-                    HashSet<Vector3i> set1 = new HashSet<Vector3i>();
-                    FInt zERO = FInt.ZERO;
-                    if ((unit is IGroup) && ((unit as IGroup).GetOwnerID() == PlayerWizard.HumanID()))
-                    {
-                        zERO = (unit as Group).CurentMP();
-                    }
-                    else if ((unit is BattleUnit) && ((unit as BattleUnit).ownerID == PlayerWizard.HumanID()))
-                    {
-                        zERO = (unit as BattleUnit).Mp;
-                    }
-                    if (zERO <= 0)
-                    {
-                        this.HidePath(true);
-                        this.HideMovementArea(true);
-                        MHEventSystem.TriggerEvent<TerrainMarkers>(this, null);
-                    }
-                    else
-                    {
-                        List<Vector3i> area;
-                        if (!(unit is BattleUnit) || !(unit as BattleUnit).teleporting)
-                        {
-                            RequestDataV2 rd = RequestDataV2.CreateRequest(unit.GetPlane(), unit.GetPosition(), zERO, unit, false);
-                            PathfinderV2.FindArea(rd, false);
-                            area = rd.GetArea();
-                        }
-                        else
-                        {
-                            IAttributeableExtension.GetAttFinal(unit as BattleUnit, TAG.TELEPORTING).ToInt();
-                            RequestDataV2 rd = RequestDataV2.CreateRequest(unit.GetPlane(), unit.GetPosition(), FInt.ONE * 50, unit, false);
-                            PathfinderV2.FindArea(rd, false);
-                            area = rd.GetArea();
-                        }
-                        WorldCode.Plane.GetMarkers().ShowMovementArea(area);
-                    }
-                }
-            }
-        }
-
-        public void ChangeTownArea(List<Vector3i> area, UnityEngine.Color c, bool show)
-        {
-            if (area.Count > 0)
-            {
-                bool[] directionalData = new bool[6];
-                WorldCode.Plane activePlane = World.GetActivePlane();
-                int num = 0;
-                while (num < area.Count)
-                {
-                    int index = 0;
-                    while (true)
-                    {
-                        if (index >= 6)
-                        {
-                            this.SetAdvancedMarker(area[num], MarkerType.Borders, show, directionalData, c);
-                            num++;
-                            break;
-                        }
-                        Vector3i pos = area[num] + HexNeighbors.neighbours[index];
-                        if (activePlane != null)
-                        {
-                            pos = activePlane.area.KeepHorizontalInside(pos);
-                        }
-                        directionalData[index] = !area.Contains(pos);
-                        index++;
-                    }
-                }
-            }
-        }
-
-        public void ClearHighlightHexes()
-        {
-            this.ClearMarkersOfType(MarkerType.HexHighlight);
-            this.UpdateMarkers();
-        }
-
-        public void ClearMarkersOfType(MarkerType t)
-        {
-            if (this.typeToPosition.ContainsKey(t) && (this.typeToPosition[t] != null))
-            {
-                foreach (Vector3i vectori in new List<Vector3i>(this.typeToPosition[t]))
-                {
-                    this.SetBasicMarker(vectori, t, false);
-                }
-            }
-        }
-
-        public void ClearOwnershipMarker(Vector3i pos)
-        {
-            this.SetBasicMarker(pos, MarkerType.Friendly, false);
-        }
-
-        private int ConvertToHashLayout(bool[] c)
-        {
-            int num = 0;
-            for (int i = 0; i < c.Length; i++)
-            {
-                if (c[i])
-                {
-                    num |= 1 << (i & 0x1f);
-                }
-            }
-            return num;
-        }
-
-        public void DEBUG_Data()
-        {
-            GameObject.Find("IMG").GetComponent<RawImage>().texture = this.dataTexture;
+            MHEventSystem.RegisterListener<FSMSelectionManager>(AreaMarkerUpdate, this);
+            MHEventSystem.RegisterListener<FSMMapGame>(AreaMarkerUpdate, this);
+            MHEventSystem.RegisterListener<FSMBattleTurn>(AreaMarkerUpdate, this);
+            MHEventSystem.RegisterListener<TurnManager>(AreaMarkerUpdate, this);
+            MHEventSystem.RegisterListener<BattleHUD>(AreaMarkerUpdate, this);
+            MHEventSystem.RegisterListener<HUD>(AreaMarkerUpdate, this);
+            MHEventSystem.RegisterListener<World>(GeneralUpdateMarkers, this);
+            MHEventSystem.RegisterListener<BattleUnit>(GeneralUpdateMarkers, this);
+            MHEventSystem.RegisterListener<Group>(SelectionUpdated, this);
         }
 
         public void Destroy()
         {
             if (this.dataTexture != null)
             {
-                UnityEngine.Object.Destroy(this.dataTexture);
+                global::UnityEngine.Object.Destroy(this.dataTexture);
             }
             MHEventSystem.UnRegisterListenersLinkedToObject(this);
         }
 
+        public void Initialize(int sizeW, int sizeH, global::WorldCode.Plane p)
+        {
+            this.size.x = sizeW;
+            this.size.y = sizeH;
+            this.plane = p;
+            Color32[] pixels = new Color32[this.size.x * 2 * this.size.y * 2];
+            this.dataTexture = new Texture2D(this.size.x * 2, this.size.y * 2, TextureFormat.ARGB32, mipChain: false, linear: true);
+            this.dataTexture.filterMode = FilterMode.Point;
+            this.dataTexture.SetPixels32(pixels);
+            this.dataTexture.Apply();
+            foreach (MarkerType value in Enum.GetValues(typeof(MarkerType)))
+            {
+                this.typeToPosition[value] = new List<Vector3i>();
+            }
+            this.merkerResolutionTexture.x = this.size.x * 2;
+            this.merkerResolutionTexture.y = this.size.y * 2;
+            this.merkerResolutionTexture.z = TerrainMarkers.atlasSizeX;
+            this.merkerResolutionTexture.w = TerrainMarkers.atlasSizeY;
+            this.pathLocations = new List<Vector3i>();
+        }
+
+        private void SelectionUpdated(object sender, object e)
+        {
+            if (this.movementAreaLocations != null)
+            {
+                this.GeneralUpdateMarkers(sender, e);
+            }
+        }
+
         public void GeneralUpdateMarkers(object sender, object e)
         {
-            if ((!(sender is IPlanePosition) || (((sender as IPlanePosition).GetPlane() != null) && ReferenceEquals((sender as IPlanePosition).GetPlane(), this.plane))) && ReferenceEquals(World.GetActivePlane(), this.plane))
+            if ((!(sender is IPlanePosition) || ((sender as IPlanePosition).GetPlane() != null && (sender as IPlanePosition).GetPlane() == this.plane)) && World.GetActivePlane() == this.plane)
             {
                 this.MarkersUpdate(sender, e);
                 this.AreaMarkerUpdate(sender, e);
@@ -272,27 +276,19 @@
             {
                 this.layoutsHashed = new Dictionary<int, Multitype<int, int>>();
                 int num = -1;
-                foreach (KeyValuePair<int, bool[][]> pair in this.layouts)
+                foreach (KeyValuePair<int, bool[][]> layout in this.layouts)
                 {
-                    int index = 0;
-                    while (index < pair.Value.Length)
+                    for (int i = 0; i < layout.Value.Length; i++)
                     {
                         num++;
-                        int num3 = this.ConvertToHashLayout(pair.Value[index]);
-                        int num4 = 0;
-                        while (true)
+                        int num2 = this.ConvertToHashLayout(layout.Value[i]);
+                        for (int j = 0; j < 6; j++)
                         {
-                            if (num4 >= 6)
-                            {
-                                index++;
-                                break;
-                            }
-                            int key = 0x3f & ((num3 << (num4 & 0x1f)) | (num3 >> ((6 - num4) & 0x1f)));
+                            int key = 0x3F & ((num2 << j) | (num2 >> 6 - j));
                             if (!this.layoutsHashed.ContainsKey(key))
                             {
-                                this.layoutsHashed[key] = new Multitype<int, int>(num, num4);
+                                this.layoutsHashed[key] = new Multitype<int, int>(num, j);
                             }
-                            num4++;
                         }
                     }
                 }
@@ -300,66 +296,318 @@
             return this.layoutsHashed;
         }
 
-        private void GetlayoutType(out int rotationOffset, out int typeIndex, bool[] directionSource, int neighbourCount)
+        private int ConvertToHashLayout(bool[] c)
+        {
+            int num = 0;
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i])
+                {
+                    num |= 1 << i;
+                }
+            }
+            return num;
+        }
+
+        private void GetlayoutType(out int rotationOffset, out int typeIndex, bool[] directionSource, int neighbourCount = -1)
         {
             if (directionSource == null)
             {
                 rotationOffset = 0;
                 typeIndex = -1;
+                return;
             }
-            else
+            if (neighbourCount == -1)
             {
-                if (neighbourCount == -1)
+                neighbourCount = 0;
+                for (int i = 0; i < directionSource.Length; i++)
                 {
-                    neighbourCount = 0;
-                    for (int i = 0; i < directionSource.Length; i++)
+                    if (directionSource[i])
                     {
-                        if (directionSource[i])
-                        {
-                            neighbourCount++;
-                        }
+                        neighbourCount++;
                     }
                 }
-                if (neighbourCount == 0)
-                {
-                    rotationOffset = 0;
-                    typeIndex = -1;
-                }
-                else
-                {
-                    int num = this.ConvertToHashLayout(directionSource);
-                    Multitype<int, int> multitype = this.GetHashedLayouts()[num];
-                    typeIndex = multitype.t0;
-                    rotationOffset = multitype.t1;
-                }
             }
+            if (neighbourCount == 0)
+            {
+                rotationOffset = 0;
+                typeIndex = -1;
+                return;
+            }
+            int key = this.ConvertToHashLayout(directionSource);
+            Multitype<int, int> multitype = this.GetHashedLayouts()[key];
+            typeIndex = multitype.t0;
+            rotationOffset = multitype.t1;
         }
 
-        public Vector2i HexToPixel(Vector3i pos)
+        public void Highlight(Vector3i pos)
         {
-            Vector2i vectori1 = HexCoordinates.HexToPixelSpace(pos);
-            int x = (vectori1.x + this.size.x) % this.size.x;
-            int y = (vectori1.y + this.size.y) % this.size.y;
-            if ((x < 0) || (y < 0))
-            {
-                Debug.LogWarning("[Warning] SetBasicMarker at position: " + x.ToString() + ", " + y.ToString());
-            }
-            return new Vector2i(x, y);
+            this.HideHighlight();
+            this.SetBasicMarker(pos, MarkerType.Highlight, visible: true);
+            this.highlightPosition = pos;
         }
 
         public void HideHighlight()
         {
-            this.SetBasicMarker(this.highlightPosition, MarkerType.Highlight, false);
+            this.SetBasicMarker(this.highlightPosition, MarkerType.Highlight, visible: false);
         }
 
-        public void HideMovementArea(bool update)
+        public void ShowPath(List<Vector3i> path, RequestDataV2 rd)
         {
-            if ((this.movementAreaLocations != null) && (this.movementAreaLocations.Count > 0))
+            IPlanePosition planePosition = null;
+            FInt fInt = FInt.ONE * 1000;
+            FInt fInt2 = FInt.ONE * 1000;
+            if (this.plane.battlePlane)
             {
-                foreach (Vector3i vectori in this.movementAreaLocations)
+                planePosition = BattleHUD.GetSelectedUnit();
+                fInt = (planePosition as BattleUnit).Mp;
+            }
+            else if (FSMSelectionManager.Get() != null)
+            {
+                planePosition = FSMSelectionManager.Get().GetSelectedGroup();
+                Group group = planePosition as Group;
+                fInt = group.CurentMP();
+                fInt2 = new FInt(group.GetMaxMP());
+            }
+            bool flag = true;
+            if (this.pathLocations != null)
+            {
+                flag = false;
+                if (path.Count == this.pathLocations.Count)
                 {
-                    UnityEngine.Color color = new UnityEngine.Color();
-                    this.SetAdvancedMarker(vectori, MarkerType.MovementBorders, false, null, color);
+                    for (int i = 0; i < path.Count; i++)
+                    {
+                        if (path[i] != this.pathLocations[i])
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    flag = true;
+                }
+                if (flag)
+                {
+                    this.HidePath(hideMarker: false);
+                }
+            }
+            if (path.Count <= 1 || !(fInt2 > 0))
+            {
+                return;
+            }
+            if (flag)
+            {
+                int num = 1;
+                FInt fInt3 = fInt;
+                if (fInt3 == 0)
+                {
+                    fInt3 = fInt2;
+                }
+                bool[] array = new bool[6];
+                Vector3i vector3i = Vector3i.zero;
+                Vector3i vector3i2 = Vector3i.zero;
+                bool flag2 = false;
+                bool roadBuildingMode = FSMSelectionManager.Get().roadBuildingMode;
+                for (int j = 0; j < path.Count; j++)
+                {
+                    if (flag2)
+                    {
+                        num++;
+                    }
+                    if (j > 0)
+                    {
+                        FInt fInt4 = rd.GetEntryCost(path[j - 1], path[j]);
+                        if (fInt4 < 0)
+                        {
+                            fInt4 = FInt.ONE;
+                        }
+                        fInt3 -= fInt4;
+                        flag2 = fInt3 <= 0;
+                        if (flag2)
+                        {
+                            if (j == path.Count - 1)
+                            {
+                                flag2 = false;
+                            }
+                            fInt3 = fInt2;
+                        }
+                    }
+                    if (j > 0)
+                    {
+                        vector3i = planePosition.GetPlane().pathfindingArea.KeepHorizontalInside(path[j - 1] - path[j]);
+                        if (vector3i.x > 1)
+                        {
+                            vector3i.x -= 80;
+                            vector3i.y += 40;
+                            vector3i.z += 40;
+                        }
+                        else if (vector3i.x < -1)
+                        {
+                            vector3i.x += 80;
+                            vector3i.y -= 40;
+                            vector3i.z -= 40;
+                        }
+                    }
+                    if (j < path.Count - 1)
+                    {
+                        vector3i2 = planePosition.GetPlane().pathfindingArea.KeepHorizontalInside(path[j + 1] - path[j]);
+                        if (vector3i2.x > 1)
+                        {
+                            vector3i2.x -= 80;
+                            vector3i2.y += 40;
+                            vector3i2.z += 40;
+                        }
+                        else if (vector3i2.x < -1)
+                        {
+                            vector3i2.x += 80;
+                            vector3i2.y -= 40;
+                            vector3i2.z -= 40;
+                        }
+                    }
+                    for (int k = 0; k < 6; k++)
+                    {
+                        if ((j > 0 && HexNeighbors.neighbours[k] == vector3i) || (j < path.Count - 1 && HexNeighbors.neighbours[k] == vector3i2))
+                        {
+                            array[k] = true;
+                        }
+                        else
+                        {
+                            array[k] = false;
+                        }
+                    }
+                    MarkerType type = ((!flag2 || roadBuildingMode) ? MarkerType.Path : MarkerType.PathWithMP);
+                    this.SetAdvancedMarker(path[j], type, visible: true, array);
+                }
+                if (!this.plane.battlePlane && (num > 1 || fInt == 0))
+                {
+                    this.destination = path[path.Count - 1];
+                    this.turns = num;
+                    VerticalMarkerManager.Get().DestroyMarker(this);
+                    if (!roadBuildingMode)
+                    {
+                        VerticalMarkerManager.Get().Addmarker(this);
+                    }
+                }
+            }
+            this.pathLocations = path;
+        }
+
+        public void HidePath(bool hideMarker = true)
+        {
+            VerticalMarkerManager.Get().DestroyMarker(this);
+            if (this.pathLocations == null || this.pathLocations.Count <= 0)
+            {
+                return;
+            }
+            foreach (Vector3i pathLocation in this.pathLocations)
+            {
+                this.SetAdvancedMarker(pathLocation, MarkerType.Path, visible: false);
+                this.SetAdvancedMarker(pathLocation, MarkerType.PathWithMP, visible: false);
+            }
+            this.pathLocations.Clear();
+        }
+
+        public void ChangeTownArea(List<Vector3i> area, Color c, bool show = true)
+        {
+            if (area.Count <= 0)
+            {
+                return;
+            }
+            bool[] array = new bool[6];
+            global::WorldCode.Plane activePlane = World.GetActivePlane();
+            for (int i = 0; i < area.Count; i++)
+            {
+                for (int j = 0; j < 6; j++)
+                {
+                    Vector3i vector3i = area[i] + HexNeighbors.neighbours[j];
+                    if (activePlane != null)
+                    {
+                        vector3i = activePlane.area.KeepHorizontalInside(vector3i);
+                    }
+                    if (!area.Contains(vector3i))
+                    {
+                        array[j] = true;
+                    }
+                    else
+                    {
+                        array[j] = false;
+                    }
+                }
+                this.SetAdvancedMarker(area[i], MarkerType.Borders, show, array, c);
+            }
+        }
+
+        public void ShowMovementArea(List<Vector3i> area)
+        {
+            bool flag = true;
+            if (this.movementAreaLocations != null)
+            {
+                flag = false;
+                if (area.Count == this.movementAreaLocations.Count)
+                {
+                    for (int i = 0; i < area.Count; i++)
+                    {
+                        if (area[i] != this.movementAreaLocations[i])
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    flag = true;
+                }
+                if (flag)
+                {
+                    this.HideMovementArea();
+                }
+            }
+            if (area.Count <= 0)
+            {
+                return;
+            }
+            if (flag)
+            {
+                bool[] array = new bool[6];
+                global::WorldCode.Plane activePlane = World.GetActivePlane();
+                for (int j = 0; j < area.Count; j++)
+                {
+                    if (activePlane != null && !activePlane.area.horizontalWrap && !activePlane.area.IsInside(area[j], allowOutWrapping: true))
+                    {
+                        continue;
+                    }
+                    for (int k = 0; k < 6; k++)
+                    {
+                        Vector3i vector3i = area[j] + HexNeighbors.neighbours[k];
+                        if (activePlane != null)
+                        {
+                            vector3i = activePlane.area.KeepHorizontalInside(vector3i);
+                        }
+                        if (!area.Contains(vector3i))
+                        {
+                            array[k] = true;
+                        }
+                        else
+                        {
+                            array[k] = false;
+                        }
+                    }
+                    this.SetAdvancedMarker(area[j], MarkerType.MovementBorders, visible: true, array, Color.white);
+                }
+            }
+            this.movementAreaLocations = area;
+        }
+
+        public void HideMovementArea(bool update = false)
+        {
+            if (this.movementAreaLocations != null && this.movementAreaLocations.Count > 0)
+            {
+                foreach (Vector3i movementAreaLocation in this.movementAreaLocations)
+                {
+                    this.SetAdvancedMarker(movementAreaLocation, MarkerType.MovementBorders, visible: false);
                 }
                 this.movementAreaLocations.Clear();
             }
@@ -369,116 +617,92 @@
             }
         }
 
-        public void HidePath(bool hideMarker)
+        public Vector2i HexToPixel(Vector3i pos)
         {
-            VerticalMarkerManager.Get().DestroyMarker(this, true);
-            if ((this.pathLocations != null) && (this.pathLocations.Count > 0))
+            Vector2i vector2i = HexCoordinates.HexToPixelSpace(pos);
+            int num = (vector2i.x + this.size.x) % this.size.x;
+            int num2 = (vector2i.y + this.size.y) % this.size.y;
+            if (num < 0 || num2 < 0)
             {
-                foreach (Vector3i vectori in this.pathLocations)
+                Debug.LogWarning("[Warning] SetBasicMarker at position: " + num + ", " + num2);
+            }
+            return new Vector2i(num, num2);
+        }
+
+        public void SetBasicMarker(Vector3i pos, MarkerType type, bool visible)
+        {
+            Vector2i vector2i = this.HexToPixel(pos);
+            vector2i *= 2;
+            if (vector2i.x < 0 || vector2i.y < 0)
+            {
+                return;
+            }
+            if (!visible && this.typeToPosition[type].Contains(pos))
+            {
+                this.typeToPosition[type].Remove(pos);
+            }
+            else if (visible && !this.typeToPosition[type].Contains(pos))
+            {
+                this.typeToPosition[type].Add(pos);
+            }
+            Color pixel = this.dataTexture.GetPixel(vector2i.x, vector2i.y);
+            switch (type)
+            {
+            case MarkerType.Highlight:
+                if (visible)
                 {
-                    UnityEngine.Color color = new UnityEngine.Color();
-                    this.SetAdvancedMarker(vectori, MarkerType.Path, false, null, color);
-                    color = new UnityEngine.Color();
-                    this.SetAdvancedMarker(vectori, MarkerType.PathWithMP, false, null, color);
+                    pixel.r = 5f / (float)TerrainMarkers.atlasSize;
                 }
-                this.pathLocations.Clear();
-            }
-        }
-
-        public void Highlight(Vector3i pos)
-        {
-            this.HideHighlight();
-            this.SetBasicMarker(pos, MarkerType.Highlight, true);
-            this.highlightPosition = pos;
-        }
-
-        public void HighlightHexes(List<Vector3i> hexes)
-        {
-            foreach (Vector3i vectori in hexes)
-            {
-                this.SetBasicMarker(vectori, MarkerType.HexHighlight, true);
-            }
-            this.UpdateMarkers();
-        }
-
-        public void Initialize(int sizeW, int sizeH, WorldCode.Plane p)
-        {
-            this.size.x = sizeW;
-            this.size.y = sizeH;
-            this.plane = p;
-            Color32[] colors = new Color32[((this.size.x * 2) * this.size.y) * 2];
-            this.dataTexture = new Texture2D(this.size.x * 2, this.size.y * 2, TextureFormat.ARGB32, false, true);
-            this.dataTexture.filterMode = FilterMode.Point;
-            this.dataTexture.SetPixels32(colors);
-            this.dataTexture.Apply();
-            foreach (MarkerType type in Enum.GetValues(typeof(MarkerType)))
-            {
-                this.typeToPosition[type] = new List<Vector3i>();
-            }
-            this.merkerResolutionTexture.x = this.size.x * 2;
-            this.merkerResolutionTexture.y = this.size.y * 2;
-            this.merkerResolutionTexture.z = atlasSizeX;
-            this.merkerResolutionTexture.w = atlasSizeY;
-            this.pathLocations = new List<Vector3i>();
-        }
-
-        public void MarkersUpdate(WorldCode.Plane plane)
-        {
-            if (ReferenceEquals(this.plane, plane))
-            {
-                this.ClearMarkersOfType(MarkerType.Friendly);
-                List<Group> groupsOfPlane = GameManager.GetGroupsOfPlane(plane);
-                if (groupsOfPlane != null)
+                else
                 {
-                    foreach (Group group in groupsOfPlane)
-                    {
-                        if (group.alive && (group.GetOwnerID() == PlayerWizard.HumanID()))
-                        {
-                            this.SetBasicMarker(group.GetPosition(), MarkerType.Friendly, true);
-                        }
-                    }
+                    pixel.r = 0f;
                 }
-                List<Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(plane);
-                if (locationsOfThePlane != null)
+                break;
+            case MarkerType.HexHighlight:
+                if (visible)
                 {
-                    foreach (Location location in locationsOfThePlane)
-                    {
-                        if (location.GetOwnerID() == PlayerWizard.HumanID())
-                        {
-                            this.SetBasicMarker(location.GetPosition(), MarkerType.Friendly, true);
-                        }
-                    }
+                    pixel.g = 6f / (float)TerrainMarkers.atlasSize;
                 }
+                else
+                {
+                    pixel.g = 0f;
+                }
+                break;
+            case MarkerType.Friendly:
+                if (visible)
+                {
+                    pixel.b = 7f / (float)TerrainMarkers.atlasSize;
+                }
+                else
+                {
+                    pixel.b = 0f;
+                }
+                break;
+            case MarkerType.Embark:
+                if (visible)
+                {
+                    pixel.a = 8f / (float)TerrainMarkers.atlasSize;
+                }
+                else
+                {
+                    pixel.a = 0f;
+                }
+                break;
             }
+            this.dataTexture.SetPixel(vector2i.x, vector2i.y, pixel);
+            this.dirty = true;
         }
 
-        private void MarkersUpdate(object sender, object e)
+        public void ClearOwnershipMarker(Vector3i pos)
         {
-            if ((!(sender is IPlanePosition) || (((sender as IPlanePosition).GetPlane() != null) && ReferenceEquals((sender as IPlanePosition).GetPlane(), this.plane))) && ReferenceEquals(World.GetActivePlane(), this.plane))
-            {
-                this.MarkersUpdate(this.plane);
-            }
+            this.SetBasicMarker(pos, MarkerType.Friendly, visible: false);
         }
 
-        public void RequestUpdate(MarkerType t)
+        public void SetAdvancedMarker(Vector3i pos, MarkerType type, bool visible, bool[] directionalData = null, Color color = default(Color))
         {
-            this.requiredUpdate.Add(t);
-        }
-
-        private void SelectionUpdated(object sender, object e)
-        {
-            if (this.movementAreaLocations != null)
-            {
-                this.GeneralUpdateMarkers(sender, e);
-            }
-        }
-
-        public void SetAdvancedMarker(Vector3i pos, MarkerType type, bool visible, bool[] directionalData, UnityEngine.Color color)
-        {
-            int num;
-            int num2;
-            Vector2i vectori = this.HexToPixel(pos) * 2;
-            if ((vectori.x < 0) || (vectori.y < 0))
+            Vector2i vector2i = this.HexToPixel(pos);
+            vector2i *= 2;
+            if (vector2i.x < 0 || vector2i.y < 0)
             {
                 return;
             }
@@ -494,481 +718,327 @@
             {
                 this.typeToPosition[type].Add(pos);
             }
-            UnityEngine.Color pixel = this.dataTexture.GetPixel(vectori.x + 1, vectori.y);
-            UnityEngine.Color color3 = this.dataTexture.GetPixel(vectori.x, vectori.y + 1);
-            UnityEngine.Color color4 = this.dataTexture.GetPixel(vectori.x + 1, vectori.y + 1);
-            UnityEngine.Color color5 = pixel;
-            UnityEngine.Color color6 = color3;
-            UnityEngine.Color color7 = color4;
-            this.GetlayoutType(out num, out num2, directionalData, -1);
-            if (type > MarkerType.PathWithMP)
+            Color pixel = this.dataTexture.GetPixel(vector2i.x + 1, vector2i.y);
+            Color pixel2 = this.dataTexture.GetPixel(vector2i.x, vector2i.y + 1);
+            Color color2 = this.dataTexture.GetPixel(vector2i.x + 1, vector2i.y + 1);
+            Color color3 = pixel;
+            Color color4 = pixel2;
+            Color color5 = color2;
+            this.GetlayoutType(out var rotationOffset, out var typeIndex, directionalData);
+            switch (type)
             {
-                if (type == MarkerType.MovementBorders)
+            case MarkerType.Path:
+            case MarkerType.PathWithMP:
+                if (visible && typeIndex > -1)
                 {
-                    if (visible && (num2 > -1))
-                    {
-                        pixel.b = ((float) (num2 + 0x19)) / ((float) atlasSize);
-                        color3.b = ((float) num) / 6f;
-                    }
-                    else
-                    {
-                        pixel.b = 0f;
-                        color3.b = 0f;
-                    }
-                }
-                else if (type == MarkerType.Roads)
-                {
-                    if (visible && (num2 > -1))
-                    {
-                        pixel.a = ((float) (num2 + 0x26)) / ((float) atlasSize);
-                        color3.a = ((float) num) / 6f;
-                    }
-                    else
-                    {
-                        pixel.a = 0f;
-                        color3.a = 0f;
-                    }
-                }
-                else if (type == MarkerType.Roads2)
-                {
-                    if (visible && (num2 > -1))
-                    {
-                        pixel.a = ((float) (num2 + 0x33)) / ((float) atlasSize);
-                        color3.a = ((float) num) / 6f;
-                    }
-                    else
-                    {
-                        pixel.a = 0f;
-                        color3.a = 0f;
-                    }
-                }
-            }
-            else
-            {
-                if (type != MarkerType.Path)
-                {
-                    if (type == MarkerType.Borders)
-                    {
-                        if (!visible || (num2 <= -1))
-                        {
-                            pixel.g = 0f;
-                            color3.g = 0f;
-                        }
-                        else
-                        {
-                            pixel.g = ((float) (num2 + 12)) / ((float) atlasSize);
-                            color3.g = ((float) num) / 6f;
-                            color4 = color;
-                        }
-                        goto TR_0006;
-                    }
-                    else if (type != MarkerType.PathWithMP)
-                    {
-                        goto TR_0006;
-                    }
-                }
-                if (visible && (num2 > -1))
-                {
-                    pixel.r = ((float) (num2 + type)) / ((float) atlasSize);
-                    color3.r = ((float) num) / 6f;
+                    pixel.r = (float)(typeIndex + type) / (float)TerrainMarkers.atlasSize;
+                    pixel2.r = (float)rotationOffset / 6f;
                 }
                 else
                 {
                     pixel.r = 0f;
-                    color3.r = 0f;
+                    pixel2.r = 0f;
                 }
-            }
-        TR_0006:
-            if (color5 != pixel)
-            {
-                this.dataTexture.SetPixel(vectori.x + 1, vectori.y, pixel);
-                this.dirty = true;
-            }
-            if (color6 != color3)
-            {
-                this.dataTexture.SetPixel(vectori.x, vectori.y + 1, color3);
-                this.dirty = true;
-            }
-            if (color7 != color4)
-            {
-                this.dataTexture.SetPixel(vectori.x + 1, vectori.y + 1, color4);
-                this.dirty = true;
-            }
-        }
-
-        public void SetBasicMarker(Vector3i pos, MarkerType type, bool visible)
-        {
-            Vector2i vectori = this.HexToPixel(pos) * 2;
-            if ((vectori.x >= 0) && (vectori.y >= 0))
-            {
-                if (!visible && this.typeToPosition[type].Contains(pos))
+                break;
+            case MarkerType.Borders:
+                if (visible && typeIndex > -1)
                 {
-                    this.typeToPosition[type].Remove(pos);
-                }
-                else if (visible && !this.typeToPosition[type].Contains(pos))
-                {
-                    this.typeToPosition[type].Add(pos);
-                }
-                UnityEngine.Color pixel = this.dataTexture.GetPixel(vectori.x, vectori.y);
-                switch (type)
-                {
-                    case MarkerType.Highlight:
-                        pixel.r = !visible ? 0f : (5f / ((float) atlasSize));
-                        break;
-
-                    case MarkerType.HexHighlight:
-                        pixel.g = !visible ? 0f : (6f / ((float) atlasSize));
-                        break;
-
-                    case MarkerType.Friendly:
-                        pixel.b = !visible ? 0f : (7f / ((float) atlasSize));
-                        break;
-
-                    case MarkerType.Embark:
-                        pixel.a = !visible ? 0f : (8f / ((float) atlasSize));
-                        break;
-
-                    default:
-                        break;
-                }
-                this.dataTexture.SetPixel(vectori.x, vectori.y, pixel);
-                this.dirty = true;
-            }
-        }
-
-        public void ShowMovementArea(List<Vector3i> area)
-        {
-            bool flag = true;
-            if (this.movementAreaLocations != null)
-            {
-                flag = false;
-                if (area.Count != this.movementAreaLocations.Count)
-                {
-                    flag = true;
+                    pixel.g = (float)(typeIndex + 12) / (float)TerrainMarkers.atlasSize;
+                    pixel2.g = (float)rotationOffset / 6f;
+                    color2 = color;
                 }
                 else
                 {
-                    for (int i = 0; i < area.Count; i++)
-                    {
-                        if (area[i] != this.movementAreaLocations[i])
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
+                    pixel.g = 0f;
+                    pixel2.g = 0f;
                 }
-                if (flag)
+                break;
+            case MarkerType.MovementBorders:
+                if (visible && typeIndex > -1)
                 {
-                    this.HideMovementArea(false);
-                }
-            }
-            if (area.Count > 0)
-            {
-                if (flag)
-                {
-                    bool[] directionalData = new bool[6];
-                    WorldCode.Plane activePlane = World.GetActivePlane();
-                    for (int i = 0; i < area.Count; i++)
-                    {
-                        if ((activePlane == null) || (activePlane.area.horizontalWrap || activePlane.area.IsInside(area[i], true)))
-                        {
-                            int index = 0;
-                            while (true)
-                            {
-                                if (index >= 6)
-                                {
-                                    this.SetAdvancedMarker(area[i], MarkerType.MovementBorders, true, directionalData, UnityEngine.Color.white);
-                                    break;
-                                }
-                                Vector3i pos = area[i] + HexNeighbors.neighbours[index];
-                                if (activePlane != null)
-                                {
-                                    pos = activePlane.area.KeepHorizontalInside(pos);
-                                }
-                                directionalData[index] = !area.Contains(pos);
-                                index++;
-                            }
-                        }
-                    }
-                }
-                this.movementAreaLocations = area;
-            }
-        }
-
-        public unsafe void ShowPath(List<Vector3i> path, RequestDataV2 rd)
-        {
-            IPlanePosition selectedUnit = null;
-            FInt mp = FInt.ONE * 0x3e8;
-            FInt num2 = FInt.ONE * 0x3e8;
-            if (this.plane.battlePlane)
-            {
-                selectedUnit = BattleHUD.GetSelectedUnit();
-                mp = (selectedUnit as BattleUnit).Mp;
-            }
-            else if (FSMSelectionManager.Get() != null)
-            {
-                Group selectedGroup = FSMSelectionManager.Get().GetSelectedGroup() as Group;
-                mp = selectedGroup.CurentMP();
-                num2 = new FInt(selectedGroup.GetMaxMP());
-            }
-            bool flag = true;
-            if (this.pathLocations != null)
-            {
-                flag = false;
-                if (path.Count != this.pathLocations.Count)
-                {
-                    flag = true;
+                    pixel.b = (float)(typeIndex + 25) / (float)TerrainMarkers.atlasSize;
+                    pixel2.b = (float)rotationOffset / 6f;
                 }
                 else
                 {
-                    for (int i = 0; i < path.Count; i++)
-                    {
-                        if (path[i] != this.pathLocations[i])
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
+                    pixel.b = 0f;
+                    pixel2.b = 0f;
                 }
-                if (flag)
+                break;
+            case MarkerType.Roads:
+                if (visible && typeIndex > -1)
                 {
-                    this.HidePath(false);
-                }
-            }
-            if ((path.Count > 1) && (num2 > 0))
-            {
-                if (flag)
-                {
-                    FInt num5;
-                    int num4 = 1;
-                    if (mp == 0)
-                    {
-                        num5 = num2;
-                    }
-                    bool[] directionalData = new bool[6];
-                    Vector3i zero = Vector3i.zero;
-                    Vector3i vectori2 = Vector3i.zero;
-                    bool flag2 = false;
-                    bool roadBuildingMode = FSMSelectionManager.Get().roadBuildingMode;
-                    int num6 = 0;
-                    while (true)
-                    {
-                        if (num6 >= path.Count)
-                        {
-                            if (!this.plane.battlePlane && ((num4 > 1) || (mp == 0)))
-                            {
-                                this.destination = path[path.Count - 1];
-                                this.turns = num4;
-                                VerticalMarkerManager.Get().DestroyMarker(this, true);
-                                if (!roadBuildingMode)
-                                {
-                                    VerticalMarkerManager.Get().Addmarker(this);
-                                }
-                            }
-                            break;
-                        }
-                        if (flag2)
-                        {
-                            num4++;
-                        }
-                        if (num6 > 0)
-                        {
-                            FInt oNE = rd.GetEntryCost(path[num6 - 1], path[num6], false, null);
-                            if (oNE < 0)
-                            {
-                                oNE = FInt.ONE;
-                            }
-                            if ((num5 - oNE) <= 0)
-                            {
-                                if (num6 == (path.Count - 1))
-                                {
-                                    flag2 = false;
-                                }
-                                num5 = num2;
-                            }
-                        }
-                        if (num6 > 0)
-                        {
-                            zero = selectedUnit.GetPlane().pathfindingArea.KeepHorizontalInside(path[num6 - 1] - path[num6]);
-                            if (zero.x > 1)
-                            {
-                                short* numPtr1 = &zero.x;
-                                numPtr1[0] = (short) (numPtr1[0] - 80);
-                                short* numPtr2 = &zero.y;
-                                numPtr2[0] = (short) (numPtr2[0] + 40);
-                                short* numPtr3 = &zero.z;
-                                numPtr3[0] = (short) (numPtr3[0] + 40);
-                            }
-                            else if (zero.x < -1)
-                            {
-                                short* numPtr4 = &zero.x;
-                                numPtr4[0] = (short) (numPtr4[0] + 80);
-                                short* numPtr5 = &zero.y;
-                                numPtr5[0] = (short) (numPtr5[0] - 40);
-                                short* numPtr6 = &zero.z;
-                                numPtr6[0] = (short) (numPtr6[0] - 40);
-                            }
-                        }
-                        if (num6 < (path.Count - 1))
-                        {
-                            vectori2 = selectedUnit.GetPlane().pathfindingArea.KeepHorizontalInside(path[num6 + 1] - path[num6]);
-                            if (vectori2.x > 1)
-                            {
-                                short* numPtr7 = &vectori2.x;
-                                numPtr7[0] = (short) (numPtr7[0] - 80);
-                                short* numPtr8 = &vectori2.y;
-                                numPtr8[0] = (short) (numPtr8[0] + 40);
-                                short* numPtr9 = &vectori2.z;
-                                numPtr9[0] = (short) (numPtr9[0] + 40);
-                            }
-                            else if (vectori2.x < -1)
-                            {
-                                short* numPtr10 = &vectori2.x;
-                                numPtr10[0] = (short) (numPtr10[0] + 80);
-                                short* numPtr11 = &vectori2.y;
-                                numPtr11[0] = (short) (numPtr11[0] - 40);
-                                short* numPtr12 = &vectori2.z;
-                                numPtr12[0] = (short) (numPtr12[0] - 40);
-                            }
-                        }
-                        int index = 0;
-                        while (true)
-                        {
-                            if (index >= 6)
-                            {
-                                MarkerType type = (!flag2 || roadBuildingMode) ? MarkerType.Path : MarkerType.PathWithMP;
-                                UnityEngine.Color color = new UnityEngine.Color();
-                                this.SetAdvancedMarker(path[num6], type, true, directionalData, color);
-                                num6++;
-                                break;
-                            }
-                            directionalData[index] = ((num6 > 0) && (HexNeighbors.neighbours[index] == zero)) || ((num6 < (path.Count - 1)) && (HexNeighbors.neighbours[index] == vectori2));
-                            index++;
-                        }
-                    }
-                }
-                this.pathLocations = path;
-            }
-        }
-
-        public bool Update(bool recalculateMarkers)
-        {
-            IPlanePosition selectedGroup = null;
-            if (recalculateMarkers)
-            {
-                this.GeneralUpdateMarkers(false, false);
-            }
-            if (!this.plane.battlePlane)
-            {
-                if (FSMSelectionManager.Get() != null)
-                {
-                    selectedGroup = FSMSelectionManager.Get().GetSelectedGroup();
-                }
-            }
-            else
-            {
-                selectedGroup = BattleHUD.GetSelectedUnit();
-                if (FSMBattleTurn.IsCastingSpells())
-                {
-                    this.HidePath(true);
-                    return false;
-                }
-            }
-            if (selectedGroup == null)
-            {
-                return false;
-            }
-            if ((!(selectedGroup is IGroup) || ((selectedGroup as IGroup).GetOwnerID() != PlayerWizard.HumanID())) && (!(selectedGroup is BattleUnit) || ((selectedGroup as BattleUnit).ownerID != PlayerWizard.HumanID())))
-            {
-                this.HidePath(true);
-            }
-            else
-            {
-                Group group = selectedGroup as Group;
-                Vector3 worldPos = CameraController.GetClickWorldPosition(true, true, true);
-                Vector3i invalid = Vector3i.invalid;
-                if ((group != null) && (group.destination != Vector3i.invalid))
-                {
-                    invalid = group.destination;
-                }
-                else if (worldPos != -Vector3.one)
-                {
-                    invalid = HexCoordinates.GetHexCoordAt(worldPos);
-                }
-                if (this.plane.battlePlane && (invalid != Vector3i.invalid))
-                {
-                    BattleUnit unitAt = Battle.GetBattle().GetUnitAt(invalid);
-                    if (unitAt != null)
-                    {
-                        if (unitAt.ownerID == (selectedGroup as BattleUnit).ownerID)
-                        {
-                            invalid = Vector3i.invalid;
-                        }
-                        BattleUnit attacker = selectedGroup as BattleUnit;
-                        if ((attacker != null) && (attacker.currentlyVisible && (Battle.AttackFormPossible(attacker, unitAt, -1) != Battle.AttackForm.eNone)))
-                        {
-                            invalid = Vector3i.invalid;
-                        }
-                    }
-                }
-                if (!(invalid != Vector3i.invalid))
-                {
-                    this.HidePath(true);
+                    pixel.a = (float)(typeIndex + 38) / (float)TerrainMarkers.atlasSize;
+                    pixel2.a = (float)rotationOffset / 6f;
                 }
                 else
                 {
-                    List<Vector3i> path = null;
-                    RequestDataV2 rd = null;
-                    if (!(selectedGroup is Location) && ((selectedGroup.GetPosition() != invalid) && ((selectedGroup.GetPlane() != null) && selectedGroup.GetPlane().pathfindingArea.IsInside(invalid, false))))
-                    {
-                        rd = RequestDataV2.CreateRequest(selectedGroup.GetPlane(), selectedGroup.GetPosition(), invalid, selectedGroup, false, false, false);
-                        rd.allowAllyPassMode = !FSMSelectionManager.Get().roadBuildingMode;
-                        rd.water = rd.water && !FSMSelectionManager.Get().roadBuildingMode;
-                        rd.nonCorporeal = rd.nonCorporeal && !FSMSelectionManager.Get().roadBuildingMode;
-                        PathfinderV2.FindPath(rd);
-                        path = rd.GetPath();
-                    }
-                    if (path == null)
-                    {
-                        this.HidePath(true);
-                    }
-                    else
-                    {
-                        this.ShowPath(path, rd);
-                    }
+                    pixel.a = 0f;
+                    pixel2.a = 0f;
                 }
+                break;
+            case MarkerType.Roads2:
+                if (visible && typeIndex > -1)
+                {
+                    pixel.a = (float)(typeIndex + 51) / (float)TerrainMarkers.atlasSize;
+                    pixel2.a = (float)rotationOffset / 6f;
+                }
+                else
+                {
+                    pixel.a = 0f;
+                    pixel2.a = 0f;
+                }
+                break;
             }
-            if (!this.dirty)
+            if (color3 != pixel)
             {
-                return false;
+                this.dataTexture.SetPixel(vector2i.x + 1, vector2i.y, pixel);
+                this.dirty = true;
             }
-            this.dataTexture.Apply();
-            this.dirty = false;
-            return true;
+            if (color4 != pixel2)
+            {
+                this.dataTexture.SetPixel(vector2i.x, vector2i.y + 1, pixel2);
+                this.dirty = true;
+            }
+            if (color5 != color2)
+            {
+                this.dataTexture.SetPixel(vector2i.x + 1, vector2i.y + 1, color2);
+                this.dirty = true;
+            }
+        }
+
+        public void DEBUG_Data()
+        {
+            GameObject.Find("IMG").GetComponent<RawImage>().texture = this.dataTexture;
         }
 
         public void UpdateMarkers()
         {
-            if ((this.dataTexture != null) && this.dirty)
+            if (this.dataTexture != null && this.dirty)
             {
                 this.dirty = false;
                 this.dataTexture.Apply();
             }
         }
 
-        public enum MarkerType
+        public void ClearMarkersOfType(MarkerType t)
         {
-            Highlight = 5,
-            Friendly = 7,
-            HexHighlight = 6,
-            Embark = 8,
-            Path = 1,
-            Borders = 12,
-            MovementBorders = 0x19,
-            Roads = 0x26,
-            Roads2 = 0x33,
-            PathWithMP = 0x10
+            if (!this.typeToPosition.ContainsKey(t) || this.typeToPosition[t] == null)
+            {
+                return;
+            }
+            foreach (Vector3i item in new List<Vector3i>(this.typeToPosition[t]))
+            {
+                this.SetBasicMarker(item, t, visible: false);
+            }
+        }
+
+        public void RequestUpdate(MarkerType t)
+        {
+            this.requiredUpdate.Add(t);
+        }
+
+        private void MarkersUpdate(object sender, object e)
+        {
+            if ((!(sender is IPlanePosition) || ((sender as IPlanePosition).GetPlane() != null && (sender as IPlanePosition).GetPlane() == this.plane)) && World.GetActivePlane() == this.plane)
+            {
+                this.MarkersUpdate(this.plane);
+            }
+        }
+
+        public void AreaMarkerUpdate(object sender, object e)
+        {
+            if (e != null || World.GetActivePlane() != this.plane)
+            {
+                return;
+            }
+            IPlanePosition planePosition = null;
+            if (this.plane.battlePlane)
+            {
+                planePosition = BattleHUD.GetSelectedUnit();
+            }
+            else if (FSMSelectionManager.Get() != null)
+            {
+                planePosition = FSMSelectionManager.Get().GetSelectedGroup();
+            }
+            if (planePosition == null || planePosition is Location)
+            {
+                this.HidePath();
+                this.HideMovementArea(update: true);
+                MHEventSystem.TriggerEvent<TerrainMarkers>(this, null);
+                return;
+            }
+            new HashSet<Vector3i>();
+            FInt fInt = FInt.ZERO;
+            if (planePosition is IGroup && (planePosition as IGroup).GetOwnerID() == PlayerWizard.HumanID())
+            {
+                fInt = (planePosition as Group).CurentMP();
+            }
+            else if (planePosition is BattleUnit && (planePosition as BattleUnit).ownerID == PlayerWizard.HumanID())
+            {
+                fInt = (planePosition as BattleUnit).Mp;
+            }
+            if (fInt <= 0)
+            {
+                this.HidePath();
+                this.HideMovementArea(update: true);
+                MHEventSystem.TriggerEvent<TerrainMarkers>(this, null);
+                return;
+            }
+            List<Vector3i> area;
+            if (planePosition is BattleUnit && (planePosition as BattleUnit).teleporting)
+            {
+                (planePosition as BattleUnit).GetAttFinal(TAG.TELEPORTING).ToInt();
+                RequestDataV2 requestDataV = RequestDataV2.CreateRequest(planePosition.GetPlane(), planePosition.GetPosition(), FInt.ONE * 50, planePosition);
+                PathfinderV2.FindArea(requestDataV);
+                area = requestDataV.GetArea();
+            }
+            else
+            {
+                RequestDataV2 requestDataV2 = RequestDataV2.CreateRequest(planePosition.GetPlane(), planePosition.GetPosition(), fInt, planePosition);
+                PathfinderV2.FindArea(requestDataV2);
+                area = requestDataV2.GetArea();
+            }
+            global::WorldCode.Plane.GetMarkers().ShowMovementArea(area);
+        }
+
+        public void MarkersUpdate(global::WorldCode.Plane plane)
+        {
+            if (this.plane != plane)
+            {
+                return;
+            }
+            this.ClearMarkersOfType(MarkerType.Friendly);
+            List<Group> groupsOfPlane = GameManager.GetGroupsOfPlane(plane);
+            if (groupsOfPlane != null)
+            {
+                foreach (Group item in groupsOfPlane)
+                {
+                    if (item.alive && item.GetOwnerID() == PlayerWizard.HumanID())
+                    {
+                        this.SetBasicMarker(item.GetPosition(), MarkerType.Friendly, visible: true);
+                    }
+                }
+            }
+            List<Location> locationsOfThePlane = GameManager.GetLocationsOfThePlane(plane);
+            if (locationsOfThePlane == null)
+            {
+                return;
+            }
+            foreach (Location item2 in locationsOfThePlane)
+            {
+                if (item2.GetOwnerID() == PlayerWizard.HumanID())
+                {
+                    this.SetBasicMarker(item2.GetPosition(), MarkerType.Friendly, visible: true);
+                }
+            }
+        }
+
+        public void HighlightHexes(List<Vector3i> hexes)
+        {
+            foreach (Vector3i hex in hexes)
+            {
+                this.SetBasicMarker(hex, MarkerType.HexHighlight, visible: true);
+            }
+            this.UpdateMarkers();
+        }
+
+        public void ClearHighlightHexes()
+        {
+            this.ClearMarkersOfType(MarkerType.HexHighlight);
+            this.UpdateMarkers();
+        }
+
+        public bool Update(bool recalculateMarkers = false)
+        {
+            IPlanePosition planePosition = null;
+            if (recalculateMarkers)
+            {
+                this.GeneralUpdateMarkers(false, false);
+            }
+            if (this.plane.battlePlane)
+            {
+                planePosition = BattleHUD.GetSelectedUnit();
+                if (FSMBattleTurn.IsCastingSpells())
+                {
+                    this.HidePath();
+                    return false;
+                }
+            }
+            else if (FSMSelectionManager.Get() != null)
+            {
+                planePosition = FSMSelectionManager.Get().GetSelectedGroup();
+            }
+            if (planePosition == null)
+            {
+                return false;
+            }
+            if ((planePosition is IGroup && (planePosition as IGroup).GetOwnerID() == PlayerWizard.HumanID()) || (planePosition is BattleUnit && (planePosition as BattleUnit).ownerID == PlayerWizard.HumanID()))
+            {
+                Group group = planePosition as Group;
+                Vector3 clickWorldPosition = CameraController.GetClickWorldPosition(flat: true, mousePosition: true, checkForUILock: true);
+                Vector3i vector3i = Vector3i.invalid;
+                if (group != null && group.destination != Vector3i.invalid)
+                {
+                    vector3i = group.destination;
+                }
+                else if (clickWorldPosition != -Vector3.one)
+                {
+                    vector3i = HexCoordinates.GetHexCoordAt(clickWorldPosition);
+                }
+                if (this.plane.battlePlane && vector3i != Vector3i.invalid)
+                {
+                    BattleUnit unitAt = Battle.GetBattle().GetUnitAt(vector3i);
+                    if (unitAt != null)
+                    {
+                        if (unitAt.ownerID == (planePosition as BattleUnit).ownerID)
+                        {
+                            vector3i = Vector3i.invalid;
+                        }
+                        if (planePosition is BattleUnit battleUnit && battleUnit.currentlyVisible && Battle.AttackFormPossible(battleUnit, unitAt) != 0)
+                        {
+                            vector3i = Vector3i.invalid;
+                        }
+                    }
+                }
+                if (vector3i != Vector3i.invalid)
+                {
+                    List<Vector3i> list = null;
+                    RequestDataV2 requestDataV = null;
+                    if (!(planePosition is Location) && planePosition.GetPosition() != vector3i && planePosition.GetPlane() != null && planePosition.GetPlane().pathfindingArea.IsInside(vector3i))
+                    {
+                        requestDataV = RequestDataV2.CreateRequest(planePosition.GetPlane(), planePosition.GetPosition(), vector3i, planePosition);
+                        requestDataV.allowAllyPassMode = !FSMSelectionManager.Get().roadBuildingMode;
+                        requestDataV.water = requestDataV.water && !FSMSelectionManager.Get().roadBuildingMode;
+                        requestDataV.nonCorporeal = requestDataV.nonCorporeal && !FSMSelectionManager.Get().roadBuildingMode;
+                        PathfinderV2.FindPath(requestDataV);
+                        list = requestDataV.GetPath();
+                    }
+                    if (list == null)
+                    {
+                        this.HidePath();
+                    }
+                    else
+                    {
+                        this.ShowPath(list, requestDataV);
+                    }
+                }
+                else
+                {
+                    this.HidePath();
+                }
+            }
+            else
+            {
+                this.HidePath();
+            }
+            if (this.dirty)
+            {
+                this.dataTexture.Apply();
+                this.dirty = false;
+                return true;
+            }
+            return false;
         }
     }
 }
-

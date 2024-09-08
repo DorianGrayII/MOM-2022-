@@ -1,5 +1,3 @@
-﻿using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 public static class ConsoleProDebug
@@ -8,25 +6,23 @@ public static class ConsoleProDebug
     {
     }
 
-    public static void LogAsType(string inLog, string inTypeName, UnityEngine.Object inContext)
+    public static void LogToFilter(string inLog, string inFilterName, Object inContext = null)
+    {
+        Debug.Log(inLog + "\nCPAPI:{\"cmd\":\"Filter\", \"name\":\"" + inFilterName + "\"}", inContext);
+    }
+
+    public static void LogAsType(string inLog, string inTypeName, Object inContext = null)
     {
         Debug.Log(inLog + "\nCPAPI:{\"cmd\":\"LogType\", \"name\":\"" + inTypeName + "\"}", inContext);
     }
 
-    public static void LogToFilter(string inLog, string inFilterName, UnityEngine.Object inContext)
+    public static void Watch(string inName, string inValue)
     {
-        Debug.Log(inLog + "\nCPAPI:{\"cmd\":\"Filter\", \"name\":\"" + inFilterName + "\"}", inContext);
+        Debug.Log(inName + " : " + inValue + "\nCPAPI:{\"cmd\":\"Watch\", \"name\":\"" + inName + "\"}");
     }
 
     public static void Search(string inText)
     {
         Debug.Log("\nCPAPI:{\"cmd\":\"Search\", \"text\":\"" + inText + "\"}");
     }
-
-    public static void Watch(string inName, string inValue)
-    {
-        string[] textArray1 = new string[] { inName, " : ", inValue, "\nCPAPI:{\"cmd\":\"Watch\", \"name\":\"", inName, "\"}" };
-        Debug.Log(string.Concat(textArray1));
-    }
 }
-

@@ -1,10 +1,9 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine.SceneManagement;
+using UnityEngine.SceneManagement;
 
-    [ActionCategory(ActionCategory.Level), Tooltip("Restarts current level.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Level)]
+    [Tooltip("Restarts current level.")]
     public class RestartLevel : FsmStateAction
     {
         public override void OnEnter()
@@ -14,4 +13,3 @@
         }
     }
 }
-

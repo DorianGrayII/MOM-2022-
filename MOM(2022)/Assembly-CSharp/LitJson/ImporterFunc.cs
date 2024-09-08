@@ -1,8 +1,5 @@
-﻿namespace LitJson
+namespace LitJson
 {
-    using System;
-    using System.Runtime.CompilerServices;
-
     internal delegate object ImporterFunc(object input);
+    public delegate TValue ImporterFunc<TJson, TValue>(TJson input);
 }
-

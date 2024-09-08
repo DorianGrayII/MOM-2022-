@@ -1,17 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Sets a trigger parameter to active. Triggers are parameters that act mostly like booleans, but get reset to inactive when they are used in a transition.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Sets a trigger parameter to active. Triggers are parameters that act mostly like booleans, but get reset to inactive when they are used in a transition.")]
     public class SetAnimatorTrigger : FsmStateAction
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, UIHint(UIHint.AnimatorTrigger), HutongGames.PlayMaker.Tooltip("The trigger name")]
+
+        [RequiredField]
+        [UIHint(UIHint.AnimatorTrigger)]
+        [Tooltip("The trigger name")]
         public FsmString trigger;
+
         private Animator _animator;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.trigger = null;
+        }
 
         public override void OnEnter()
         {
@@ -19,26 +30,16 @@
             if (ownerDefaultTarget == null)
             {
                 base.Finish();
+                return;
             }
-            else
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
             {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
-                {
-                    base.Finish();
-                }
-                else
-                {
-                    this.SetTrigger();
-                    base.Finish();
-                }
+                base.Finish();
+                return;
             }
-        }
-
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.trigger = null;
+            this.SetTrigger();
+            base.Finish();
         }
 
         private void SetTrigger()
@@ -50,4 +51,3 @@
         }
     }
 }
-

@@ -1,26 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Scene), Tooltip("Get a scene RootCount, the number of root transforms of this scene.")]
+    [ActionCategory(ActionCategory.Scene)]
+    [Tooltip("Get a scene RootCount, the number of root transforms of this scene.")]
     public class GetSceneRootCount : GetSceneActionBase
     {
-        [ActionSection("Result"), Tooltip("The scene RootCount"), RequiredField, UIHint(UIHint.Variable)]
+        [ActionSection("Result")]
+        [Tooltip("The scene RootCount")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmInt rootCount;
+
         [Tooltip("Repeat every frame")]
         public bool everyFrame;
 
-        private void DoGetSceneRootCount()
+        public override void Reset()
         {
-            if (base._sceneFound)
-            {
-                if (!this.rootCount.IsNone)
-                {
-                    this.rootCount.Value = base._scene.rootCount;
-                }
-                base.Fsm.Event(base.sceneFoundEvent);
-            }
+            base.Reset();
+            this.rootCount = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -38,12 +35,16 @@
             this.DoGetSceneRootCount();
         }
 
-        public override void Reset()
+        private void DoGetSceneRootCount()
         {
-            base.Reset();
-            this.rootCount = null;
-            this.everyFrame = false;
+            if (base._sceneFound)
+            {
+                if (!this.rootCount.IsNone)
+                {
+                    this.rootCount.Value = base._scene.rootCount;
+                }
+                base.Fsm.Event(base.sceneFoundEvent);
+            }
         }
     }
 }
-

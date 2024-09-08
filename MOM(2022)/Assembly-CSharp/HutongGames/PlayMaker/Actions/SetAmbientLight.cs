@@ -1,19 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.RenderSettings), HutongGames.PlayMaker.Tooltip("Sets the Ambient Light Color for the scene.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.RenderSettings)]
+    [Tooltip("Sets the Ambient Light Color for the scene.")]
     public class SetAmbientLight : FsmStateAction
     {
         [RequiredField]
         public FsmColor ambientColor;
+
         public bool everyFrame;
 
-        private void DoSetAmbientColor()
+        public override void Reset()
         {
-            RenderSettings.ambientLight = this.ambientColor.get_Value();
+            this.ambientColor = Color.gray;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -30,11 +31,9 @@
             this.DoSetAmbientColor();
         }
 
-        public override void Reset()
+        private void DoSetAmbientColor()
         {
-            this.ambientColor = (FsmColor) Color.gray;
-            this.everyFrame = false;
+            RenderSettings.ambientLight = this.ambientColor.Value;
         }
     }
 }
-

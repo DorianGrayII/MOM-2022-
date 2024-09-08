@@ -1,24 +1,25 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Time), HutongGames.PlayMaker.Tooltip("Multiplies a Float by Time.deltaTime to use in frame-rate independent operations. E.g., 10 becomes 10 units per second.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Time)]
+    [Tooltip("Multiplies a Float by Time.deltaTime to use in frame-rate independent operations. E.g., 10 becomes 10 units per second.")]
     public class PerSecond : FsmStateAction
     {
         [RequiredField]
         public FsmFloat floatValue;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmFloat storeResult;
+
         public bool everyFrame;
 
-        private void DoPerSecond()
+        public override void Reset()
         {
-            if (this.storeResult != null)
-            {
-                this.storeResult.Value = this.floatValue.Value * Time.deltaTime;
-            }
+            this.floatValue = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -35,12 +36,12 @@
             this.DoPerSecond();
         }
 
-        public override void Reset()
+        private void DoPerSecond()
         {
-            this.floatValue = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (this.storeResult != null)
+            {
+                this.storeResult.Value = this.floatValue.Value * Time.deltaTime;
+            }
         }
     }
 }
-

@@ -1,22 +1,31 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Quaternion), HutongGames.PlayMaker.Tooltip("Creates a rotation which rotates from fromDirection to toDirection. Usually you use this to rotate a transform so that one of its axes, e.g., the y-axis - follows a target direction toDirection in world space.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Quaternion)]
+    [Tooltip("Creates a rotation which rotates from fromDirection to toDirection. Usually you use this to rotate a transform so that one of its axes, e.g., the y-axis - follows a target direction toDirection in world space.")]
     public class GetQuaternionFromRotation : QuaternionBaseAction
     {
-        [RequiredField, HutongGames.PlayMaker.Tooltip("the 'from' direction")]
+        [RequiredField]
+        [Tooltip("the 'from' direction")]
         public FsmVector3 fromDirection;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("the 'to' direction")]
+
+        [RequiredField]
+        [Tooltip("the 'to' direction")]
         public FsmVector3 toDirection;
-        [RequiredField, UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("the resulting quaternion")]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("the resulting quaternion")]
         public FsmQuaternion result;
 
-        private void DoQuatFromRotation()
+        public override void Reset()
         {
-            this.result.set_Value(Quaternion.FromToRotation(this.fromDirection.get_Value(), this.toDirection.get_Value()));
+            this.fromDirection = null;
+            this.toDirection = null;
+            this.result = null;
+            base.everyFrame = false;
+            base.everyFrameOption = everyFrameOptions.Update;
         }
 
         public override void OnEnter()
@@ -28,9 +37,9 @@
             }
         }
 
-        public override void OnFixedUpdate()
+        public override void OnUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.FixedUpdate)
+            if (base.everyFrameOption == everyFrameOptions.Update)
             {
                 this.DoQuatFromRotation();
             }
@@ -38,28 +47,23 @@
 
         public override void OnLateUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.LateUpdate)
+            if (base.everyFrameOption == everyFrameOptions.LateUpdate)
             {
                 this.DoQuatFromRotation();
             }
         }
 
-        public override void OnUpdate()
+        public override void OnFixedUpdate()
         {
-            if (base.everyFrameOption == QuaternionBaseAction.everyFrameOptions.Update)
+            if (base.everyFrameOption == everyFrameOptions.FixedUpdate)
             {
                 this.DoQuatFromRotation();
             }
         }
 
-        public override void Reset()
+        private void DoQuatFromRotation()
         {
-            this.fromDirection = null;
-            this.toDirection = null;
-            this.result = null;
-            base.everyFrame = false;
-            base.everyFrameOption = QuaternionBaseAction.everyFrameOptions.Update;
+            this.result.Value = Quaternion.FromToRotation(this.fromDirection.Value, this.toDirection.Value);
         }
     }
 }
-

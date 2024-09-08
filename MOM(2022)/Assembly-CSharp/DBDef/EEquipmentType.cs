@@ -1,7 +1,5 @@
-﻿namespace DBDef
+namespace DBDef
 {
-    using System;
-
     public enum EEquipmentType
     {
         None = 0,
@@ -21,4 +19,3 @@
         Orb = 0x2000
     }
 }
-

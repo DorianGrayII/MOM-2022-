@@ -1,16 +1,16 @@
-﻿namespace MOM
-{
-    using DBDef;
-    using ProtoBuf;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using DBDef;
+using ProtoBuf;
+using UnityEngine;
 
+namespace MOM
+{
     [ProtoContract]
     public class ArtefactManager
     {
         [ProtoMember(1)]
         public Reference<BaseUnit> owner;
+
         [ProtoMember(2)]
         public List<EquipmentSlot> equipmentSlots;
 
@@ -24,10 +24,12 @@
             this.equipmentSlots = new List<EquipmentSlot>();
             if (owner.dbSource.Get() is Hero)
             {
-                foreach (ArtefactSlot slot in (owner.dbSource.Get() as Hero).equipmentSlot)
+                ArtefactSlot[] equipmentSlot = (owner.dbSource.Get() as Hero).equipmentSlot;
+                foreach (ArtefactSlot artefactSlot in equipmentSlot)
                 {
-                    EquipmentSlot item = new EquipmentSlot(owner) {
-                        slotType = slot
+                    EquipmentSlot item = new EquipmentSlot(owner)
+                    {
+                        slotType = artefactSlot
                     };
                     this.equipmentSlots.Add(item);
                 }
@@ -36,12 +38,12 @@
 
         public void ReturnEquipment(PlayerWizard w)
         {
-            foreach (EquipmentSlot slot in this.equipmentSlots)
+            foreach (EquipmentSlot equipmentSlot in this.equipmentSlots)
             {
-                if (slot.item != null)
+                if (equipmentSlot.item != null)
                 {
-                    w.artefacts.Add(slot.item);
-                    slot.item = null;
+                    w.artefacts.Add(equipmentSlot.item);
+                    equipmentSlot.item = null;
                 }
             }
         }
@@ -51,61 +53,54 @@
             if (slot == null)
             {
                 Debug.LogWarning("Data in Artefact Manager UpdateSkills should be EquipmentSlot type");
+                return;
             }
-            else
+            if (slot.item != null)
             {
-                List<DBReference<ArtefactPower>>.Enumerator enumerator;
-                if (slot.item == null)
+                List<DBReference<Skill>> skills = this.owner.Get().GetSkills();
+                List<EnchantmentInstance> enchantments = this.owner.Get().GetEnchantments();
                 {
-                    List<DBReference<Skill>> skills = ISkillableExtension.GetSkills(this.owner.Get());
-                    foreach (EquipmentSlot slot2 in this.equipmentSlots)
+                    foreach (DBReference<ArtefactPower> artefactPower in slot.item.artefactPowers)
                     {
-                        if (!ReferenceEquals(slot2, slot) && (slot2.item != null))
+                        Skill skill = artefactPower.Get().skill;
+                        if (skills.Contains(skill) && !skill.stackable)
                         {
-                            using (enumerator = slot2.item.artefactPowers.GetEnumerator())
+                            continue;
+                        }
+                        Enchantment[] relatedEnchantment = skill.relatedEnchantment;
+                        if (relatedEnchantment != null && relatedEnchantment.Length != 0)
+                        {
+                            Enchantment[] array = relatedEnchantment;
+                            foreach (Enchantment en in array)
                             {
-                                while (enumerator.MoveNext())
+                                EnchantmentInstance enchantmentInstance = enchantments.Find((EnchantmentInstance o) => o.source == en);
+                                if (enchantmentInstance != null)
                                 {
-                                    Skill skill = enumerator.Current.Get().skill;
-                                    if (!skills.Contains(skill))
-                                    {
-                                        ISkillableExtension.AddSkill(this.owner.Get(), skill);
-                                    }
+                                    this.owner.Get().RemoveEnchantment(enchantmentInstance);
                                 }
                             }
                         }
+                        this.owner.Get().AddSkill(skill);
                     }
+                    return;
                 }
-                else
+            }
+            List<DBReference<Skill>> skills2 = this.owner.Get().GetSkills();
+            foreach (EquipmentSlot equipmentSlot in this.equipmentSlots)
+            {
+                if (equipmentSlot == slot || equipmentSlot.item == null)
                 {
-                    List<DBReference<Skill>> skills = ISkillableExtension.GetSkills(this.owner.Get());
-                    List<EnchantmentInstance> enchantments = IEnchantableExtension.GetEnchantments(this.owner.Get());
-                    using (enumerator = slot.item.artefactPowers.GetEnumerator())
+                    continue;
+                }
+                foreach (DBReference<ArtefactPower> artefactPower2 in equipmentSlot.item.artefactPowers)
+                {
+                    Skill skill2 = artefactPower2.Get().skill;
+                    if (!skills2.Contains(skill2))
                     {
-                        while (enumerator.MoveNext())
-                        {
-                            Skill item = enumerator.Current.Get().skill;
-                            if (!skills.Contains(item) || item.stackable)
-                            {
-                                Enchantment[] relatedEnchantment = item.relatedEnchantment;
-                                if ((relatedEnchantment != null) && (relatedEnchantment.Length != 0))
-                                {
-                                    foreach (Enchantment en in relatedEnchantment)
-                                    {
-                                        EnchantmentInstance e = enchantments.Find(o => o.source == en);
-                                        if (e != null)
-                                        {
-                                            IEnchantableExtension.RemoveEnchantment(this.owner.Get(), e);
-                                        }
-                                    }
-                                }
-                                ISkillableExtension.AddSkill(this.owner.Get(), item);
-                            }
-                        }
+                        this.owner.Get().AddSkill(skill2);
                     }
                 }
             }
         }
     }
 }
-

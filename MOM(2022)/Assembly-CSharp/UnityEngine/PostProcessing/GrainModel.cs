@@ -1,19 +1,44 @@
-﻿namespace UnityEngine.PostProcessing
-{
-    using System;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
+using System;
 
+namespace UnityEngine.PostProcessing
+{
     [Serializable]
     public class GrainModel : PostProcessingModel
     {
+        [Serializable]
+        public struct Settings
+        {
+            [Tooltip("Enable the use of colored grain.")]
+            public bool colored;
+
+            [Range(0f, 1f)]
+            [Tooltip("Grain strength. Higher means more visible grain.")]
+            public float intensity;
+
+            [Range(0.3f, 3f)]
+            [Tooltip("Grain particle size.")]
+            public float size;
+
+            [Range(0f, 1f)]
+            [Tooltip("Controls the noisiness response curve based on scene luminance. Lower values mean less noise in dark areas.")]
+            public float luminanceContribution;
+
+            public static Settings defaultSettings
+            {
+                get
+                {
+                    Settings result = default(Settings);
+                    result.colored = true;
+                    result.intensity = 0.5f;
+                    result.size = 1f;
+                    result.luminanceContribution = 0.8f;
+                    return result;
+                }
+            }
+        }
+
         [SerializeField]
         private Settings m_Settings = Settings.defaultSettings;
-
-        public override void Reset()
-        {
-            this.m_Settings = Settings.defaultSettings;
-        }
 
         public Settings settings
         {
@@ -27,30 +52,9 @@
             }
         }
 
-        [Serializable, StructLayout(LayoutKind.Sequential)]
-        public struct Settings
+        public override void Reset()
         {
-            [Tooltip("Enable the use of colored grain.")]
-            public bool colored;
-            [Range(0f, 1f), Tooltip("Grain strength. Higher means more visible grain.")]
-            public float intensity;
-            [Range(0.3f, 3f), Tooltip("Grain particle size.")]
-            public float size;
-            [Range(0f, 1f), Tooltip("Controls the noisiness response curve based on scene luminance. Lower values mean less noise in dark areas.")]
-            public float luminanceContribution;
-            public static GrainModel.Settings defaultSettings
-            {
-                get
-                {
-                    return new GrainModel.Settings { 
-                        colored = true,
-                        intensity = 0.5f,
-                        size = 1f,
-                        luminanceContribution = 0.8f
-                    };
-                }
-            }
+            this.m_Settings = Settings.defaultSettings;
         }
     }
 }
-

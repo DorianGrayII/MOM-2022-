@@ -1,12 +1,9 @@
-﻿namespace MadGoat_SSAA
+namespace MadGoat_SSAA
 {
-    using System;
-
     public enum Filter
     {
-        NEAREST_NEIGHBOR,
-        BILINEAR,
-        BICUBIC
+        NEAREST_NEIGHBOR = 0,
+        BILINEAR = 1,
+        BICUBIC = 2
     }
 }
-

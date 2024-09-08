@@ -1,50 +1,51 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DrawGizmos : MonoBehaviour
 {
     public static List<List<Vector3>> rivers;
-    public static List<List<ValueTuple<Vector3, Vector2>>> riversMesh;
+
+    public static List<List<(Vector3, Vector2)>> riversMesh;
 
     private void OnDrawGizmosSelected()
     {
-        if (rivers != null)
+        if (DrawGizmos.rivers != null)
         {
             Gizmos.color = Color.blue;
-            foreach (List<Vector3> list in rivers)
+            foreach (List<Vector3> river in DrawGizmos.rivers)
             {
-                for (int i = 0; i < (list.Count - 1); i++)
+                for (int i = 0; i < river.Count - 1; i++)
                 {
-                    Vector3 to = list[i + 1] + (Vector3.up * 0.1f);
-                    Gizmos.DrawLine(list[i] + (Vector3.up * 0.1f), to);
+                    Vector3 from = river[i] + Vector3.up * 0.1f;
+                    Vector3 to = river[i + 1] + Vector3.up * 0.1f;
+                    Gizmos.DrawLine(from, to);
                 }
             }
         }
-        if (riversMesh != null)
+        if (DrawGizmos.riversMesh == null)
         {
-            Gizmos.color = Color.green;
-            foreach (List<ValueTuple<Vector3, Vector2>> list2 in riversMesh)
+            return;
+        }
+        Gizmos.color = Color.green;
+        foreach (List<(Vector3, Vector2)> item in DrawGizmos.riversMesh)
+        {
+            for (int j = 0; j < item.Count - 2; j += 2)
             {
-                for (int i = 0; i < (list2.Count - 2); i += 2)
-                {
-                    Vector3 from = list2[i].Item1 + (Vector3.up * 0.1f);
-                    Vector3 to = list2[i + 1].Item1 + (Vector3.up * 0.1f);
-                    Vector3 vector4 = list2[i + 2].Item1 + (Vector3.up * 0.1f);
-                    Gizmos.color = Color.blue;
-                    Gizmos.DrawLine(from, to);
-                    Gizmos.DrawLine(to, vector4);
-                    Gizmos.DrawLine(vector4, from);
-                    from = list2[i + 1].Item1 + (Vector3.up * 0.1f);
-                    to = list2[i + 2].Item1 + (Vector3.up * 0.1f);
-                    vector4 = list2[i + 3].Item1 + (Vector3.up * 0.1f);
-                    Gizmos.color = Color.yellow;
-                    Gizmos.DrawLine(from, to);
-                    Gizmos.DrawLine(to, vector4);
-                    Gizmos.DrawLine(vector4, from);
-                }
+                Vector3 vector = item[j].Item1 + Vector3.up * 0.1f;
+                Vector3 vector2 = item[j + 1].Item1 + Vector3.up * 0.1f;
+                Vector3 vector3 = item[j + 2].Item1 + Vector3.up * 0.1f;
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(vector, vector2);
+                Gizmos.DrawLine(vector2, vector3);
+                Gizmos.DrawLine(vector3, vector);
+                vector = item[j + 1].Item1 + Vector3.up * 0.1f;
+                vector2 = item[j + 2].Item1 + Vector3.up * 0.1f;
+                vector3 = item[j + 3].Item1 + Vector3.up * 0.1f;
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawLine(vector, vector2);
+                Gizmos.DrawLine(vector2, vector3);
+                Gizmos.DrawLine(vector3, vector);
             }
         }
     }
 }
-

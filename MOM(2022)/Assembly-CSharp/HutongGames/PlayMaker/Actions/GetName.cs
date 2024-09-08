@@ -1,22 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Gets the name of a Game Object and stores it in a String Variable.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Gets the name of a Game Object and stores it in a String Variable.")]
     public class GetName : FsmStateAction
     {
         [RequiredField]
         public FsmGameObject gameObject;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmString storeName;
+
         public bool everyFrame;
 
-        private void DoGetGameObjectName()
+        public override void Reset()
         {
-            GameObject obj2 = this.gameObject.get_Value();
-            this.storeName.Value = (obj2 != null) ? obj2.name : "";
+            this.gameObject = new FsmGameObject
+            {
+                UseVariable = true
+            };
+            this.storeName = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -33,14 +39,10 @@
             this.DoGetGameObjectName();
         }
 
-        public override void Reset()
+        private void DoGetGameObjectName()
         {
-            FsmGameObject obj1 = new FsmGameObject();
-            obj1.UseVariable = true;
-            this.gameObject = obj1;
-            this.storeName = null;
-            this.everyFrame = false;
+            GameObject value = this.gameObject.Value;
+            this.storeName.Value = ((value != null) ? value.name : "");
         }
     }
 }
-

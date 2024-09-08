@@ -1,29 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Array), Tooltip("Add values to an array.")]
+    [ActionCategory(ActionCategory.Array)]
+    [Tooltip("Add values to an array.")]
     public class ArrayAddRange : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable), Tooltip("The Array Variable to use.")]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The Array Variable to use.")]
         public FsmArray array;
-        [RequiredField, MatchElementType("array"), Tooltip("The variables to add.")]
+
+        [RequiredField]
+        [MatchElementType("array")]
+        [Tooltip("The variables to add.")]
         public FsmVar[] variables;
 
-        private void DoAddRange()
+        public override void Reset()
         {
-            int length = this.variables.Length;
-            if (length > 0)
-            {
-                this.array.Resize(this.array.Length + length);
-                foreach (FsmVar var in this.variables)
-                {
-                    var.UpdateValue();
-                    this.array.Set(this.array.Length - length, var.GetValue());
-                    length--;
-                }
-            }
+            this.array = null;
+            this.variables = new FsmVar[2];
         }
 
         public override void OnEnter()
@@ -32,11 +26,20 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoAddRange()
         {
-            this.array = null;
-            this.variables = new FsmVar[2];
+            int num = this.variables.Length;
+            if (num > 0)
+            {
+                this.array.Resize(this.array.Length + num);
+                FsmVar[] array = this.variables;
+                foreach (FsmVar fsmVar in array)
+                {
+                    fsmVar.UpdateValue();
+                    this.array.Set(this.array.Length - num, fsmVar.GetValue());
+                    num--;
+                }
+            }
         }
     }
 }
-

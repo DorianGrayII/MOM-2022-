@@ -1,50 +1,50 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("RectTransform"), HutongGames.PlayMaker.Tooltip("Gets the local rotation of this RectTransform.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("RectTransform")]
+    [Tooltip("Gets the local rotation of this RectTransform.")]
     public class RectTransformGetLocalRotation : BaseUpdateAction
     {
-        [RequiredField, CheckForComponent(typeof(RectTransform)), HutongGames.PlayMaker.Tooltip("The GameObject target.")]
+        [RequiredField]
+        [CheckForComponent(typeof(RectTransform))]
+        [Tooltip("The GameObject target.")]
         public FsmOwnerDefault gameObject;
-        [HutongGames.PlayMaker.Tooltip("The rotation")]
+
+        [Tooltip("The rotation")]
         public FsmVector3 rotation;
-        [HutongGames.PlayMaker.Tooltip("The x component of the rotation")]
+
+        [Tooltip("The x component of the rotation")]
         public FsmFloat x;
-        [HutongGames.PlayMaker.Tooltip("The y component of the rotation")]
+
+        [Tooltip("The y component of the rotation")]
         public FsmFloat y;
-        [HutongGames.PlayMaker.Tooltip("The z component of the rotation")]
+
+        [Tooltip("The z component of the rotation")]
         public FsmFloat z;
+
         private RectTransform _rt;
 
-        private void DoGetValues()
+        public override void Reset()
         {
-            if (this._rt != null)
+            base.Reset();
+            this.gameObject = null;
+            this.rotation = new FsmVector3
             {
-                if (!this.rotation.IsNone)
-                {
-                    this.rotation.set_Value(this._rt.eulerAngles);
-                }
-                if (!this.x.IsNone)
-                {
-                    this.x.Value = this._rt.eulerAngles.x;
-                }
-                if (!this.y.IsNone)
-                {
-                    this.y.Value = this._rt.eulerAngles.y;
-                }
-                if (!this.z.IsNone)
-                {
-                    this.z.Value = this._rt.eulerAngles.z;
-                }
-            }
-        }
-
-        public override void OnActionUpdate()
-        {
-            this.DoGetValues();
+                UseVariable = true
+            };
+            this.x = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.y = new FsmFloat
+            {
+                UseVariable = true
+            };
+            this.z = new FsmFloat
+            {
+                UseVariable = true
+            };
         }
 
         public override void OnEnter()
@@ -61,23 +61,32 @@
             }
         }
 
-        public override void Reset()
+        public override void OnActionUpdate()
         {
-            base.Reset();
-            this.gameObject = null;
-            FsmVector3 vector1 = new FsmVector3();
-            vector1.UseVariable = true;
-            this.rotation = vector1;
-            FsmFloat num1 = new FsmFloat();
-            num1.UseVariable = true;
-            this.x = num1;
-            FsmFloat num2 = new FsmFloat();
-            num2.UseVariable = true;
-            this.y = num2;
-            FsmFloat num3 = new FsmFloat();
-            num3.UseVariable = true;
-            this.z = num3;
+            this.DoGetValues();
+        }
+
+        private void DoGetValues()
+        {
+            if (!(this._rt == null))
+            {
+                if (!this.rotation.IsNone)
+                {
+                    this.rotation.Value = this._rt.eulerAngles;
+                }
+                if (!this.x.IsNone)
+                {
+                    this.x.Value = this._rt.eulerAngles.x;
+                }
+                if (!this.y.IsNone)
+                {
+                    this.y.Value = this._rt.eulerAngles.y;
+                }
+                if (!this.z.IsNone)
+                {
+                    this.z.Value = this._rt.eulerAngles.z;
+                }
+            }
         }
     }
 }
-

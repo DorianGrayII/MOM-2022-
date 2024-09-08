@@ -1,23 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Color), Tooltip("Sets the value of a Color Variable.")]
+    [ActionCategory(ActionCategory.Color)]
+    [Tooltip("Sets the value of a Color Variable.")]
     public class SetColorValue : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmColor colorVariable;
+
         [RequiredField]
         public FsmColor color;
+
         public bool everyFrame;
 
-        private void DoSetColorValue()
+        public override void Reset()
         {
-            if (this.colorVariable != null)
-            {
-                this.colorVariable.set_Value(this.color.get_Value());
-            }
+            this.colorVariable = null;
+            this.color = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -34,12 +34,12 @@
             this.DoSetColorValue();
         }
 
-        public override void Reset()
+        private void DoSetColorValue()
         {
-            this.colorVariable = null;
-            this.color = null;
-            this.everyFrame = false;
+            if (this.colorVariable != null)
+            {
+                this.colorVariable.Value = this.color.Value;
+            }
         }
     }
 }
-

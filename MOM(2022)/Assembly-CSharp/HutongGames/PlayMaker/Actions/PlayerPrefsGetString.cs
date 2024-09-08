@@ -1,16 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("PlayerPrefs"), HutongGames.PlayMaker.Tooltip("Returns the value corresponding to key in the preference file if it exists.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("PlayerPrefs")]
+    [Tooltip("Returns the value corresponding to key in the preference file if it exists.")]
     public class PlayerPrefsGetString : FsmStateAction
     {
-        [CompoundArray("Count", "Key", "Variable"), HutongGames.PlayMaker.Tooltip("Case sensitive key.")]
+        [CompoundArray("Count", "Key", "Variable")]
+        [Tooltip("Case sensitive key.")]
         public FsmString[] keys;
+
         [UIHint(UIHint.Variable)]
         public FsmString[] variables;
+
+        public override void Reset()
+        {
+            this.keys = new FsmString[1];
+            this.variables = new FsmString[1];
+        }
 
         public override void OnEnter()
         {
@@ -23,12 +30,5 @@
             }
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.keys = new FsmString[1];
-            this.variables = new FsmString[1];
-        }
     }
 }
-

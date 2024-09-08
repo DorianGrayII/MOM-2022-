@@ -1,23 +1,47 @@
-﻿namespace MOM
-{
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
+namespace MOM
+{
     public class BattleResult
     {
         public List<BattleUnit> attacker;
+
         public List<BattleUnit> defender;
+
         public int[] aWinPerRank;
+
         public int[] dWinPerRank;
+
         public int aWinAveraged;
+
         public int dWinAveraged;
+
         public int aManaLeft;
+
         public int dManaLeft;
 
         public BattleResult()
         {
             this.ResetWinPerRank();
+        }
+
+        public void ResetWinPerRank()
+        {
+            this.aWinPerRank = new int[5];
+            this.dWinPerRank = new int[5];
+        }
+
+        public void RegisterWinByRank(int rank, bool attacker)
+        {
+            if (attacker)
+            {
+                this.aWinPerRank[rank - 1]++;
+            }
+            else
+            {
+                this.dWinPerRank[rank - 1]++;
+            }
         }
 
         public int GetAttackerWinAveraged()
@@ -26,20 +50,14 @@
             {
                 int num = 0;
                 int num2 = 0;
-                int[] aWinPerRank = this.aWinPerRank;
-                int index = 0;
-                while (true)
+                int[] array = this.aWinPerRank;
+                for (int i = 0; i < array.Length; i++)
                 {
-                    if (index >= aWinPerRank.Length)
-                    {
-                        float f = ((float) num2) / ((float) num);
-                        this.aWinAveraged = Mathf.RoundToInt(f);
-                        break;
-                    }
-                    num += aWinPerRank[index];
-                    num2 += (index + 1) * aWinPerRank[index];
-                    index++;
+                    num += array[i];
+                    num2 += (i + 1) * array[i];
                 }
+                float f = (float)num2 / (float)num;
+                this.aWinAveraged = Mathf.RoundToInt(f);
             }
             return this.aWinAveraged;
         }
@@ -50,20 +68,14 @@
             {
                 int num = 0;
                 int num2 = 0;
-                int[] dWinPerRank = this.dWinPerRank;
-                int index = 0;
-                while (true)
+                int[] array = this.dWinPerRank;
+                for (int i = 0; i < array.Length; i++)
                 {
-                    if (index >= dWinPerRank.Length)
-                    {
-                        float f = ((float) num2) / ((float) num);
-                        this.dWinAveraged = Mathf.RoundToInt(f);
-                        break;
-                    }
-                    num += dWinPerRank[index];
-                    num2 += (index + 1) * dWinPerRank[index];
-                    index++;
+                    num += array[i];
+                    num2 += (i + 1) * array[i];
                 }
+                float f = (float)num2 / (float)num;
+                this.dWinAveraged = Mathf.RoundToInt(f);
             }
             return this.dWinAveraged;
         }
@@ -72,64 +84,61 @@
         {
             int num = 0;
             int num2 = 0;
-            foreach (BattleUnit v in aOrigList)
+            foreach (BattleUnit v2 in aOrigList)
             {
                 if (this.attacker == null)
                 {
                     num2 += 5;
                 }
-                BattleUnit unit = this.attacker.Find(o => o.ID == v.ID);
-                if ((unit == null) || (unit.figureCount == 0))
+                BattleUnit battleUnit = this.attacker.Find((BattleUnit o) => o.ID == v2.ID);
+                if (battleUnit == null || battleUnit.figureCount == 0)
                 {
                     num2 += 5;
                 }
-                else if (v.figureCount != 0)
+                else if (v2.figureCount != 0)
                 {
-                    num2 += (int) (5f * (1f - Mathf.Clamp01(((float) unit.figureCount) / ((float) v.figureCount))));
+                    float num3 = Mathf.Clamp01((float)battleUnit.figureCount / (float)v2.figureCount);
+                    num2 += (int)(5f * (1f - num3));
                 }
             }
-            foreach (BattleUnit unit1 in dOrigList)
+            foreach (BattleUnit v in dOrigList)
             {
                 if (this.defender == null)
                 {
                     num += 5;
                 }
-                BattleUnit unit2 = this.defender.Find(o => o.ID == unit1.ID);
-                if ((unit2 == null) || (unit2.figureCount == 0))
+                BattleUnit battleUnit2 = this.defender.Find((BattleUnit o) => o.ID == v.ID);
+                if (battleUnit2 == null || battleUnit2.figureCount == 0)
                 {
                     num += 5;
                 }
-                else if (unit1.figureCount != 0)
+                else if (v.figureCount != 0)
                 {
-                    num += (int) (5f * (1f - Mathf.Clamp01(((float) unit2.figureCount) / ((float) unit1.figureCount))));
+                    float num4 = Mathf.Clamp01((float)battleUnit2.figureCount / (float)v.figureCount);
+                    num += (int)(5f * (1f - num4));
                 }
             }
-            float num3 = ((float) num2) / ((float) (aOrigList.Count * 5));
-            float single1 = ((float) num) / ((float) (dOrigList.Count * 5));
-            float num4 = Mathf.Abs((float) (single1 - num3));
-            int num5 = (single1 > num3) ? 1 : -1;
-            return ((num4 <= 0.9f) ? ((num4 <= 0.5f) ? ((num4 <= 0.25f) ? ((num4 <= 0f) ? num5 : (2 * num5)) : (3 * num5)) : (4 * num5)) : (5 * num5));
-        }
-
-        public unsafe void RegisterWinByRank(int rank, bool attacker)
-        {
-            if (attacker)
+            float num5 = (float)num2 / (float)(aOrigList.Count * 5);
+            float num6 = (float)num / (float)(dOrigList.Count * 5);
+            float num7 = Mathf.Abs(num6 - num5);
+            int num8 = ((num6 > num5) ? 1 : (-1));
+            if (num7 > 0.9f)
             {
-                int* numPtr1 = &(this.aWinPerRank[rank - 1]);
-                numPtr1[0]++;
+                return 5 * num8;
             }
-            else
+            if (num7 > 0.5f)
             {
-                int* numPtr2 = &(this.dWinPerRank[rank - 1]);
-                numPtr2[0]++;
+                return 4 * num8;
             }
-        }
-
-        public void ResetWinPerRank()
-        {
-            this.aWinPerRank = new int[5];
-            this.dWinPerRank = new int[5];
+            if (num7 > 0.25f)
+            {
+                return 3 * num8;
+            }
+            if (num7 > 0f)
+            {
+                return 2 * num8;
+            }
+            return num8;
         }
     }
 }
-

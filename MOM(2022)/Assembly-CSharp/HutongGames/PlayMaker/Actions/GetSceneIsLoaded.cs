@@ -1,30 +1,28 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Scene), Tooltip("Get a scene isLoaded flag.")]
+    [ActionCategory(ActionCategory.Scene)]
+    [Tooltip("Get a scene isLoaded flag.")]
     public class GetSceneIsLoaded : GetSceneActionBase
     {
-        [ActionSection("Result"), Tooltip("true if the scene is loaded."), UIHint(UIHint.Variable)]
+        [ActionSection("Result")]
+        [Tooltip("true if the scene is loaded.")]
+        [UIHint(UIHint.Variable)]
         public FsmBool isLoaded;
+
         [Tooltip("Event sent if the scene is loaded.")]
         public FsmEvent isLoadedEvent;
+
         [Tooltip("Event sent if the scene is not loaded.")]
         public FsmEvent isNotLoadedEvent;
+
         [Tooltip("Repeat every Frame")]
         public bool everyFrame;
 
-        private void DoGetSceneIsLoaded()
+        public override void Reset()
         {
-            if (base._sceneFound)
-            {
-                if (!this.isLoaded.IsNone)
-                {
-                    this.isLoaded.Value = base._scene.isLoaded;
-                }
-                base.Fsm.Event(base.sceneFoundEvent);
-            }
+            base.Reset();
+            this.isLoaded = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,12 +40,16 @@
             this.DoGetSceneIsLoaded();
         }
 
-        public override void Reset()
+        private void DoGetSceneIsLoaded()
         {
-            base.Reset();
-            this.isLoaded = null;
-            this.everyFrame = false;
+            if (base._sceneFound)
+            {
+                if (!this.isLoaded.IsNone)
+                {
+                    this.isLoaded.Value = base._scene.isLoaded;
+                }
+                base.Fsm.Event(base.sceneFoundEvent);
+            }
         }
     }
 }
-

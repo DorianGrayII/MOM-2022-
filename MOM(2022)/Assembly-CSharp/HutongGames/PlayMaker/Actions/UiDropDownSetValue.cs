@@ -1,20 +1,32 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
 
-    [ActionCategory(ActionCategory.UI), HutongGames.PlayMaker.Tooltip("Set the selected value (zero based index) of the UI Dropdown Component")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.UI)]
+    [Tooltip("Set the selected value (zero based index) of the UI Dropdown Component")]
     public class UiDropDownSetValue : ComponentAction<Dropdown>
     {
-        [RequiredField, CheckForComponent(typeof(Dropdown)), HutongGames.PlayMaker.Tooltip("The GameObject with the UI DropDown component.")]
+        [RequiredField]
+        [CheckForComponent(typeof(Dropdown))]
+        [Tooltip("The GameObject with the UI DropDown component.")]
         public FsmOwnerDefault gameObject;
-        [RequiredField, HutongGames.PlayMaker.Tooltip("The selected index of the dropdown (zero based index).")]
+
+        [RequiredField]
+        [Tooltip("The selected index of the dropdown (zero based index).")]
         public FsmInt value;
-        [HutongGames.PlayMaker.Tooltip("Repeats every frame")]
+
+        [Tooltip("Repeats every frame")]
         public bool everyFrame;
+
         private Dropdown dropDown;
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.value = null;
+            this.everyFrame = false;
+        }
 
         public override void OnEnter()
         {
@@ -35,20 +47,12 @@
             this.SetValue();
         }
 
-        public override void Reset()
-        {
-            this.gameObject = null;
-            this.value = null;
-            this.everyFrame = false;
-        }
-
         private void SetValue()
         {
-            if ((this.dropDown != null) && (this.dropDown.value != this.value.Value))
+            if (!(this.dropDown == null) && this.dropDown.value != this.value.Value)
             {
                 this.dropDown.value = this.value.Value;
             }
         }
     }
 }
-

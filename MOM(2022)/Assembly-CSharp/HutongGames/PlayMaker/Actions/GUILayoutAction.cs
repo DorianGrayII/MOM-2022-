@@ -1,23 +1,13 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [HutongGames.PlayMaker.Tooltip("GUILayout base action - don't use!")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [Tooltip("GUILayout base action - don't use!")]
     public abstract class GUILayoutAction : FsmStateAction
     {
         public LayoutOption[] layoutOptions;
+
         private GUILayoutOption[] options;
-
-        protected GUILayoutAction()
-        {
-        }
-
-        public override void Reset()
-        {
-            this.layoutOptions = new LayoutOption[0];
-        }
 
         public GUILayoutOption[] LayoutOptions
         {
@@ -34,6 +24,10 @@
                 return this.options;
             }
         }
+
+        public override void Reset()
+        {
+            this.layoutOptions = new LayoutOption[0];
+        }
     }
 }
-

@@ -1,40 +1,66 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.Animator), HutongGames.PlayMaker.Tooltip("Gets the avatar body mass center position and rotation. Optionally accepts a GameObject to get the body transform. \nThe position and rotation are local to the gameobject")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.Animator)]
+    [Tooltip("Gets the avatar body mass center position and rotation. Optionally accepts a GameObject to get the body transform. \nThe position and rotation are local to the gameobject")]
     public class GetAnimatorBody : FsmStateActionAnimatorBase
     {
-        [RequiredField, CheckForComponent(typeof(Animator)), HutongGames.PlayMaker.Tooltip("The target. An Animator component is required")]
+        [RequiredField]
+        [CheckForComponent(typeof(Animator))]
+        [Tooltip("The target. An Animator component is required")]
         public FsmOwnerDefault gameObject;
-        [ActionSection("Results"), UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The avatar body mass center")]
+
+        [ActionSection("Results")]
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The avatar body mass center")]
         public FsmVector3 bodyPosition;
-        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The avatar body mass center")]
+
+        [UIHint(UIHint.Variable)]
+        [Tooltip("The avatar body mass center")]
         public FsmQuaternion bodyRotation;
-        [HutongGames.PlayMaker.Tooltip("If set, apply the body mass center position and rotation to this gameObject")]
+
+        [Tooltip("If set, apply the body mass center position and rotation to this gameObject")]
         public FsmGameObject bodyGameObject;
+
         private Animator _animator;
+
         private Transform _transform;
 
-        private void DoGetBodyPosition()
+        public override void Reset()
         {
-            if (this._animator != null)
-            {
-                this.bodyPosition.set_Value(this._animator.bodyPosition);
-                this.bodyRotation.set_Value(this._animator.bodyRotation);
-                if (this._transform != null)
-                {
-                    this._transform.position = this._animator.bodyPosition;
-                    this._transform.rotation = this._animator.bodyRotation;
-                }
-            }
+            base.Reset();
+            this.gameObject = null;
+            this.bodyPosition = null;
+            this.bodyRotation = null;
+            this.bodyGameObject = null;
+            base.everyFrame = false;
+            base.everyFrameOption = AnimatorFrameUpdateSelector.OnAnimatorIK;
         }
 
-        public override string ErrorCheck()
+        public override void OnEnter()
         {
-            return ((base.everyFrameOption == FsmStateActionAnimatorBase.AnimatorFrameUpdateSelector.OnAnimatorIK) ? string.Empty : "Getting Body Position should only be done in OnAnimatorIK");
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (ownerDefaultTarget == null)
+            {
+                base.Finish();
+                return;
+            }
+            this._animator = ownerDefaultTarget.GetComponent<Animator>();
+            if (this._animator == null)
+            {
+                base.Finish();
+                return;
+            }
+            GameObject value = this.bodyGameObject.Value;
+            if (value != null)
+            {
+                this._transform = value.transform;
+            }
+            if (base.everyFrameOption != AnimatorFrameUpdateSelector.OnAnimatorIK)
+            {
+                base.everyFrameOption = AnimatorFrameUpdateSelector.OnAnimatorIK;
+            }
         }
 
         public override void OnActionUpdate()
@@ -46,45 +72,27 @@
             }
         }
 
-        public override void OnEnter()
+        private void DoGetBodyPosition()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget == null)
+            if (!(this._animator == null))
             {
-                base.Finish();
-            }
-            else
-            {
-                this._animator = ownerDefaultTarget.GetComponent<Animator>();
-                if (this._animator == null)
+                this.bodyPosition.Value = this._animator.bodyPosition;
+                this.bodyRotation.Value = this._animator.bodyRotation;
+                if (this._transform != null)
                 {
-                    base.Finish();
-                }
-                else
-                {
-                    GameObject obj3 = this.bodyGameObject.get_Value();
-                    if (obj3 != null)
-                    {
-                        this._transform = obj3.transform;
-                    }
-                    if (base.everyFrameOption != FsmStateActionAnimatorBase.AnimatorFrameUpdateSelector.OnAnimatorIK)
-                    {
-                        base.everyFrameOption = FsmStateActionAnimatorBase.AnimatorFrameUpdateSelector.OnAnimatorIK;
-                    }
+                    this._transform.position = this._animator.bodyPosition;
+                    this._transform.rotation = this._animator.bodyRotation;
                 }
             }
         }
 
-        public override void Reset()
+        public override string ErrorCheck()
         {
-            base.Reset();
-            this.gameObject = null;
-            this.bodyPosition = null;
-            this.bodyRotation = null;
-            this.bodyGameObject = null;
-            base.everyFrame = false;
-            base.everyFrameOption = FsmStateActionAnimatorBase.AnimatorFrameUpdateSelector.OnAnimatorIK;
+            if (base.everyFrameOption != AnimatorFrameUpdateSelector.OnAnimatorIK)
+            {
+                return "Getting Body Position should only be done in OnAnimatorIK";
+            }
+            return string.Empty;
         }
     }
 }
-

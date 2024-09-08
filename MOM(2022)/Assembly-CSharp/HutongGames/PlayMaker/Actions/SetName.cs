@@ -1,24 +1,21 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GameObject), HutongGames.PlayMaker.Tooltip("Sets a Game Object's Name.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Sets a Game Object's Name.")]
     public class SetName : FsmStateAction
     {
         [RequiredField]
         public FsmOwnerDefault gameObject;
+
         [RequiredField]
         public FsmString name;
 
-        private void DoSetLayer()
+        public override void Reset()
         {
-            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
-            if (ownerDefaultTarget != null)
-            {
-                ownerDefaultTarget.name = this.name.Value;
-            }
+            this.gameObject = null;
+            this.name = null;
         }
 
         public override void OnEnter()
@@ -27,11 +24,13 @@
             base.Finish();
         }
 
-        public override void Reset()
+        private void DoSetLayer()
         {
-            this.gameObject = null;
-            this.name = null;
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (!(ownerDefaultTarget == null))
+            {
+                ownerDefaultTarget.name = this.name.Value;
+            }
         }
     }
 }
-

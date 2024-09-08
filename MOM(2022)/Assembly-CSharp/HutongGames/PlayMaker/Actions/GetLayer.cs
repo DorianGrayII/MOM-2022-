@@ -1,23 +1,23 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.GameObject), Tooltip("Gets a Game Object's Layer and stores it in an Int Variable.")]
+    [ActionCategory(ActionCategory.GameObject)]
+    [Tooltip("Gets a Game Object's Layer and stores it in an Int Variable.")]
     public class GetLayer : FsmStateAction
     {
         [RequiredField]
         public FsmGameObject gameObject;
-        [RequiredField, UIHint(UIHint.Variable)]
+
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmInt storeResult;
+
         public bool everyFrame;
 
-        private void DoGetLayer()
+        public override void Reset()
         {
-            if (this.gameObject.get_Value() != null)
-            {
-                this.storeResult.Value = this.gameObject.get_Value().layer;
-            }
+            this.gameObject = null;
+            this.storeResult = null;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -34,12 +34,12 @@
             this.DoGetLayer();
         }
 
-        public override void Reset()
+        private void DoGetLayer()
         {
-            this.gameObject = null;
-            this.storeResult = null;
-            this.everyFrame = false;
+            if (!(this.gameObject.Value == null))
+            {
+                this.storeResult.Value = this.gameObject.Value.layer;
+            }
         }
     }
 }
-

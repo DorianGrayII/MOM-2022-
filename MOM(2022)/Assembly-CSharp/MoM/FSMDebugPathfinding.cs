@@ -1,10 +1,9 @@
-﻿namespace MOM
-{
-    using HutongGames.PlayMaker;
+using HutongGames.PlayMaker;
 
+namespace MOM
+{
     [ActionCategory(ActionCategory.GameLogic)]
     public class FSMDebugPathfinding : FSMStateBase
     {
     }
 }
-

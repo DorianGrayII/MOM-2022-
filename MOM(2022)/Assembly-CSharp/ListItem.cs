@@ -1,5 +1,3 @@
-// Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// ListItem
 using UnityEngine;
 
 public abstract class ListItem : MonoBehaviour

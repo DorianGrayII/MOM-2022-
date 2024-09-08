@@ -1,19 +1,20 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.RenderSettings), HutongGames.PlayMaker.Tooltip("Sets the color of the Fog in the scene.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.RenderSettings)]
+    [Tooltip("Sets the color of the Fog in the scene.")]
     public class SetFogColor : FsmStateAction
     {
         [RequiredField]
         public FsmColor fogColor;
+
         public bool everyFrame;
 
-        private void DoSetFogColor()
+        public override void Reset()
         {
-            RenderSettings.fogColor = this.fogColor.get_Value();
+            this.fogColor = Color.white;
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -30,11 +31,9 @@
             this.DoSetFogColor();
         }
 
-        public override void Reset()
+        private void DoSetFogColor()
         {
-            this.fogColor = (FsmColor) Color.white;
-            this.everyFrame = false;
+            RenderSettings.fogColor = this.fogColor.Value;
         }
     }
 }
-

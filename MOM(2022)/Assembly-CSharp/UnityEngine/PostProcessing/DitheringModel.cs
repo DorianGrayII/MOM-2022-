@@ -1,19 +1,20 @@
-﻿namespace UnityEngine.PostProcessing
-{
-    using System;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
+using System;
+using System.Runtime.InteropServices;
 
+namespace UnityEngine.PostProcessing
+{
     [Serializable]
     public class DitheringModel : PostProcessingModel
     {
+        [Serializable]
+        [StructLayout(LayoutKind.Sequential, Size = 1)]
+        public struct Settings
+        {
+            public static Settings defaultSettings => default(Settings);
+        }
+
         [SerializeField]
         private Settings m_Settings = Settings.defaultSettings;
-
-        public override void Reset()
-        {
-            this.m_Settings = Settings.defaultSettings;
-        }
 
         public Settings settings
         {
@@ -27,17 +28,9 @@
             }
         }
 
-        [Serializable, StructLayout(LayoutKind.Sequential, Size=1)]
-        public struct Settings
+        public override void Reset()
         {
-            public static DitheringModel.Settings defaultSettings
-            {
-                get
-                {
-                    return new DitheringModel.Settings();
-                }
-            }
+            this.m_Settings = Settings.defaultSettings;
         }
     }
 }
-

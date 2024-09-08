@@ -1,15 +1,22 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory("PlayerPrefs"), HutongGames.PlayMaker.Tooltip("Sets the value of the preference identified by key.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory("PlayerPrefs")]
+    [Tooltip("Sets the value of the preference identified by key.")]
     public class PlayerPrefsSetFloat : FsmStateAction
     {
-        [CompoundArray("Count", "Key", "Value"), HutongGames.PlayMaker.Tooltip("Case sensitive key.")]
+        [CompoundArray("Count", "Key", "Value")]
+        [Tooltip("Case sensitive key.")]
         public FsmString[] keys;
+
         public FsmFloat[] values;
+
+        public override void Reset()
+        {
+            this.keys = new FsmString[1];
+            this.values = new FsmFloat[1];
+        }
 
         public override void OnEnter()
         {
@@ -22,12 +29,5 @@
             }
             base.Finish();
         }
-
-        public override void Reset()
-        {
-            this.keys = new FsmString[1];
-            this.values = new FsmFloat[1];
-        }
     }
 }
-

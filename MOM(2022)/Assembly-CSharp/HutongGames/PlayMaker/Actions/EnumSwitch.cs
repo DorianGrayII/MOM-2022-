@@ -1,31 +1,27 @@
-﻿namespace HutongGames.PlayMaker.Actions
+namespace HutongGames.PlayMaker.Actions
 {
-    using HutongGames.PlayMaker;
-    using System;
-
-    [ActionCategory(ActionCategory.Logic), Tooltip("Sends an Event based on the value of an Enum Variable.")]
+    [ActionCategory(ActionCategory.Logic)]
+    [Tooltip("Sends an Event based on the value of an Enum Variable.")]
     public class EnumSwitch : FsmStateAction
     {
-        [RequiredField, UIHint(UIHint.Variable)]
+        [RequiredField]
+        [UIHint(UIHint.Variable)]
         public FsmEnum enumVariable;
-        [CompoundArray("Enum Switches", "Compare Enum Values", "Send"), MatchFieldType("enumVariable")]
+
+        [CompoundArray("Enum Switches", "Compare Enum Values", "Send")]
+        [MatchFieldType("enumVariable")]
         public FsmEnum[] compareTo;
+
         public FsmEvent[] sendEvent;
+
         public bool everyFrame;
 
-        private void DoEnumSwitch()
+        public override void Reset()
         {
-            if (!this.enumVariable.IsNone)
-            {
-                for (int i = 0; i < this.compareTo.Length; i++)
-                {
-                    if (Equals(this.enumVariable.Value, this.compareTo[i].Value))
-                    {
-                        base.Fsm.Event(this.sendEvent[i]);
-                        return;
-                    }
-                }
-            }
+            this.enumVariable = null;
+            this.compareTo = new FsmEnum[0];
+            this.sendEvent = new FsmEvent[0];
+            this.everyFrame = false;
         }
 
         public override void OnEnter()
@@ -42,13 +38,20 @@
             this.DoEnumSwitch();
         }
 
-        public override void Reset()
+        private void DoEnumSwitch()
         {
-            this.enumVariable = null;
-            this.compareTo = new FsmEnum[0];
-            this.sendEvent = new FsmEvent[0];
-            this.everyFrame = false;
+            if (this.enumVariable.IsNone)
+            {
+                return;
+            }
+            for (int i = 0; i < this.compareTo.Length; i++)
+            {
+                if (object.Equals(this.enumVariable.Value, this.compareTo[i].Value))
+                {
+                    base.Fsm.Event(this.sendEvent[i]);
+                    break;
+                }
+            }
         }
     }
 }
-

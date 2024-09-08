@@ -1,27 +1,16 @@
-﻿namespace MOM
+namespace MOM
 {
-    using System;
-
     public class UnitOffer
     {
         private BaseUnit _baseUnit;
+
         private Unit _unit;
+
         private int _quantity;
+
         private int _exp;
+
         private int _cost;
-
-        public UnitOffer()
-        {
-        }
-
-        public UnitOffer(UnitOffer uo)
-        {
-            this.baseUnit = uo.baseUnit;
-            this.unit = uo.unit;
-            this.quantity = uo.quantity;
-            this.exp = uo.exp;
-            this.cost = uo.cost;
-        }
 
         public BaseUnit baseUnit
         {
@@ -31,7 +20,7 @@
             }
             set
             {
-                if (!ReferenceEquals(this._baseUnit, value))
+                if (this._baseUnit != value)
                 {
                     this._baseUnit = value;
                 }
@@ -46,7 +35,7 @@
             }
             set
             {
-                if (!ReferenceEquals(this._unit, value))
+                if (this._unit != value)
                 {
                     this._unit = value;
                     this._baseUnit = value;
@@ -58,7 +47,11 @@
         {
             get
             {
-                return ((this._quantity != 0) ? this._quantity : 1);
+                if (this._quantity == 0)
+                {
+                    return 1;
+                }
+                return this._quantity;
             }
             set
             {
@@ -98,6 +91,18 @@
                 }
             }
         }
+
+        public UnitOffer()
+        {
+        }
+
+        public UnitOffer(UnitOffer uo)
+        {
+            this.baseUnit = uo.baseUnit;
+            this.unit = uo.unit;
+            this.quantity = uo.quantity;
+            this.exp = uo.exp;
+            this.cost = uo.cost;
+        }
     }
 }
-

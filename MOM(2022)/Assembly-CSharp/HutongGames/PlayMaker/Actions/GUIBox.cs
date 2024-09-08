@@ -1,10 +1,9 @@
-﻿namespace HutongGames.PlayMaker.Actions
-{
-    using HutongGames.PlayMaker;
-    using System;
-    using UnityEngine;
+using UnityEngine;
 
-    [ActionCategory(ActionCategory.GUI), HutongGames.PlayMaker.Tooltip("GUI Box.")]
+namespace HutongGames.PlayMaker.Actions
+{
+    [ActionCategory(ActionCategory.GUI)]
+    [Tooltip("GUI Box.")]
     public class GUIBox : GUIContentAction
     {
         public override void OnGUI()
@@ -21,4 +20,3 @@
         }
     }
 }
-

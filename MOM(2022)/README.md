@@ -21,5 +21,7 @@ A reconstructed Visual Studio 2017 c# source code project to allow compilation o
 
   - Target Framework: .NET Framework 4.7.1
   - Language Version: C# 7.3
+  - Build Environment: Microsoft Visual Studio 2017 Version 15.9.65
+
   - The .NET Module References are set to the "C:\Program Files (x86)\Steam\steamapps\common\Master-Of-Magic\MoM_Data\Managed\" directory.  
     - As long as you have Master of Magic (2022) installed in the default program directory via Steam, the project should just build without having to install anything else.

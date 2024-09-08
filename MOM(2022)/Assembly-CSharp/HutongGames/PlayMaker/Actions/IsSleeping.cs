@@ -1,0 +1,53 @@
+﻿namespace HutongGames.PlayMaker.Actions
+{
+    using HutongGames.PlayMaker;
+    using System;
+    using UnityEngine;
+
+    [ActionCategory(ActionCategory.Physics), HutongGames.PlayMaker.Tooltip("Tests if a Game Object's Rigid Body is sleeping.")]
+    public class IsSleeping : ComponentAction<Rigidbody>
+    {
+        [RequiredField, CheckForComponent(typeof(Rigidbody))]
+        public FsmOwnerDefault gameObject;
+        public FsmEvent trueEvent;
+        public FsmEvent falseEvent;
+        [UIHint(UIHint.Variable)]
+        public FsmBool store;
+        public bool everyFrame;
+
+        private void DoIsSleeping()
+        {
+            GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
+            if (base.UpdateCache(ownerDefaultTarget))
+            {
+                bool flag = base.rigidbody.IsSleeping();
+                this.store.Value = flag;
+                base.Fsm.Event(flag ? this.trueEvent : this.falseEvent);
+            }
+        }
+
+        public override void OnEnter()
+        {
+            this.DoIsSleeping();
+            if (!this.everyFrame)
+            {
+                base.Finish();
+            }
+        }
+
+        public override void OnUpdate()
+        {
+            this.DoIsSleeping();
+        }
+
+        public override void Reset()
+        {
+            this.gameObject = null;
+            this.trueEvent = null;
+            this.falseEvent = null;
+            this.store = null;
+            this.everyFrame = false;
+        }
+    }
+}
+

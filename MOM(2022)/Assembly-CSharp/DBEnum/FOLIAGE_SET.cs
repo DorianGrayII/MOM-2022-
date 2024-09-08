@@ -1,0 +1,42 @@
+﻿namespace DBEnum
+{
+    using System;
+
+    public enum FOLIAGE_SET
+    {
+        DEFAULT,
+        DECOR_TREES1,
+        DECOR_TREES2,
+        DECOR_TREES3,
+        DECOR_DEAD_TREES1,
+        DECOR_SWAMP_BUSH1,
+        DECOR_STONES1,
+        DECOR_STONES2,
+        DECOR_ICE_ROCKS,
+        DECOR_DESERT_BUSH1,
+        DECOR_MYRROR_PLANTS1,
+        DECOR_MYRROR_PLANTS2,
+        DECOR_MYRROR_PLANTS3,
+        DECOR_MYRROR_ROOTS1,
+        DECOR_MYRROR_MUSHROOMS1,
+        DECOR_MYRROR_MUSHROOMS2,
+        DECOR_MYRROR_MUSHROOMS3,
+        DECOR_FLOWERS1,
+        DECOR_BONES1,
+        DECOR_MYR_GRASSLAND1,
+        DECOR_MYR_GRASSLAND2,
+        ARCANUS_PINE1,
+        MYRROR_PINE1,
+        ARCANUS_LEAF1,
+        MYRROR_LEAF1,
+        ARCANUS_DRY1,
+        MYRROR_DRY1,
+        MAGIC1,
+        CACTUS1,
+        CACTUS2,
+        MYR_CORAL1,
+        MYR_CORAL2,
+        CRYSTAL1
+    }
+}
+

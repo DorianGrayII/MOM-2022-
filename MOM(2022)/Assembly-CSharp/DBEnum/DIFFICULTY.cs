@@ -1,0 +1,29 @@
+﻿namespace DBEnum
+{
+    using System;
+
+    public enum DIFFICULTY
+    {
+        WIZARD_PICKS,
+        STARTING_GOLD,
+        AI_SKILL,
+        AI_WIZARDS,
+        NEUTRAL_ARMIES_SIZE,
+        LAIR_DEFENCE,
+        MAGIC_INTENSITY,
+        SPECIAL_EVENTS,
+        BATTLE_MP_TERRAIN_COSTS,
+        WORLD_SIZE,
+        INITIAL_ECONOMY,
+        ADD_HERO,
+        NEUTRAL_TOWN_COUNT,
+        AWAKE,
+        TOWN_DISTANCE,
+        OUR_TOWN_GROW_MULTIPLIER,
+        FOE_TOWN_GROW_MULTIPLIER,
+        LAIR_NUMBER_MULTIPLIER,
+        WATER_LAIR_NUMBER_MULTIPLIER,
+        CASTING_SKILL_MULTIPLIER
+    }
+}
+

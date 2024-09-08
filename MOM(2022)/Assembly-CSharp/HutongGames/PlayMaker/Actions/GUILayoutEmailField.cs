@@ -1,0 +1,47 @@
+﻿namespace HutongGames.PlayMaker.Actions
+{
+    using HutongGames.PlayMaker;
+    using System;
+    using UnityEngine;
+
+    [ActionCategory(ActionCategory.GUILayout), HutongGames.PlayMaker.Tooltip("GUILayout Password Field. Optionally send an event if the text has been edited.")]
+    public class GUILayoutEmailField : GUILayoutAction
+    {
+        [UIHint(UIHint.Variable), HutongGames.PlayMaker.Tooltip("The email Text")]
+        public FsmString text;
+        [HutongGames.PlayMaker.Tooltip("The Maximum Length of the field")]
+        public FsmInt maxLength;
+        [HutongGames.PlayMaker.Tooltip("The Style of the Field")]
+        public FsmString style;
+        [HutongGames.PlayMaker.Tooltip("Event sent when field content changed")]
+        public FsmEvent changedEvent;
+        [HutongGames.PlayMaker.Tooltip("Email valid format flag")]
+        public FsmBool valid;
+
+        public override void OnGUI()
+        {
+            bool changed = GUI.changed;
+            GUI.changed = false;
+            this.text.Value = GUILayout.TextField(this.text.Value, this.style.Value, base.LayoutOptions);
+            if (!GUI.changed)
+            {
+                GUI.changed = changed;
+            }
+            else
+            {
+                base.Fsm.Event(this.changedEvent);
+                GUIUtility.ExitGUI();
+            }
+        }
+
+        public override void Reset()
+        {
+            this.text = null;
+            this.maxLength = 0x19;
+            this.style = "TextField";
+            this.valid = true;
+            this.changedEvent = null;
+        }
+    }
+}
+

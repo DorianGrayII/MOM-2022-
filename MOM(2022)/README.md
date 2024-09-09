@@ -42,3 +42,11 @@ Just look for the method:
         }
 
 and tweak the 1 to another value.  This should have been configurable via an XML value.  I personally like changing it to a 2 as it gives Master of Magic a more of a Civ6 feel while exploring.
+
+## World Map Hardcoded Values
+
+IIRC, those are located here: [FSMWorldGenerator.cs](MOM(2022)/Assembly-CSharp/MoM/FSMWorldGenerator.cs)
+
+Look for ```DifficultySettingsData.GetSettingAsInt("UI_WORLD_SIZE")``` and the method: 
+
+        private IEnumerator WorldBuilder()

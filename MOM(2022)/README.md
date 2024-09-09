@@ -25,3 +25,20 @@ A reconstructed Visual Studio 2017 c# source code project to allow compilation o
 
   - The .NET Module References are set to the "C:\Program Files (x86)\Steam\steamapps\common\Master-Of-Magic\MoM_Data\Managed\" directory.  
     - As long as you have Master of Magic (2022) installed in the default program directory via Steam, the project should just build without having to install anything else.
+
+# Fun Things To Try
+
+As I think of them, I will add some interesting things to play around with.
+
+## Default Sight Range
+
+The default sight range used in the game can easily be changed here: [Group.cs](MOM(2022)/Assembly-CSharp/MoM/Group.cs)
+
+Just look for the method:
+
+        public int GetSightRange()
+        {
+            return 1 + this.GetSightRangeBonus();
+        }
+
+and tweak the 1 to another value.  This should have been configurable via an XML value.  I personally like changing it to a 2 as it gives Master of Magic a more of a Civ6 feel while exploring.

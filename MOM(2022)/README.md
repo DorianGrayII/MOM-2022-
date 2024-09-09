@@ -32,7 +32,7 @@ As I think of them, I will add some interesting things to play around with.
 
 ## Default Sight Range
 
-The default sight range used in the game can easily be changed here: [Group.cs](MOM(2022)/Assembly-CSharp/MoM/Group.cs)
+The default sight range used in the game can easily be changed here: [Group.cs](https://github.com/DorianGrayII/MOM-2022-/blob/ebdccdb448898b5b775c544dbc06bfa5ca7948be/MOM(2022)/Assembly-CSharp/MoM/Group.cs)
 
 Just look for the method:
 
@@ -45,7 +45,7 @@ and tweak the 1 to another value.  This should have been configurable via an XML
 
 ## World Map Hardcoded Values
 
-IIRC, those are located here: [FSMWorldGenerator.cs](MOM(2022)/Assembly-CSharp/MoM/FSMWorldGenerator.cs)
+IIRC, those are located here: [FSMWorldGenerator.cs](https://github.com/DorianGrayII/MOM-2022-/blob/ebdccdb448898b5b775c544dbc06bfa5ca7948be/MOM(2022)/Assembly-CSharp/MoM/FSMWorldGenerator.cs)
 
 Look for ```DifficultySettingsData.GetSettingAsInt("UI_WORLD_SIZE")``` and the method: 
 

@@ -50,3 +50,29 @@ IIRC, those are located here: [FSMWorldGenerator.cs](https://github.com/DorianGr
 Look for ```DifficultySettingsData.GetSettingAsInt("UI_WORLD_SIZE")``` and the method: 
 
         private IEnumerator WorldBuilder()
+
+## How To Increase The Number of NPC Wizards?
+
+This is not insurmountable as there are areas in the code that can handle the additional NPC Wizards without too much difficulty.  The following are a list of suggestions on where I would start...
+
+1.  Number of NPC Wizards is tied to Wizard colors, so that will have to be addressed 1st, which is really not that hard at all.
+-  The following would need to be expanded (from PlayerWizard.cs):
+
+        public enum Color
+        {
+            None = 0,
+            Green = 1,
+            Blue = 2,
+            Red = 3,
+            Purple = 4,
+            Yellow = 5,
+            MAX = 6
+        }
+- Every source file that has a dependency on PlayerWizard.Color would need modification, to include:
+  - WizardColors.cs
+  - PopupWizardBanished.cs
+  - BattleHUDInfo.cs
+  - PostBattle.cs
+  - PreBattle.cs
+
+2.  1 see the biggest challenge is implementing the required changes to the Wizard Stats and Wizard Diplomacy UI elements... and that is about the point where I stopped when previously considering it.  The UI code reference elements contained in the Unity asset definitions. Those details were unplublished and would require additional investigation.

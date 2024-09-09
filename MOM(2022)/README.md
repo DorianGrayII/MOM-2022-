@@ -75,4 +75,4 @@ This is not insurmountable as there are areas in the code that can handle the ad
   - PostBattle.cs
   - PreBattle.cs
 
-2.  1 see the biggest challenge is implementing the required changes to the Wizard Stats and Wizard Diplomacy UI elements... and that is about the point where I stopped when previously considering it.  The UI code reference elements contained in the Unity asset definitions. Those details were unplublished and would require additional investigation.
+2.  I see the biggest challenge is implementing the required changes to the Wizard Stats and Wizard Diplomacy UI elements... and that is about the point where I stopped when previously considering it.  The UI code reference elements contained in the Unity asset definitions. Those details were unplublished and would require additional investigation.

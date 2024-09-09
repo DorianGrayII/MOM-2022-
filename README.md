@@ -7,5 +7,5 @@
 
 # MOM-2022-
 
-A reconstructed Visual Studio 2017 c# source code project to allow compilation of the Assembly-CSharp.dll binary from source code.
+A reconstructed Microsoft Visual Studio 2017 c# source code project to allow compilation of Master of Magic (2022)'s Assembly-CSharp.dll binary from source code.
 

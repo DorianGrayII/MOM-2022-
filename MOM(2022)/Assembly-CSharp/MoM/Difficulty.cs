@@ -37,53 +37,53 @@ namespace MOM
         public override void OnStart()
         {
             base.OnStart();
-            this.difficultyGrid.CustomDynamicItem(DifficultyItem, UpdateItems);
-            this.UpdateItems();
-            this.UpdatePresets();
-            this.UpdateScoreMultiplier();
-            this.tgEasy.onValueChanged.AddListener(delegate(bool b)
+            difficultyGrid.CustomDynamicItem(DifficultyItem, UpdateItems);
+            UpdateItems();
+            UpdatePresets();
+            UpdateScoreMultiplier();
+            tgEasy.onValueChanged.AddListener(delegate(bool b)
             {
                 if (b)
                 {
                     DifficultySettingsData.SetDefaults(1);
-                    this.UpdateItems();
-                    this.UpdateScoreMultiplier();
+                    UpdateItems();
+                    UpdateScoreMultiplier();
                 }
             });
-            this.tgNormal.onValueChanged.AddListener(delegate(bool b)
+            tgNormal.onValueChanged.AddListener(delegate(bool b)
             {
                 if (b)
                 {
                     DifficultySettingsData.SetDefaults(2);
-                    this.UpdateItems();
-                    this.UpdateScoreMultiplier();
+                    UpdateItems();
+                    UpdateScoreMultiplier();
                 }
             });
-            this.tgDifficult.onValueChanged.AddListener(delegate(bool b)
+            tgDifficult.onValueChanged.AddListener(delegate(bool b)
             {
                 if (b)
                 {
                     DifficultySettingsData.SetDefaults(3);
-                    this.UpdateItems();
-                    this.UpdateScoreMultiplier();
+                    UpdateItems();
+                    UpdateScoreMultiplier();
                 }
             });
-            this.tgExtreme.onValueChanged.AddListener(delegate(bool b)
+            tgExtreme.onValueChanged.AddListener(delegate(bool b)
             {
                 if (b)
                 {
                     DifficultySettingsData.SetDefaults(4);
-                    this.UpdateItems();
-                    this.UpdateScoreMultiplier();
+                    UpdateItems();
+                    UpdateScoreMultiplier();
                 }
             });
-            this.tgQuick.onValueChanged.AddListener(delegate(bool b)
+            tgQuick.onValueChanged.AddListener(delegate(bool b)
             {
                 if (b)
                 {
                     DifficultySettingsData.SetDefaults(2, quickStart: true);
-                    this.UpdateItems();
-                    this.UpdateScoreMultiplier();
+                    UpdateItems();
+                    UpdateScoreMultiplier();
                 }
             });
         }
@@ -91,11 +91,11 @@ namespace MOM
         protected override void ButtonClick(Selectable s)
         {
             base.ButtonClick(s);
-            if (s == this.btContinue)
+            if (s == btContinue)
             {
                 MHEventSystem.TriggerEvent(this, "Advance");
             }
-            else if (s == this.btCancel)
+            else if (s == btCancel)
             {
                 MHEventSystem.TriggerEvent(this, "Back");
             }
@@ -106,57 +106,57 @@ namespace MOM
             switch (DifficultySettingsData.GetCurentDifficultyRank())
             {
             case 1:
-                this.tgEasy.isOn = true;
+                tgEasy.isOn = true;
                 break;
             case 2:
-                this.tgNormal.isOn = true;
+                tgNormal.isOn = true;
                 break;
             case 3:
-                this.tgDifficult.isOn = true;
+                tgDifficult.isOn = true;
                 break;
             case 4:
-                this.tgExtreme.isOn = true;
+                tgExtreme.isOn = true;
                 break;
             case 5:
-                this.tgQuick.isOn = true;
+                tgQuick.isOn = true;
                 break;
             default:
-                this.tgCustom.isOn = true;
+                tgCustom.isOn = true;
                 break;
             }
         }
 
         private void UpdateScoreMultiplier()
         {
-            this.scoreMultiplier.text = DifficultySettingsData.GetCurentScoreMultiplier() + "%";
+            scoreMultiplier.text = DifficultySettingsData.GetCurentScoreMultiplier() + "%";
         }
 
         private void DifficultyItem(GameObject item, object source, object data, int index)
         {
             DifficultyListItem component = item.GetComponent<DifficultyListItem>();
-            Multitype<global::DBDef.Difficulty, DifficultyOption> d = source as Multitype<global::DBDef.Difficulty, DifficultyOption>;
-            component.label.text = global::DBUtils.Localization.Get(d.t0.name, true);
+            Multitype<global::DBDef.Difficulty, DifficultyOption> difficulty = source as Multitype<global::DBDef.Difficulty, DifficultyOption>;
+            component.label.text = global::DBUtils.Localization.Get(difficulty.t0.name, true);
             List<string> list = new List<string>();
-            DifficultyOption[] setting = d.t0.setting;
+            DifficultyOption[] setting = difficulty.t0.setting;
             foreach (DifficultyOption difficultyOption in setting)
             {
                 list.Add(difficultyOption.title);
             }
             component.dropdown.SetOptions(list);
-            component.dropdown.SelectOption(Array.IndexOf(d.t0.setting, d.t1));
+            component.dropdown.SelectOption(Array.IndexOf(difficulty.t0.setting, difficulty.t1));
             component.dropdown.onChange = delegate(object obj)
             {
-                if (!this.blockChanges)
+                if (!blockChanges)
                 {
-                    int orderIndex = Array.FindIndex(d.t0.setting, (DifficultyOption o) => o.title == obj as string);
-                    DifficultySettingsData.SetValue(d.t0.name, orderIndex);
-                    this.UpdatePresets();
-                    this.UpdateScoreMultiplier();
+                    int orderIndex = Array.FindIndex(difficulty.t0.setting, (DifficultyOption o) => o.title == obj as string);
+                    DifficultySettingsData.SetValue(difficulty.t0.name, orderIndex);
+                    UpdatePresets();
+                    UpdateScoreMultiplier();
                 }
             };
             RolloverSimpleTooltip orAddComponent = component.label.gameObject.GetOrAddComponent<RolloverSimpleTooltip>();
-            orAddComponent.title = global::DBUtils.Localization.Get(d.t0.tooltipName, true);
-            orAddComponent.description = global::DBUtils.Localization.Get(d.t0.tooltipDescription, true);
+            orAddComponent.title = global::DBUtils.Localization.Get(difficulty.t0.tooltipName, true);
+            orAddComponent.description = global::DBUtils.Localization.Get(difficulty.t0.tooltipDescription, true);
             orAddComponent.useMouseLocation = false;
             orAddComponent.anchor = new Vector2(1.05f, 1f);
             orAddComponent.offset = new Vector2(0f, 50f);
@@ -174,22 +174,22 @@ namespace MOM
             List<Multitype<global::DBDef.Difficulty, DifficultyOption>> list = new List<Multitype<global::DBDef.Difficulty, DifficultyOption>>();
             for (int i = 0; i < type.Count; i++)
             {
-                DifficultyOption difficultyOption = null;
+             //   DifficultyOption difficultyOption = null;
                 list.Add(new Multitype<global::DBDef.Difficulty, DifficultyOption>(t1: (current.settingsNamed == null || !current.settingsNamed.ContainsKey(type[i].name)) ? type[i].setting[0] : type[i].setting[current.settingsNamed[type[i].name]], t0: type[i]));
             }
-            this.blockChanges = true;
-            this.difficultyGrid.UpdateGrid(list);
-            this.blockChanges = false;
+            blockChanges = true;
+            difficultyGrid.UpdateGrid(list);
+            blockChanges = false;
         }
 
         private void ResetToggles()
         {
-            this.tgEasy.isOn = false;
-            this.tgNormal.isOn = false;
-            this.tgDifficult.isOn = false;
-            this.tgExtreme.isOn = false;
-            this.tgCustom.isOn = false;
-            this.tgQuick.isOn = false;
+            tgEasy.isOn = false;
+            tgNormal.isOn = false;
+            tgDifficult.isOn = false;
+            tgExtreme.isOn = false;
+            tgCustom.isOn = false;
+            tgQuick.isOn = false;
         }
     }
 }

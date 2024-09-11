@@ -50,12 +50,12 @@ namespace MHUtils.UI
         private void Awake()
         {
             UIManager.instance = this;
-            for (int i = 0; i < 7; i++)
+            for (int iLayer = 0; iLayer < (int)Layer.MAX; iLayer++)
             {
-                Layer key = (Layer)i;
+                Layer key = (Layer)iLayer;
                 this.openScreensByLayer[key] = new HashSet<ScreenBase>();
                 GameObject gameObject = null;
-                gameObject = ((i != 0) ? global::UnityEngine.Object.Instantiate(this.layerSource, base.transform) : this.layerSource);
+                gameObject = ((iLayer != 0) ? global::UnityEngine.Object.Instantiate(this.layerSource, base.transform) : this.layerSource);
                 gameObject.name = key.ToString();
                 this.layerRoots[key] = gameObject;
             }
@@ -111,26 +111,26 @@ namespace MHUtils.UI
             }
         }
 
-        public static bool IsOpen(Layer l, ScreenBase screen)
+        public static bool IsOpen(Layer eLayer, ScreenBase screen)
         {
             if (screen == null || screen.stateStatus > State.StateStatus.Active)
             {
                 return false;
             }
-            if (UIManager.Get().openScreensByLayer[l].Contains(screen))
+            if (UIManager.Get().openScreensByLayer[eLayer].Contains(screen))
             {
-                return UIManager.Get().openScreensByLayer[l].Contains(screen);
+                return UIManager.Get().openScreensByLayer[eLayer].Contains(screen);
             }
             return false;
         }
 
-        public static bool IsOpen<T>(Layer l) where T : ScreenBase
+        public static bool IsOpen<T>(Layer eLayer) where T : ScreenBase
         {
-            if (UIManager.Get() == null || !UIManager.Get().openScreensByLayer.ContainsKey(l) || UIManager.Get().openScreensByLayer[l] == null)
+            if (UIManager.Get() == null || !UIManager.Get().openScreensByLayer.ContainsKey(eLayer) || UIManager.Get().openScreensByLayer[eLayer] == null)
             {
                 return false;
             }
-            foreach (ScreenBase item in UIManager.Get().openScreensByLayer[l])
+            foreach (ScreenBase item in UIManager.Get().openScreensByLayer[eLayer])
             {
                 if (item is T && item.stateStatus <= State.StateStatus.Active)
                 {
@@ -140,19 +140,19 @@ namespace MHUtils.UI
             return false;
         }
 
-        public static T Open<T>(Layer layer, State parent = null) where T : ScreenBase
+        public static T Open<T>(Layer eLayer, State parent = null) where T : ScreenBase
         {
-            return UIManager.OpenCore<T>(UIManager.Get().screens.Find((GameObject o) => o.GetComponent<ScreenBase>() is T), layer, parent);
+            return UIManager.OpenCore<T>(UIManager.Get().screens.Find((GameObject o) => o.GetComponent<ScreenBase>() is T), eLayer, parent);
         }
 
-        public static T GetOrOpen<T>(Layer layer, State parent = null) where T : ScreenBase
+        public static T GetOrOpen<T>(Layer eLayer, State parent = null) where T : ScreenBase
         {
-            return UIManager.GetOrOpen<T>(UIManager.Get().screens.Find((GameObject o) => o.GetComponent<ScreenBase>() is T), layer, parent);
+            return UIManager.GetOrOpen<T>(UIManager.Get().screens.Find((GameObject o) => o.GetComponent<ScreenBase>() is T), eLayer, parent);
         }
 
-        public static T GetOrOpen<T>(GameObject source, Layer layer, State parent = null) where T : ScreenBase
+        public static T GetOrOpen<T>(GameObject source, Layer eLayer, State parent = null) where T : ScreenBase
         {
-            if (UIManager.Get().openScreensByLayer.ContainsKey(layer))
+            if (UIManager.Get().openScreensByLayer.ContainsKey(eLayer))
             {
                 ScreenBase component = source.GetComponent<ScreenBase>();
                 if (component == null)
@@ -160,7 +160,7 @@ namespace MHUtils.UI
                     Debug.LogError("Source screen " + source.name + " does not contain ScreenBase type script on it");
                     return null;
                 }
-                HashSet<ScreenBase> hashSet = UIManager.Get().openScreensByLayer[layer];
+                HashSet<ScreenBase> hashSet = UIManager.Get().openScreensByLayer[eLayer];
                 Type type = component.GetType();
                 foreach (ScreenBase item in hashSet)
                 {
@@ -170,12 +170,12 @@ namespace MHUtils.UI
                     }
                 }
             }
-            return UIManager.OpenCore<T>(source, layer, parent);
+            return UIManager.OpenCore<T>(source, eLayer, parent);
         }
 
-        public static T OpenCore<T>(GameObject source, Layer layer, State parent = null, bool acceptKeyboardInput = true) where T : ScreenBase
+        public static T OpenCore<T>(GameObject source, Layer eLayer, State parent = null, bool acceptKeyboardInput = true) where T : ScreenBase
         {
-            GameObject obj = GameObjectUtils.Instantiate(source, UIManager.Get().layerRoots[layer].transform);
+            GameObject obj = GameObjectUtils.Instantiate(source, UIManager.Get().layerRoots[eLayer].transform);
             RectTransform obj2 = obj.transform as RectTransform;
             obj2.localPosition = Vector3.zero;
             obj2.offsetMax = Vector2.zero;
@@ -186,10 +186,10 @@ namespace MHUtils.UI
             {
                 return null;
             }
-            component.layer = layer;
-            UIManager.Get().openScreensByLayer[layer].Add(component);
+            component.layer = eLayer;
+            UIManager.Get().openScreensByLayer[eLayer].Add(component);
             UIManager.Get().OpenState(component, closeUnrelevant: false, parent);
-            if (acceptKeyboardInput && layer >= Layer.HUD)
+            if (acceptKeyboardInput && eLayer >= Layer.HUD)
             {
                 UIManager.Get().interactionStackForKeyboard.Add(component);
             }

@@ -33,7 +33,27 @@ public struct MHVector2
         return new Vector2(this.x, this.y);
     }
 
-    public static bool operator ==(MHVector2 a, MHVector2 b)
+        public override bool Equals(object obj)
+        {
+            if (!(obj is MHVector2))
+            {
+                return false;
+            }
+
+            var vector = (MHVector2)obj;
+            return x == vector.x &&
+                   y == vector.y;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1502939027;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(MHVector2 a, MHVector2 b)
     {
         if (a.x == b.x)
         {

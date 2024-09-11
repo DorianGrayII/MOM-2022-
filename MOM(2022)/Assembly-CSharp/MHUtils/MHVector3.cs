@@ -133,5 +133,27 @@ public struct MHVector3
     {
         return ((Vector3)this).normalized;
     }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is MHVector3))
+            {
+                return false;
+            }
+
+            var vector = (MHVector3)obj;
+            return x == vector.x &&
+                   y == vector.y &&
+                   z == vector.z;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 373119288;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            hashCode = hashCode * -1521134295 + z.GetHashCode();
+            return hashCode;
+        }
     }
 }

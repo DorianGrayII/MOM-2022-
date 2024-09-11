@@ -66,17 +66,21 @@ namespace MOM
             {
                 vector.x = vector2.x - 4f;
             }
+            /*
             if (false)
             {
                 float y = vector.y;
                 vector.y = vector2.y;
                 vector2.y = y;
             }
+            */
             Vector3 localScale = new Vector3((vector2.x - vector.x) / 100f, (vector2.y - vector.y) / 100f, 1f);
+            /*
             if (false)
             {
                 localScale.y = 0f - localScale.y;
             }
+            */
             this.rt.localScale = localScale;
             Vector2 vector4 = (vector2 + vector) * 0.5f;
             this.rt.localPosition = vector4;

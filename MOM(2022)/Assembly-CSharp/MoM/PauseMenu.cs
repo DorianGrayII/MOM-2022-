@@ -185,7 +185,7 @@ namespace MOM
             List<Multitype<global::DBDef.Difficulty, DifficultyOption>> list = new List<Multitype<global::DBDef.Difficulty, DifficultyOption>>();
             for (int i = 0; i < type.Count; i++)
             {
-                DifficultyOption difficultyOption = null;
+          //      DifficultyOption difficultyOption = null;
                 list.Add(new Multitype<global::DBDef.Difficulty, DifficultyOption>(t1: (current.settingsNamed == null || !current.settingsNamed.ContainsKey(type[i].name)) ? type[i].setting[0] : type[i].setting[current.settingsNamed[type[i].name]], t0: type[i]));
             }
             this.blockChanges = true;

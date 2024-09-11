@@ -133,9 +133,9 @@ namespace MOM
             return false;
         }
 
-        public static void TriggerScripts(this IEnchantable obj, EEnchantmentType eType, object data = null, IEnchantable customTarget = null)
+        public static void TriggerScripts(this IEnchantable obj, EEnchantmentType eEnchType, object data = null, IEnchantable customTarget = null)
         {
-            obj.GetEnchantmentManager().TriggerScripts(eType, data, customTarget);
+            obj.GetEnchantmentManager().TriggerScripts(eEnchType, data, customTarget);
         }
 
         public static List<EnchantmentInstance> GetEnchantments(this IEnchantable obj)

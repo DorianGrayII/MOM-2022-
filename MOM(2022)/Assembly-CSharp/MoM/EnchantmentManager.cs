@@ -17,7 +17,7 @@ namespace MOM
         {
             private static List<List<ScriptIterator>> currentIterators;
 
-            private EEnchantmentType eType;
+            private EEnchantmentType eEnchType;
 
             public int next;
 
@@ -36,9 +36,9 @@ namespace MOM
                 }
             }
 
-            public static bool ItemRemoved(EEnchantmentType type, int index, List<EnchantmentScript> list)
+            public static bool ItemRemoved(EEnchantmentType eEnchType, int index, List<EnchantmentScript> list)
             {
-                List<ScriptIterator> obj = ScriptIterator.currentIterators[(int)type];
+                List<ScriptIterator> obj = ScriptIterator.currentIterators[(int)eEnchType];
                 bool result = false;
                 foreach (ScriptIterator item in obj)
                 {
@@ -51,65 +51,65 @@ namespace MOM
                 return result;
             }
 
-            public ScriptIterator(EEnchantmentType eType, List<EnchantmentScript> list)
+            public ScriptIterator(EEnchantmentType eEnchType, List<EnchantmentScript> list)
             {
-                this.eType = eType;
+                this.eEnchType = eEnchType;
                 this.list = list;
-                this.current = ((list != null) ? (list.Count - 1) : (-1));
-                this.next = this.current - 1;
-                if (this.current >= 0)
+                current = ((list != null) ? (list.Count - 1) : (-1));
+                next = current - 1;
+                if (current >= 0)
                 {
-                    ScriptIterator.currentIterators[(int)eType].Add(this);
+                    ScriptIterator.currentIterators[(int)eEnchType].Add(this);
                 }
             }
 
             public EnchantmentScript Current()
             {
-                if (this.current >= 0)
+                if (current >= 0)
                 {
-                    return this.list[this.current];
+                    return list[current];
                 }
                 return null;
             }
 
             public void Next()
             {
-                this.current = this.next;
-                this.next--;
-                if (this.current < 0)
+                current = next;
+                next--;
+                if (current < 0)
                 {
-                    ScriptIterator.currentIterators[(int)this.eType].Remove(this);
-                    this.list = null;
+                    ScriptIterator.currentIterators[(int)eEnchType].Remove(this);
+                    list = null;
                 }
             }
 
             private void InternalItemRemoved(int index)
             {
-                if (this.current == index)
+                if (current == index)
                 {
-                    this.current = -1;
+                    current = -1;
                 }
-                else if (this.current > index)
+                else if (current > index)
                 {
-                    this.current--;
+                    current--;
                 }
-                if (this.next >= index)
+                if (next >= index)
                 {
-                    this.next--;
+                    next--;
                 }
-                if (this.next < 0 && this.current < 0)
+                if (next < 0 && current < 0)
                 {
-                    ScriptIterator.currentIterators[(int)this.eType].Remove(this);
-                    this.list = null;
+                    ScriptIterator.currentIterators[(int)eEnchType].Remove(this);
+                    list = null;
                 }
             }
 
             public void End()
             {
-                ScriptIterator.currentIterators[(int)this.eType].Remove(this);
-                this.next = -1;
-                this.current = -1;
-                this.list = null;
+                ScriptIterator.currentIterators[(int)eEnchType].Remove(this);
+                next = -1;
+                current = -1;
+                list = null;
             }
         }
 
@@ -148,51 +148,51 @@ namespace MOM
 
         ~EnchantmentManager()
         {
-            if (!EnchantmentRegister.IsInstantiated() || (this.owner is BattleUnit || (this.owner is BattlePlayer || (this.owner is Battle || this.enchantments == null))))
+            if (!EnchantmentRegister.IsInstantiated() || (owner is BattleUnit || (owner is BattlePlayer || (owner is Battle || enchantments == null))))
             {
                 return;
             }
-            foreach (EnchantmentInstance enchantment in this.enchantments)
+            foreach (EnchantmentInstance ei in enchantments)
             {
-                EnchantmentRegister.EnchantmentRemoved(enchantment);
+                EnchantmentRegister.EnchantmentRemoved(ei);
             }
         }
 
         [ProtoAfterDeserialization]
         public void Reinitialization()
         {
-            this.EnsureDictionaries();
-            this.EnsureJoinLeaveLists();
-            this.SetEnchantmentManagers();
+            EnsureDictionaries();
+            EnsureJoinLeaveLists();
+            SetEnchantmentManagers();
         }
 
         public EnchantmentInstance Add(Enchantment effect, Entity owner = null, int countDown = -1, string parameters = null, bool inBattle = false, int dispelcost = 0)
         {
-            this.iteration++;
-            EnchantmentInstance enchantmentInstance = new EnchantmentInstance();
-            enchantmentInstance.nameID = effect.dbName;
-            enchantmentInstance.countDown = countDown;
-            enchantmentInstance.manager = this;
-            enchantmentInstance.owner = ((owner != null) ? new Reference(owner) : null);
-            enchantmentInstance.source = effect;
-            enchantmentInstance.parameters = parameters;
-            enchantmentInstance.battleEnchantment = inBattle;
-            enchantmentInstance.dispelCost = dispelcost;
-            enchantmentInstance.upkeepMana = effect.upkeepCost;
-            this.enchantments.Add(enchantmentInstance);
+            iteration++;
+            EnchantmentInstance ei = new EnchantmentInstance();
+            ei.nameID = effect.dbName;
+            ei.countDown = countDown;
+            ei.manager = this;
+            ei.owner = ((owner != null) ? new Reference(owner) : null);
+            ei.source = effect;
+            ei.parameters = parameters;
+            ei.battleEnchantment = inBattle;
+            ei.dispelCost = dispelcost;
+            ei.upkeepMana = effect.upkeepCost;
+            enchantments.Add(ei);
             if (effect.scripts != null)
             {
                 EnchantmentScript[] array = effect.scripts;
                 foreach (EnchantmentScript enchantmentScript in array)
                 {
-                    if (!this.scripts.ContainsKey(enchantmentScript.triggerType))
+                    if (!scripts.ContainsKey(enchantmentScript.triggerType))
                     {
-                        this.scripts[enchantmentScript.triggerType] = new List<EnchantmentScript>();
+                        scripts[enchantmentScript.triggerType] = new List<EnchantmentScript>();
                     }
-                    this.scripts[enchantmentScript.triggerType].Add(enchantmentScript);
-                    enchantmentInstance.enchantmentHolder = ((this.owner.GetWizardOwner() != null) ? this.owner.GetWizardOwner().ID : 0);
-                    this.scriptToinstance[enchantmentScript] = enchantmentInstance;
-                    if (enchantmentScript.triggerType == EEnchantmentType.VisibilityRangeModifier && this.owner is IPlanePosition planePosition)
+                    scripts[enchantmentScript.triggerType].Add(enchantmentScript);
+                    ei.enchantmentHolder = ((this.owner.GetWizardOwner() != null) ? this.owner.GetWizardOwner().ID : 0);
+                    scriptToinstance[enchantmentScript] = ei;
+                    if (enchantmentScript.triggerType == EEnchantmentType.VisibilityRangeModifier && owner is IPlanePosition planePosition)
                     {
                         FOW.Get().UpdateFogForPlane(planePosition.GetPlane());
                     }
@@ -200,77 +200,77 @@ namespace MOM
             }
             if (!string.IsNullOrEmpty(effect.onJoinWithUnit))
             {
-                if (this.onJoinTriggers == null)
+                if (onJoinTriggers == null)
                 {
-                    this.onJoinTriggers = new List<EnchantmentInstance>();
+                    onJoinTriggers = new List<EnchantmentInstance>();
                 }
-                this.onJoinTriggers.Add(enchantmentInstance);
+                onJoinTriggers.Add(ei);
             }
             if (!string.IsNullOrEmpty(effect.onLeaveFromUnit))
             {
-                if (this.onLeaveTriggers == null)
+                if (onLeaveTriggers == null)
                 {
-                    this.onLeaveTriggers = new List<EnchantmentInstance>();
+                    onLeaveTriggers = new List<EnchantmentInstance>();
                 }
-                this.onLeaveTriggers.Add(enchantmentInstance);
+                onLeaveTriggers.Add(ei);
             }
-            if (this.owner is TownLocation)
+            if (owner is TownLocation)
             {
-                VerticalMarkerManager.Get().UpdateInfoOnMarker(this.owner);
-                (this.owner as TownLocation).UpdateOwnerModels();
+                VerticalMarkerManager.Get().UpdateInfoOnMarker(owner);
+                (owner as TownLocation).UpdateOwnerModels();
             }
-            if (this.owner is Battle || this.owner is BattlePlayer || this.owner is BattleUnit)
+            if (owner is BattleUnit)
             {
                 BattleHUD.Get()?.Dirty();
             }
             else if (!inBattle)
             {
-                EnchantmentRegister.EnchantmentAdded(enchantmentInstance);
+                EnchantmentRegister.EnchantmentAdded(ei);
             }
-            return enchantmentInstance;
+            return ei;
         }
 
         public EnchantmentInstance Add2(EnchantmentInstance ei, bool inBattle = false)
         {
-            this.iteration++;
+            iteration++;
             ei.battleEnchantment = inBattle;
             ei.manager = this;
-            this.enchantments.Add(ei);
+            enchantments.Add(ei);
             if (ei.source.Get().scripts != null)
             {
                 EnchantmentScript[] array = ei.source.Get().scripts;
-                foreach (EnchantmentScript enchantmentScript in array)
+                foreach (EnchantmentScript es in array)
                 {
-                    if (!this.scripts.ContainsKey(enchantmentScript.triggerType))
+                    if (!scripts.ContainsKey(es.triggerType))
                     {
-                        this.scripts[enchantmentScript.triggerType] = new List<EnchantmentScript>();
+                        scripts[es.triggerType] = new List<EnchantmentScript>();
                     }
-                    this.scripts[enchantmentScript.triggerType].Add(enchantmentScript);
-                    this.scriptToinstance[enchantmentScript] = ei;
+                    scripts[es.triggerType].Add(es);
+                    scriptToinstance[es] = ei;
                 }
             }
             if (!string.IsNullOrEmpty(ei.source.Get().onJoinWithUnit))
             {
-                if (this.onJoinTriggers == null)
+                if (onJoinTriggers == null)
                 {
-                    this.onJoinTriggers = new List<EnchantmentInstance>();
+                    onJoinTriggers = new List<EnchantmentInstance>();
                 }
-                this.onJoinTriggers.Add(ei);
+                onJoinTriggers.Add(ei);
             }
             if (!string.IsNullOrEmpty(ei.source.Get().onLeaveFromUnit))
             {
-                if (this.onLeaveTriggers == null)
+                if (onLeaveTriggers == null)
                 {
-                    this.onLeaveTriggers = new List<EnchantmentInstance>();
+                    onLeaveTriggers = new List<EnchantmentInstance>();
                 }
-                this.onLeaveTriggers.Add(ei);
+                onLeaveTriggers.Add(ei);
             }
-            if (this.owner is TownLocation townLocation)
+            if (owner is TownLocation townLocation)
             {
-                VerticalMarkerManager.Get().UpdateInfoOnMarker(this.owner);
+                VerticalMarkerManager.Get().UpdateInfoOnMarker(owner);
                 townLocation.EnchantmentsChanged();
             }
-            if (this.owner is Battle || this.owner is BattlePlayer || this.owner is BattleUnit)
+            if (owner is Battle || owner is BattlePlayer || owner is BattleUnit)
             {
                 BattleHUD.Get()?.Dirty();
             }
@@ -283,20 +283,20 @@ namespace MOM
 
         public EnchantmentInstance Remove(Enchantment effect)
         {
-            this.iteration++;
-            for (int i = 0; i < this.enchantments.Count; i++)
+            iteration++;
+            for (int i = 0; i < enchantments.Count; i++)
             {
-                if (this.enchantments[i].source.Get() == effect)
+                if (enchantments[i].source.Get() == effect)
                 {
-                    MHEventSystem.TriggerEvent("RemoveEnchantment", this, this.enchantments[i]);
-                    return this.Remove(this.enchantments[i]);
+                    MHEventSystem.TriggerEvent("RemoveEnchantment", this, enchantments[i]);
+                    return Remove(enchantments[i]);
                 }
             }
-            if (this.owner is TownLocation townLocation)
+            if (owner is TownLocation townLocation)
             {
                 townLocation.EnchantmentsChanged();
             }
-            if (this.owner is Battle || this.owner is BattlePlayer || this.owner is BattleUnit)
+            if (owner is Battle || owner is BattlePlayer || owner is BattleUnit)
             {
                 BattleHUD.Get()?.Dirty();
             }
@@ -305,11 +305,11 @@ namespace MOM
 
         public EnchantmentInstance Remove(EnchantmentInstance ei)
         {
-            this.iteration++;
+            iteration++;
             while (true)
             {
                 EnchantmentScript enchantmentScript = null;
-                foreach (KeyValuePair<EnchantmentScript, EnchantmentInstance> item in this.scriptToinstance)
+                foreach (KeyValuePair<EnchantmentScript, EnchantmentInstance> item in scriptToinstance)
                 {
                     if (item.Value == ei)
                     {
@@ -321,9 +321,9 @@ namespace MOM
                 {
                     break;
                 }
-                this.scriptToinstance.Remove(enchantmentScript);
+                scriptToinstance.Remove(enchantmentScript);
                 EEnchantmentType triggerType = enchantmentScript.triggerType;
-                if (!this.scripts.TryGetValue(triggerType, out var value) || value == null)
+                if (!scripts.TryGetValue(triggerType, out List<EnchantmentScript> value) || value == null)
                 {
                     continue;
                 }
@@ -337,111 +337,123 @@ namespace MOM
                     }
                 }
             }
-            this.enchantments.Remove(ei);
-            if (!string.IsNullOrEmpty(ei.source.Get().onJoinWithUnit) && this.onJoinTriggers != null)
+            enchantments.Remove(ei);
+            if (!string.IsNullOrEmpty(ei.source.Get().onJoinWithUnit) && onJoinTriggers != null)
             {
-                this.onJoinTriggers.Remove(ei);
-                if (this.onJoinTriggers.Count == 0)
+                onJoinTriggers.Remove(ei);
+                if (onJoinTriggers.Count == 0)
                 {
-                    this.onJoinTriggers = null;
+                    onJoinTriggers = null;
                 }
             }
-            if (!string.IsNullOrEmpty(ei.source.Get().onLeaveFromUnit) && this.onLeaveTriggers != null)
+            if (!string.IsNullOrEmpty(ei.source.Get().onLeaveFromUnit) && onLeaveTriggers != null)
             {
-                this.onLeaveTriggers.Remove(ei);
-                if (this.onLeaveTriggers.Count == 0)
+                onLeaveTriggers.Remove(ei);
+                if (onLeaveTriggers.Count == 0)
                 {
-                    this.onLeaveTriggers = null;
+                    onLeaveTriggers = null;
                 }
             }
-            if (this.owner is TownLocation townLocation)
+            if (owner is TownLocation townLocation)
             {
-                VerticalMarkerManager.Get().UpdateInfoOnMarker(this.owner);
+                VerticalMarkerManager.Get().UpdateInfoOnMarker(owner);
                 townLocation.EnchantmentsChanged();
             }
             EnchantmentRegister.EnchantmentRemoved(ei);
-            if (this.owner is Battle || this.owner is BattlePlayer || this.owner is BattleUnit)
+            if (owner is Battle || owner is BattlePlayer || owner is BattleUnit)
             {
                 BattleHUD.Get()?.Dirty();
             }
             return ei;
         }
 
-        public void TriggerScripts(EEnchantmentType eType, object data, IEnchantable customTarget = null)
+        public void TriggerScripts(EEnchantmentType eEnchType, object data, IEnchantable customTarget = null)
         {
-            if (this.scripts == null || !this.scripts.ContainsKey(eType))
+            if (eEnchType == EEnchantmentType.BattleEndEffect)
+                {
+                 Debug.Log("enter TriggerScripts-BattleEndEffect");
+                }
+
+            if (scripts == null || !scripts.ContainsKey(eEnchType))
             {
                 return;
             }
             IEnchantable enchantable = customTarget;
             if (enchantable == null)
             {
-                enchantable = this.owner;
+                enchantable = owner;
             }
-            this.localActiveIterators++;
-            for (ScriptIterator scriptIterator = this.StartIteration(eType); scriptIterator.Current() != null; scriptIterator.Next())
+            localActiveIterators++;
+            for (ScriptIterator si = StartIteration(eEnchType); si.Current() != null; si.Next())
             {
-                EnchantmentScript enchantmentScript = scriptIterator.Current();
-                if (enchantmentScript == null)
+                EnchantmentScript es = si.Current();
+                if (es == null)
                 {
-                    Debug.LogError("null script in the dictionary of type : " + eType);
+                    Debug.LogError("null script in the dictionary of type : " + eEnchType);
                 }
-                if (!this.scriptToinstance.ContainsKey(enchantmentScript))
+                if (!scriptToinstance.ContainsKey(es))
                 {
                     continue;
                 }
-                EnchantmentInstance enchantmentInstance = this.scriptToinstance[enchantmentScript];
-                if (eType == EEnchantmentType.RemoteUnitAttributeChange || eType == EEnchantmentType.RemoteUnitAttributeChangeMP)
+                EnchantmentInstance ei = scriptToinstance[es];
+                if (eEnchType == EEnchantmentType.RemoteUnitAttributeChange || eEnchType == EEnchantmentType.RemoteUnitAttributeChangeMP)
                 {
-                    string onRemoteTriggerFilter = enchantmentInstance.source.Get().onRemoteTriggerFilter;
-                    if (customTarget != null && !string.IsNullOrEmpty(onRemoteTriggerFilter) && !(bool)ScriptLibrary.Call(onRemoteTriggerFilter, enchantable, enchantmentScript, enchantmentInstance, data))
+                    string onRemoteTriggerFilter = ei.source.Get().onRemoteTriggerFilter;
+                    if (customTarget != null && 
+                        !string.IsNullOrEmpty(onRemoteTriggerFilter) && 
+                        !(bool)ScriptLibrary.Call(onRemoteTriggerFilter, enchantable, es, ei, data))
                     {
                         continue;
                     }
                 }
-                ScriptLibrary.Call(enchantmentScript.script, enchantable, enchantmentScript, enchantmentInstance, data);
+
+                if (eEnchType == EEnchantmentType.BattleEndEffect)
+                {
+                   Debug.Log("TriggerScripts-BattleEndEffect calling ScriptLibrary : " + es.script);
+                }
+                ScriptLibrary.Call(es.script, enchantable, es, ei, data);
             }
-            this.localActiveIterators--;
-            this.IfAllIterationsFinished();
+            localActiveIterators--;
+            IfAllIterationsFinished();
         }
 
-        private ScriptIterator StartIteration(EEnchantmentType eType)
+        private ScriptIterator StartIteration(EEnchantmentType eEnchType)
         {
-            if (this.scripts != null && this.scripts.TryGetValue(eType, out var value))
+            if (scripts != null && scripts.TryGetValue(eEnchType, out List<EnchantmentScript> value))
             {
-                return new ScriptIterator(eType, value);
+                return new ScriptIterator(eEnchType, value);
             }
-            return new ScriptIterator(eType, null);
+            return new ScriptIterator(eEnchType, null);
         }
 
-        public void ProcessIntigerScripts(EEnchantmentType eType, ref int value)
+        public void ProcessIntigerScripts(EEnchantmentType eEnchType, ref int value)
         {
-            this.localActiveIterators++;
-            ScriptIterator scriptIterator = this.StartIteration(eType);
+            localActiveIterators++;
+            ScriptIterator scriptIterator = StartIteration(eEnchType);
             while (scriptIterator.Current() != null)
             {
-                EnchantmentScript enchantmentScript = scriptIterator.Current();
-                if (this.scriptToinstance.ContainsKey(enchantmentScript))
+                EnchantmentScript es = scriptIterator.Current();
+                if (scriptToinstance.ContainsKey(es))
                 {
-                    value = (int)ScriptLibrary.Call(enchantmentScript.script, this.owner, enchantmentScript, this.scriptToinstance[enchantmentScript], value);
+                    value = (int)ScriptLibrary.Call(es.script, owner, es, scriptToinstance[es], value);
                 }
                 scriptIterator.Next();
             }
-            this.localActiveIterators--;
-            this.IfAllIterationsFinished();
+            localActiveIterators--;
+            IfAllIterationsFinished();
         }
 
-        public void ProcessIntigerScripts(EEnchantmentType eType, ref int income, ref int upkeep)
+        public void ProcessIntigerScripts(EEnchantmentType eEnchType, ref int income, ref int upkeep)
         {
-            this.localActiveIterators++;
-            ScriptIterator scriptIterator = this.StartIteration(eType);
+            localActiveIterators++;
+            ScriptIterator scriptIterator = StartIteration(eEnchType);
             while (scriptIterator.Current() != null)
             {
-                EnchantmentScript enchantmentScript = scriptIterator.Current();
-                if (this.scriptToinstance.ContainsKey(enchantmentScript))
+                EnchantmentScript es = scriptIterator.Current();
+                if (scriptToinstance.ContainsKey(es))
                 {
                     int num = income + upkeep;
-                    int num2 = (int)ScriptLibrary.Call(enchantmentScript.script, this.owner, enchantmentScript, this.scriptToinstance[enchantmentScript], num) - num;
+                    int num2 = (int)ScriptLibrary.Call(es.script, owner, es, scriptToinstance[es], num) - num;
                     if (num2 < 0)
                     {
                         upkeep += num2;
@@ -453,68 +465,68 @@ namespace MOM
                 }
                 scriptIterator.Next();
             }
-            this.localActiveIterators--;
-            this.IfAllIterationsFinished();
+            localActiveIterators--;
+            IfAllIterationsFinished();
         }
 
-        public void ProcessIntigerScripts(EEnchantmentType eType, ref int income, StatDetails details)
+        public void ProcessIntigerScripts(EEnchantmentType eEnchType, ref int income, StatDetails details)
         {
-            this.localActiveIterators++;
-            ScriptIterator scriptIterator = this.StartIteration(eType);
+            localActiveIterators++;
+            ScriptIterator scriptIterator = StartIteration(eEnchType);
             while (scriptIterator.Current() != null)
             {
-                EnchantmentScript enchantmentScript = scriptIterator.Current();
-                if (this.scriptToinstance.ContainsKey(enchantmentScript))
+                EnchantmentScript es = scriptIterator.Current();
+                if (scriptToinstance.ContainsKey(es))
                 {
                     int num = income;
-                    income = (int)ScriptLibrary.Call(enchantmentScript.script, this.owner, enchantmentScript, this.scriptToinstance[enchantmentScript], income);
+                    income = (int)ScriptLibrary.Call(es.script, owner, es, scriptToinstance[es], income);
                     int amount = income - num;
-                    EnchantmentInstance enchantmentInstance = this.scriptToinstance[enchantmentScript];
-                    details?.Add(enchantmentInstance.source.dbName, amount);
+                    EnchantmentInstance ei = scriptToinstance[es];
+                    details?.Add(ei.source.dbName, amount);
                 }
                 scriptIterator.Next();
             }
-            this.localActiveIterators--;
-            this.IfAllIterationsFinished();
+            localActiveIterators--;
+            IfAllIterationsFinished();
         }
 
-        public void ProcessFloatScripts(EEnchantmentType eType, ref float value)
+        public void ProcessFloatScripts(EEnchantmentType eEnchType, ref float value)
         {
-            this.localActiveIterators++;
-            ScriptIterator scriptIterator = this.StartIteration(eType);
+            localActiveIterators++;
+            ScriptIterator scriptIterator = StartIteration(eEnchType);
             while (scriptIterator.Current() != null)
             {
-                EnchantmentScript enchantmentScript = scriptIterator.Current();
-                if (this.scriptToinstance.ContainsKey(enchantmentScript))
+                EnchantmentScript es = scriptIterator.Current();
+                if (scriptToinstance.ContainsKey(es))
                 {
-                    value = (float)ScriptLibrary.Call(enchantmentScript.script, this.owner, enchantmentScript, this.scriptToinstance[enchantmentScript], value);
+                    value = (float)ScriptLibrary.Call(es.script, owner, es, scriptToinstance[es], value);
                 }
                 scriptIterator.Next();
             }
-            this.localActiveIterators--;
-            this.IfAllIterationsFinished();
+            localActiveIterators--;
+            IfAllIterationsFinished();
         }
 
-        public void ProcessFIntScripts(EEnchantmentType eType, ref FInt value)
+        public void ProcessFIntScripts(EEnchantmentType eEnchType, ref FInt value)
         {
-            this.localActiveIterators++;
-            ScriptIterator scriptIterator = this.StartIteration(eType);
+            localActiveIterators++;
+            ScriptIterator scriptIterator = StartIteration(eEnchType);
             while (scriptIterator.Current() != null)
             {
-                EnchantmentScript enchantmentScript = scriptIterator.Current();
-                if (this.scriptToinstance.ContainsKey(enchantmentScript))
+                EnchantmentScript es = scriptIterator.Current();
+                if (scriptToinstance.ContainsKey(es))
                 {
-                    value = (FInt)ScriptLibrary.Call(enchantmentScript.script, this.owner, enchantmentScript, this.scriptToinstance[enchantmentScript], value);
+                    value = (FInt)ScriptLibrary.Call(es.script, owner, es, scriptToinstance[es], value);
                 }
                 scriptIterator.Next();
             }
-            this.localActiveIterators--;
-            this.IfAllIterationsFinished();
+            localActiveIterators--;
+            IfAllIterationsFinished();
         }
 
         public List<EnchantmentInstance> GetEnchantments()
         {
-            return this.enchantments;
+            return enchantments;
         }
 
         public HashSet<EnchantmentInstance> GetRemoteEnchantments(IEnchantable target)
@@ -525,65 +537,67 @@ namespace MOM
             {
                 netDictionary = (target as IAttributable).GetAttributes().finalAttributes;
             }
-            if (this.scripts.ContainsKey(EEnchantmentType.RemoteUnitAttributeChange))
+            if (scripts.ContainsKey(EEnchantmentType.RemoteUnitAttributeChange))
             {
-                foreach (EnchantmentScript item in this.scripts[EEnchantmentType.RemoteUnitAttributeChange])
+                foreach (EnchantmentScript es in scripts[EEnchantmentType.RemoteUnitAttributeChange])
                 {
-                    EnchantmentInstance enchantmentInstance = this.scriptToinstance[item];
-                    if (string.IsNullOrEmpty(enchantmentInstance.source.Get().onRemoteTriggerFilter) || (bool)ScriptLibrary.Call(enchantmentInstance.source.Get().onRemoteTriggerFilter, target, item, enchantmentInstance, netDictionary))
+                    EnchantmentInstance ei = scriptToinstance[es];
+                    if (string.IsNullOrEmpty(ei.source.Get().onRemoteTriggerFilter) || 
+                        (bool)ScriptLibrary.Call(ei.source.Get().onRemoteTriggerFilter, target, es, ei, netDictionary))
                     {
                         if (hashSet == null)
                         {
                             hashSet = new HashSet<EnchantmentInstance>();
                         }
-                        hashSet.Add(enchantmentInstance);
+                        hashSet.Add(ei);
                     }
                 }
             }
-            if (this.scripts.ContainsKey(EEnchantmentType.RemoteUnitAttributeChangeMP))
+            if (scripts.ContainsKey(EEnchantmentType.RemoteUnitAttributeChangeMP))
             {
-                foreach (EnchantmentScript item2 in this.scripts[EEnchantmentType.RemoteUnitAttributeChangeMP])
+                foreach (EnchantmentScript es2 in scripts[EEnchantmentType.RemoteUnitAttributeChangeMP])
                 {
-                    EnchantmentInstance enchantmentInstance2 = this.scriptToinstance[item2];
-                    if (string.IsNullOrEmpty(enchantmentInstance2.source.Get().onRemoteTriggerFilter) || (bool)ScriptLibrary.Call(enchantmentInstance2.source.Get().onRemoteTriggerFilter, target, item2, enchantmentInstance2, netDictionary))
+                    EnchantmentInstance ei2 = scriptToinstance[es2];
+                    if (string.IsNullOrEmpty(ei2.source.Get().onRemoteTriggerFilter) || 
+                        (bool)ScriptLibrary.Call(ei2.source.Get().onRemoteTriggerFilter, target, es2, ei2, netDictionary))
                     {
                         if (hashSet == null)
                         {
                             hashSet = new HashSet<EnchantmentInstance>();
                         }
-                        hashSet.Add(enchantmentInstance2);
+                        hashSet.Add(ei2);
                     }
                 }
             }
             return hashSet;
         }
 
-        public bool ContainsType(EEnchantmentType eType)
+        public bool ContainsType(EEnchantmentType eEnchType)
         {
-            if (this.scripts == null)
+            if (scripts == null)
             {
                 return false;
             }
-            if (this.scripts.ContainsKey(eType))
+            if (scripts.ContainsKey(eEnchType))
             {
                 return true;
             }
             return false;
         }
 
-        public List<EnchantmentInstance> GetEnchantmentsOfType(EEnchantmentType eType)
+        public List<EnchantmentInstance> GetEnchantmentsOfType(EEnchantmentType eEnchType)
         {
-            if (this.scripts == null || !this.scripts.ContainsKey(eType))
+            if (scripts == null || !scripts.ContainsKey(eEnchType))
             {
                 return null;
             }
-            return this.enchantments.FindAll((EnchantmentInstance o) => o.source.Get().scripts != null && Array.Exists(o.source.Get().scripts, (EnchantmentScript et) => et.triggerType == eType));
+            return enchantments.FindAll((EnchantmentInstance o) => o.source.Get().scripts != null && Array.Exists(o.source.Get().scripts, (EnchantmentScript et) => et.triggerType == eEnchType));
         }
 
         public List<EnchantmentInstance> GetEnchantmentsWithRemotes(bool visibleOnly = false)
         {
-            IEnchantable enchantable = this.owner;
-            List<EnchantmentInstance> list = this.GetEnchantments();
+            IEnchantable enchantable = owner;
+            List<EnchantmentInstance> list = GetEnchantments();
             List<EnchantmentInstance> list2 = ((list != null) ? new List<EnchantmentInstance>(list) : new List<EnchantmentInstance>());
             BaseUnit baseUnit = enchantable as BaseUnit;
             if (baseUnit is Unit)
@@ -646,21 +660,21 @@ namespace MOM
 
         public void CountedownUpdate(IEnchantable obj)
         {
-            if (this.enchantments == null || this.enchantments.Count <= 0)
+            if (enchantments == null || enchantments.Count <= 0)
             {
                 return;
             }
-            for (int num = this.enchantments.Count - 1; num >= 0; num--)
+            for (int num = enchantments.Count - 1; num >= 0; num--)
             {
-                if (!this.enchantments[num].battleEnchantment)
+                if (!enchantments[num].battleEnchantment)
                 {
-                    if (this.enchantments[num].countDown > 0)
+                    if (enchantments[num].countDown > 0)
                     {
-                        this.enchantments[num].countDown--;
+                        enchantments[num].countDown--;
                     }
-                    if (this.enchantments[num].countDown == 0)
+                    if (enchantments[num].countDown == 0)
                     {
-                        obj.RemoveEnchantment(this.enchantments[num].source.Get());
+                        obj.RemoveEnchantment(enchantments[num].source.Get());
                     }
                 }
             }
@@ -668,25 +682,25 @@ namespace MOM
 
         public void BattleCountdownUpdate(IEnchantable obj, bool isAttackerTurn)
         {
-            if (this.enchantments == null || this.enchantments.Count <= 0)
+            if (enchantments == null || enchantments.Count <= 0)
             {
                 return;
             }
-            for (int num = this.enchantments.Count - 1; num >= 0; num--)
+            for (int num = enchantments.Count - 1; num >= 0; num--)
             {
-                EnchantmentInstance enchantmentInstance = this.enchantments[num];
-                if (enchantmentInstance.battleEnchantment && enchantmentInstance.countDown > -1)
+                EnchantmentInstance ei = enchantments[num];
+                if (ei.battleEnchantment && ei.countDown > -1)
                 {
-                    bool flag = this.owner.GetWizardOwner()?.GetID() == Battle.Get().attacker.GetID();
+                    bool flag = owner.GetWizardOwner()?.GetID() == Battle.Get().attacker.GetID();
                     if ((isAttackerTurn && flag) || (!isAttackerTurn && !flag))
                     {
-                        if (enchantmentInstance.countDown > 0)
+                        if (ei.countDown > 0)
                         {
-                            enchantmentInstance.countDown--;
+                            ei.countDown--;
                         }
-                        if (enchantmentInstance.countDown == 0)
+                        if (ei.countDown == 0)
                         {
-                            obj.RemoveEnchantment(enchantmentInstance.source.Get());
+                            obj.RemoveEnchantment(ei.source.Get());
                         }
                     }
                 }
@@ -697,14 +711,14 @@ namespace MOM
         {
             EnchantmentManager enchantmentManager = new EnchantmentManager();
             enchantmentManager.owner = newOwner;
-            foreach (KeyValuePair<EEnchantmentType, List<EnchantmentScript>> script in this.scripts)
+            foreach (KeyValuePair<EEnchantmentType, List<EnchantmentScript>> script in scripts)
             {
                 enchantmentManager.scripts[script.Key] = new List<EnchantmentScript>(script.Value);
             }
-            enchantmentManager.enchantments = new List<EnchantmentInstance>(this.enchantments);
-            enchantmentManager.scriptToinstance = new Dictionary<EnchantmentScript, EnchantmentInstance>(this.scriptToinstance);
-            enchantmentManager.onJoinTriggers = ((this.onJoinTriggers != null) ? new List<EnchantmentInstance>(this.onJoinTriggers) : null);
-            enchantmentManager.onLeaveTriggers = ((this.onLeaveTriggers != null) ? new List<EnchantmentInstance>(this.onLeaveTriggers) : null);
+            enchantmentManager.enchantments = new List<EnchantmentInstance>(enchantments);
+            enchantmentManager.scriptToinstance = new Dictionary<EnchantmentScript, EnchantmentInstance>(scriptToinstance);
+            enchantmentManager.onJoinTriggers = ((onJoinTriggers != null) ? new List<EnchantmentInstance>(onJoinTriggers) : null);
+            enchantmentManager.onLeaveTriggers = ((onLeaveTriggers != null) ? new List<EnchantmentInstance>(onLeaveTriggers) : null);
             return enchantmentManager;
         }
 
@@ -712,113 +726,113 @@ namespace MOM
         {
             foreach (EnchantmentInstance ei in source.GetEnchantmentManager().GetEnchantments())
             {
-                if (this.GetEnchantments().Find((EnchantmentInstance o) => o.source == ei.source) != null)
+                if (GetEnchantments().Find((EnchantmentInstance o) => o.source == ei.source) != null)
                 {
                     continue;
                 }
                 if (useRequirementScripts)
                 {
-                    EnchantmentScript requirementScript = ei.source.Get().requirementScript;
-                    if (requirementScript != null && (bool)ScriptLibrary.Call(requirementScript.script, this.owner))
+                    EnchantmentScript es = ei.source.Get().requirementScript;
+                    if (es != null && (bool)ScriptLibrary.Call(es.script, owner))
                     {
                         Enchantment enchantment = ei.source;
-                        EnchantmentInstance enchantmentInstance = new EnchantmentInstance();
-                        enchantmentInstance.nameID = enchantment.dbName;
-                        enchantmentInstance.countDown = ei.countDown;
-                        enchantmentInstance.manager = this;
-                        enchantmentInstance.owner = ei.owner;
-                        enchantmentInstance.source = enchantment;
-                        enchantmentInstance.parameters = ei.parameters;
-                        enchantmentInstance.battleEnchantment = ei.battleEnchantment;
-                        enchantmentInstance.dispelCost = ei.dispelCost;
-                        enchantmentInstance.upkeepMana = enchantment.upkeepCost;
-                        this.owner.AddEnchantment(enchantmentInstance);
+                        EnchantmentInstance ei2 = new EnchantmentInstance();
+                        ei2.nameID = enchantment.dbName;
+                        ei2.countDown = ei.countDown;
+                        ei2.manager = this;
+                        ei2.owner = ei.owner;
+                        ei2.source = enchantment;
+                        ei2.parameters = ei.parameters;
+                        ei2.battleEnchantment = ei.battleEnchantment;
+                        ei2.dispelCost = ei.dispelCost;
+                        ei2.upkeepMana = enchantment.upkeepCost;
+                        owner.AddEnchantment(ei2);
                     }
                 }
                 else
                 {
                     Enchantment enchantment2 = ei.source;
-                    EnchantmentInstance enchantmentInstance2 = new EnchantmentInstance();
-                    enchantmentInstance2.nameID = enchantment2.dbName;
-                    enchantmentInstance2.countDown = ei.countDown;
-                    enchantmentInstance2.manager = this;
-                    enchantmentInstance2.owner = ei.owner;
-                    enchantmentInstance2.source = enchantment2;
-                    enchantmentInstance2.parameters = ei.parameters;
-                    enchantmentInstance2.battleEnchantment = ei.battleEnchantment;
-                    enchantmentInstance2.dispelCost = ei.dispelCost;
-                    enchantmentInstance2.upkeepMana = enchantment2.upkeepCost;
-                    this.owner.AddEnchantment(enchantmentInstance2);
+                    EnchantmentInstance ei3 = new EnchantmentInstance();
+                    ei3.nameID = enchantment2.dbName;
+                    ei3.countDown = ei.countDown;
+                    ei3.manager = this;
+                    ei3.owner = ei.owner;
+                    ei3.source = enchantment2;
+                    ei3.parameters = ei.parameters;
+                    ei3.battleEnchantment = ei.battleEnchantment;
+                    ei3.dispelCost = ei.dispelCost;
+                    ei3.upkeepMana = enchantment2.upkeepCost;
+                    owner.AddEnchantment(ei3);
                 }
             }
         }
 
         private void SetEnchantmentManagers()
         {
-            foreach (EnchantmentInstance enchantment in this.enchantments)
+            foreach (EnchantmentInstance ei in enchantments)
             {
-                enchantment.manager = this;
+                ei.manager = this;
             }
         }
 
         private void EnsureDictionaries()
         {
-            foreach (EnchantmentInstance enchantment in this.enchantments)
+            foreach (EnchantmentInstance ei in enchantments)
             {
-                if (enchantment.source.Get().scripts == null)
+                if (ei.source.Get().scripts == null)
                 {
                     continue;
                 }
-                EnchantmentScript[] array = enchantment.source.Get().scripts;
-                foreach (EnchantmentScript enchantmentScript in array)
+                EnchantmentScript[] array = ei.source.Get().scripts;
+                foreach (EnchantmentScript es in array)
                 {
-                    if (!this.scripts.ContainsKey(enchantmentScript.triggerType))
+                    if (!scripts.ContainsKey(es.triggerType))
                     {
-                        this.scripts[enchantmentScript.triggerType] = new List<EnchantmentScript>();
+                        scripts[es.triggerType] = new List<EnchantmentScript>();
                     }
-                    this.scripts[enchantmentScript.triggerType].Add(enchantmentScript);
-                    this.scriptToinstance[enchantmentScript] = enchantment;
+                    scripts[es.triggerType].Add(es);
+                    scriptToinstance[es] = ei;
                 }
             }
         }
 
         private void EnsureJoinLeaveLists()
         {
-            foreach (EnchantmentInstance enchantment in this.enchantments)
+            foreach (EnchantmentInstance ei in enchantments)
             {
-                if (!string.IsNullOrEmpty(enchantment.source.Get().onJoinWithUnit))
+                if (!string.IsNullOrEmpty(ei.source.Get().onJoinWithUnit))
                 {
-                    if (this.onJoinTriggers == null)
+                    if (onJoinTriggers == null)
                     {
-                        this.onJoinTriggers = new List<EnchantmentInstance>();
+                        onJoinTriggers = new List<EnchantmentInstance>();
                     }
-                    this.onJoinTriggers.Add(enchantment);
+                    onJoinTriggers.Add(ei);
                 }
-                if (!string.IsNullOrEmpty(enchantment.source.Get().onLeaveFromUnit))
+                if (!string.IsNullOrEmpty(ei.source.Get().onLeaveFromUnit))
                 {
-                    if (this.onLeaveTriggers == null)
+                    if (onLeaveTriggers == null)
                     {
-                        this.onLeaveTriggers = new List<EnchantmentInstance>();
+                        onLeaveTriggers = new List<EnchantmentInstance>();
                     }
-                    this.onLeaveTriggers.Add(enchantment);
+                    onLeaveTriggers.Add(ei);
                 }
             }
         }
 
         public void Destroy()
         {
-            for (int num = this.enchantments.Count - 1; num >= 0; num--)
+            for (int num = enchantments.Count - 1; num >= 0; num--)
             {
-                if (this.enchantments[num] != null)
+                if (enchantments[num] != null)
                 {
-                    this.Remove(this.enchantments[num]);
+                    Remove(enchantments[num]);
                 }
             }
         }
 
         public void OnJoinTriggers(IEnchantable otherEnchantable, IEnumerable unitList)
         {
-            if (this.onJoinTriggers == null)
+            if (onJoinTriggers == null)
             {
                 return;
             }
@@ -838,15 +852,15 @@ namespace MOM
                     }
                 }
             }
-            foreach (EnchantmentInstance onJoinTrigger in this.onJoinTriggers)
+            foreach (EnchantmentInstance ei in onJoinTriggers)
             {
-                ScriptLibrary.Call(onJoinTrigger.source.Get().onJoinWithUnit, this.owner, otherEnchantable, onJoinTrigger, list);
+                ScriptLibrary.Call(ei.source.Get().onJoinWithUnit, owner, otherEnchantable, ei, list);
             }
         }
 
         public void OnLeaveTriggers(IEnchantable otherEnchantable, IEnumerable unitList)
         {
-            if (this.onLeaveTriggers == null)
+            if (onLeaveTriggers == null)
             {
                 return;
             }
@@ -866,34 +880,34 @@ namespace MOM
                     }
                 }
             }
-            foreach (EnchantmentInstance onLeaveTrigger in this.onLeaveTriggers)
+            foreach (EnchantmentInstance ei in onLeaveTriggers)
             {
-                ScriptLibrary.Call(onLeaveTrigger.source.Get().onLeaveFromUnit, this.owner, otherEnchantable, onLeaveTrigger, list);
+                ScriptLibrary.Call(ei.source.Get().onLeaveFromUnit, owner, otherEnchantable, ei, list);
             }
         }
 
         public void EnsureEnchantments()
         {
-            for (int num = this.enchantments.Count - 1; num >= 0; num--)
+            for (int num = enchantments.Count - 1; num >= 0; num--)
             {
                 bool flag = true;
-                EnchantmentScript requirementScript = this.enchantments[num].source.Get().requirementScript;
-                if (requirementScript != null)
+                EnchantmentScript es = enchantments[num].source.Get().requirementScript;
+                if (es != null)
                 {
-                    flag = (bool)ScriptLibrary.Call(requirementScript.script, this.owner);
+                    flag = (bool)ScriptLibrary.Call(es.script, owner);
                 }
                 if (!flag)
                 {
-                    this.owner.RemoveEnchantment(this.enchantments[num]);
+                    owner.RemoveEnchantment(enchantments[num]);
                 }
             }
         }
 
         private void IfAllIterationsFinished()
         {
-            if (this.localActiveIterators == 0)
+            if (localActiveIterators == 0)
             {
-                this.owner?.FinishedIteratingEnchantments();
+                owner?.FinishedIteratingEnchantments();
             }
         }
     }

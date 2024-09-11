@@ -23,7 +23,8 @@ namespace MHUtils
         public static GameObject FindByName(string name, bool includeInactive = false)
         {
             Object[] array = Object.FindObjectsOfType<GameObject>();
-            array = array;
+
+            // array = array;
             foreach (Object @object in array)
             {
                 if (@object is GameObject && @object.name == name)

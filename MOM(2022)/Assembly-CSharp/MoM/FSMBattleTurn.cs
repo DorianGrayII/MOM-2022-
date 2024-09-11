@@ -49,27 +49,29 @@ namespace MOM
 
         public override void OnEnter()
         {
+            // Debug.Log("OnEnter()");
+
             FSMBattleTurn.instance = this;
-            this.busy = true;
+            busy = true;
             base.OnEnter();
-            this.turnAutomation = base.StartCoroutine(this.TurnAutomationCoroutine());
-            if (this.battle == null)
+            turnAutomation = base.StartCoroutine(TurnAutomationCoroutine());
+            if (battle == null)
             {
                 return;
             }
-            if (this.isAttackerTurn)
+            if (isAttackerTurn)
             {
-                this.battle.attacker.spellCasted = false;
+                battle.attacker.spellCasted = false;
                 {
-                    foreach (BattleUnit attackerUnit in this.battle.attackerUnits)
+                    foreach (BattleUnit attackerUnit in battle.attackerUnits)
                     {
                         attackerUnit.spellCasted = false;
                     }
                     return;
                 }
             }
-            this.battle.defender.spellCasted = false;
-            foreach (BattleUnit defenderUnit in this.battle.defenderUnits)
+            battle.defender.spellCasted = false;
+            foreach (BattleUnit defenderUnit in battle.defenderUnits)
             {
                 defenderUnit.spellCasted = false;
             }
@@ -77,6 +79,8 @@ namespace MOM
 
         public override void OnExit()
         {
+            // Debug.Log("OnExit()");
+
             if (FSMBattleTurn.casting != null)
             {
                 base.StopCoroutine(FSMBattleTurn.casting);
@@ -89,53 +93,53 @@ namespace MOM
 
         private IEnumerator TurnAutomationCoroutine()
         {
-            this.endTurn = false;
-            this.battle = Battle.GetBattle();
-            if (BattleHUD.Get() == null || this.battle == null || this.battle.battleEnd)
+            endTurn = false;
+            battle = Battle.GetBattle();
+            if (BattleHUD.Get() == null || battle == null || battle.battleEnd)
             {
                 yield break;
             }
-            this.battle.activeTurn = this;
-            BattleHUD.Get().UIUpdateFor(this.isAttackerTurn);
-            if (!this.isAttackerTurn)
+            battle.activeTurn = this;
+            BattleHUD.Get().UIUpdateFor(isAttackerTurn);
+            if (!isAttackerTurn)
             {
-                this.battle.turn++;
-                if (this.battle.turn == 1)
+                battle.turn++;
+                if (battle.turn == 1)
                 {
-                    this.TriggerEvent(EEnchantmentType.BattleStartEffect, ESkillType.BattleStartEffect);
-                    this.NewTurn(this.battle.attackerUnits);
-                    this.NewTurn(this.battle.defenderUnits);
+                    TriggerEvent(EEnchantmentType.BattleStartEffect, ESkillType.BattleStartEffect);
+                    NewTurn(battle.attackerUnits);
+                    NewTurn(battle.defenderUnits);
                     yield return new WaitForSeconds(3f);
-                    if (BattleHUD.Get() == null || this.battle == null || this.battle.battleEnd)
+                    if (BattleHUD.Get() == null || battle == null || battle.battleEnd)
                     {
                         yield break;
                     }
                 }
-                this.TriggerEventForSide(attacker: false, includeBattle: true, EEnchantmentType.BattleTurnStartEffect, ESkillType.BattleTurnStartEffect);
-                this.NewTurnHudMessage();
+                TriggerEventForSide(attacker: false, includeBattle: true, EEnchantmentType.BattleTurnStartEffect, ESkillType.BattleTurnStartEffect);
+                NewTurnHudMessage();
                 BattleHUD.Get().attackerInfo.DisableAllHighlights();
-                BattleHUD.Get().SelectUnit(this.battle.defenderUnits.Find((BattleUnit o) => o.IsAlive()), attacker: false, focus: true);
+                BattleHUD.Get().SelectUnit(battle.defenderUnits.Find((BattleUnit o) => o.IsAlive()), attacker: false, focus: true);
             }
             else
             {
-                this.TriggerEventForSide(attacker: true, includeBattle: false, EEnchantmentType.BattleTurnStartEffect, ESkillType.BattleTurnStartEffect);
-                this.NewTurnHudMessage();
+                TriggerEventForSide(attacker: true, includeBattle: false, EEnchantmentType.BattleTurnStartEffect, ESkillType.BattleTurnStartEffect);
+                NewTurnHudMessage();
                 BattleHUD.Get().defenderInfo.DisableAllHighlights();
-                BattleHUD.Get().SelectUnit(this.battle.attackerUnits.Find((BattleUnit o) => o.IsAlive()), attacker: true, focus: true);
+                BattleHUD.Get().SelectUnit(battle.attackerUnits.Find((BattleUnit o) => o.IsAlive()), attacker: true, focus: true);
             }
-            yield return this.UpdateVortexes(this.isAttackerTurn);
-            yield return this.UpdateConfusedUnits(this.isAttackerTurn);
-            if (BattleHUD.Get() == null || this.battle == null || this.battle.battleEnd)
+            yield return UpdateVortexes(isAttackerTurn);
+            yield return UpdateConfusedUnits(isAttackerTurn);
+            if (BattleHUD.Get() == null || battle == null || battle.battleEnd)
             {
                 yield break;
             }
-            if (this.isAttackerTurn)
+            if (isAttackerTurn)
             {
-                this.busy = false;
-                if (this.battle.attacker.autoPlayByAI)
+                busy = false;
+                if (battle.attacker.autoPlayByAI)
                 {
-                    yield return this.AITurn(attacker: true);
-                    if (BattleHUD.Get() == null || this.battle == null || this.battle.battleEnd)
+                    yield return AITurn(attacker: true);
+                    if (BattleHUD.Get() == null || battle == null || battle.battleEnd)
                     {
                         yield break;
                     }
@@ -143,16 +147,16 @@ namespace MOM
             }
             else
             {
-                yield return this.BattleWizardTowerBolts();
-                if (BattleHUD.Get() == null || this.battle == null || this.battle.battleEnd)
+                yield return BattleWizardTowerBolts();
+                if (BattleHUD.Get() == null || battle == null || battle.battleEnd)
                 {
                     yield break;
                 }
-                this.busy = false;
-                if (this.battle.defender.autoPlayByAI)
+                busy = false;
+                if (battle.defender.autoPlayByAI)
                 {
-                    yield return this.AITurn(attacker: false);
-                    if (BattleHUD.Get() == null || this.battle == null || this.battle.battleEnd)
+                    yield return AITurn(attacker: false);
+                    if (BattleHUD.Get() == null || battle == null || battle.battleEnd)
                     {
                         yield break;
                     }
@@ -160,35 +164,35 @@ namespace MOM
             }
             BattleHUD.Get().UpdateGeneralInfo();
             MHEventSystem.RegisterListener<BattleHUD>(HUDEvent, this);
-            this.turnAutomation = null;
+            turnAutomation = null;
         }
 
         private IEnumerator BattleWizardTowerBolts()
         {
-            this.battle = Battle.GetBattle();
-            if (this.battle.battleEnd || this.battle.wizardTower == null)
+            battle = Battle.GetBattle();
+            if (battle.battleEnd || battle.wizardTower == null)
             {
                 yield break;
             }
-            List<EnchantmentInstance> enchantmentsOfType = this.battle.GetEnchantmentManager().GetEnchantmentsOfType(EEnchantmentType.BattleWizardTowerEffect);
+            List<EnchantmentInstance> enchantmentsOfType = battle.GetEnchantmentManager().GetEnchantmentsOfType(EEnchantmentType.BattleWizardTowerEffect);
             if (enchantmentsOfType == null)
             {
                 yield break;
             }
             foreach (EnchantmentInstance v in enchantmentsOfType)
             {
-                List<BattleUnit> list = this.battle.attackerUnits.FindAll((BattleUnit o) => o.IsAlive());
+                List<BattleUnit> list = battle.attackerUnits.FindAll((BattleUnit o) => o.IsAlive());
                 if (list.Count == 0)
                 {
                     break;
                 }
                 BattleUnit target = list[Random.Range(0, list.Count)];
-                if (this.battle.battleEnd)
+                if (battle.battleEnd)
                 {
                     break;
                 }
-                yield return this.TowerBolt(this.battle, v, target);
-                if (this.battle.battleEnd)
+                yield return TowerBolt(battle, v, target);
+                if (battle.battleEnd)
                 {
                     break;
                 }
@@ -197,7 +201,7 @@ namespace MOM
                     EnchantmentScript[] scripts = v.source.Get().scripts;
                     foreach (EnchantmentScript enchantmentScript in scripts)
                     {
-                        ScriptLibrary.Call(enchantmentScript.script, this.battle, enchantmentScript, v, target);
+                        ScriptLibrary.Call(enchantmentScript.script, battle, enchantmentScript, v, target);
                         BattleHUD.CombatLogAdd(global::DBUtils.Localization.Get("UI_COMBAT_LOG_FORTRESS_BOLT", true, target.GetName(), WizardColors.GetHex(target.GetWizardOwner()), v.source.Get().GetDILocalizedName()));
                     }
                     target.GetOrCreateFormation().UpdateFigureCount();
@@ -278,29 +282,29 @@ namespace MOM
 
         private IEnumerator UpdateVortexes(bool attacker)
         {
-            if (this.battle.vortexList != null)
+            if (battle.vortexList != null)
             {
-                for (int i = this.battle.vortexList.Count - 1; i >= 0; i--)
+                for (int i = battle.vortexList.Count - 1; i >= 0; i--)
                 {
-                    Vortex vortex = this.battle.vortexList[i];
+                    Vortex vortex = battle.vortexList[i];
                     if (vortex.attacker == attacker)
                     {
-                        yield return vortex.Update(this.battle);
+                        yield return vortex.Update(battle);
                     }
                 }
             }
-            this.updateVortexes = null;
+            updateVortexes = null;
         }
 
         private IEnumerator UpdateConfusedUnits(bool attacker)
         {
-            if (this.battle.confusedList == null)
+            if (battle.confusedList == null)
             {
                 yield break;
             }
-            for (int i = this.battle.confusedList.Count - 1; i >= 0; i--)
+            for (int i = battle.confusedList.Count - 1; i >= 0; i--)
             {
-                BattleUnit u = this.battle.confusedList[i];
+                BattleUnit u = battle.confusedList[i];
                 if (u.IsAlive() && u.attackingSide == attacker)
                 {
                     int mp = u.Mp.ToInt();
@@ -308,24 +312,24 @@ namespace MOM
                     {
                         int num = Random.Range(0, 6);
                         Vector3i vector3i = u.battlePosition + HexNeighbors.neighbours[num];
-                        if (!this.battle.plane.area.IsInside(vector3i))
+                        if (!battle.plane.area.IsInside(vector3i))
                         {
                             Random.Range(0, 6);
                             continue;
                         }
                         Vector3i hexCoordAt = HexCoordinates.GetHexCoordAt(HexCoordinates.HexToWorld3D(vector3i));
-                        bool flag = this.battle.GetUnitAt(hexCoordAt) == null;
-                        if (this.battle.plane.exclusionPoints != null)
+                        bool flag = battle.GetUnitAt(hexCoordAt) == null;
+                        if (battle.plane.exclusionPoints != null)
                         {
-                            flag = !this.battle.plane.exclusionPoints.Contains(hexCoordAt) && flag;
+                            flag = !battle.plane.exclusionPoints.Contains(hexCoordAt) && flag;
                         }
                         if (flag)
                         {
-                            u.MoveAnimatedTo(hexCoordAt, this.battle);
-                            yield return this.battle.WaitForAttention();
+                            u.MoveAnimatedTo(hexCoordAt, battle);
+                            yield return battle.WaitForAttention();
                         }
                     }
-                    this.battle.confusedList.Remove(u);
+                    battle.confusedList.Remove(u);
                     u.Mp = FInt.ZERO;
                 }
             }
@@ -333,9 +337,9 @@ namespace MOM
 
         public void StartAI(bool attacker)
         {
-            if (this.aiActivity == null && !this.endTurn)
+            if (aiActivity == null && !endTurn)
             {
-                this.aiActivity = base.StartCoroutine(this.AITurn(attacker));
+                aiActivity = base.StartCoroutine(AITurn(attacker));
             }
         }
 
@@ -345,21 +349,21 @@ namespace MOM
 
         private IEnumerator AITurn(bool attacker)
         {
-            while (this.updateVortexes != null)
+            while (updateVortexes != null)
             {
                 yield return null;
             }
-            yield return this.battle.WaitForAttention();
-            Debug.Log("AI turn " + this.battle.turn + " start");
+            yield return battle.WaitForAttention();
+            Debug.Log("AI turn " + battle.turn + " start");
             MHTimer t = MHTimer.StartNew();
-            yield return ScriptLibrary.Call("AITurnV02", this.battle, attacker);
-            Debug.Log("AI turn " + this.battle.turn + " took " + t.GetTime());
-            this.aiActivity = null;
+            yield return ScriptLibrary.Call("AITurnV02", battle, attacker);
+            Debug.Log("AI turn " + battle.turn + " took " + t.GetTime());
+            aiActivity = null;
         }
 
         public void AITurnEnd()
         {
-            this.endTurn = true;
+            endTurn = true;
         }
 
         public static bool IsCastingSpells()
@@ -371,13 +375,13 @@ namespace MOM
         {
             CursorsLibrary.SetMode(CursorsLibrary.Mode.CastSpell);
             BattleHUD.Get().SetCasting(spell);
-            FSMBattleTurn.casting = base.StartCoroutine(this.CastingSpell(spell, spellCaster));
-            this.castingStopLimiter = true;
+            FSMBattleTurn.casting = base.StartCoroutine(CastingSpell(spell, spellCaster));
+            castingStopLimiter = true;
         }
 
         private IEnumerator CastingSpell(Spell spell, ISpellCaster sc)
         {
-            if ((bool)ScriptLibrary.Call("CounterMagicBattle", this.battle, spell, sc))
+            if ((bool)ScriptLibrary.Call("CounterMagicBattle", battle, spell, sc))
             {
                 BattleHUD.Get().SetCasting(null);
                 FSMBattleTurn.casting = null;
@@ -385,7 +389,7 @@ namespace MOM
                 Battle.GetBattle()?.ResistedSpell(Vector3i.invalid, counterMagickedSpell: true);
                 if (sc is PlayerWizard)
                 {
-                    ((this.battle.attacker.wizard == sc) ? this.battle.attacker : this.battle.defender).UseResourcesFor(spell);
+                    ((battle.attacker.wizard == sc) ? battle.attacker : battle.defender).UseResourcesFor(spell);
                 }
                 else if (sc is BattleUnit)
                 {
@@ -398,7 +402,7 @@ namespace MOM
                 }
                 if (sc is PlayerWizard w)
                 {
-                    this.battle.GetBattlePlayerForWizard(w).spellCasted = true;
+                    battle.GetBattlePlayerForWizard(w).spellCasted = true;
                 }
                 yield break;
             }
@@ -408,19 +412,19 @@ namespace MOM
             {
                 VerticalMarkerManager.Get().UpdateSpelcasterIcon(sc, active: true);
             }
-            else if (this.battle.buToSource != null)
+            else if (battle.buToSource != null)
             {
-                currentCopy = new List<BattleUnit>(this.battle.buToSource.Keys);
+                currentCopy = new List<BattleUnit>(battle.buToSource.Keys);
                 sourceCopy = Serializer.DeepClone(currentCopy);
             }
-            this.chosenTarget = Vector3i.invalid;
+            chosenTarget = Vector3i.invalid;
             ETargetType spellTargetEnum = spell.targetType.enumType;
             bool castingSuccesful = false;
             Debug.Log("CastingSpell " + spell.dbName);
-            SpellCastData castData = new SpellCastData(sc, this.battle);
+            SpellCastData castData = new SpellCastData(sc, battle);
             if (spellTargetEnum == ETargetType.TargetWizard)
             {
-                BattlePlayer battlePlayer2 = this.battle.attacker;
+                BattlePlayer battlePlayer2 = battle.attacker;
                 bool flag = false;
                 if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battlePlayer2, spell))
                 {
@@ -430,7 +434,7 @@ namespace MOM
                 }
                 else
                 {
-                    battlePlayer2 = this.battle.defender;
+                    battlePlayer2 = battle.defender;
                     if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battlePlayer2, spell))
                     {
                         flag = true;
@@ -442,26 +446,26 @@ namespace MOM
                 }
                 if (flag)
                 {
-                    this.CastEffect(Vector3i.invalid, spell, sc);
+                    CastEffect(Vector3i.invalid, spell, sc);
                     castingSuccesful = true;
                 }
-                else if (this.AreSameEnchsOnTarget(spell.enchantmentData, battlePlayer2.GetEnchantments()))
+                else if (AreSameEnchsOnTarget(spell.enchantmentData, battlePlayer2.GetEnchantments()))
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_ALREADY_ACTIVE");
+                    InvalidBattleTarget(spell, "UI_SPELL_ALREADY_ACTIVE");
                 }
                 else
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_WIZARD");
+                    InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_WIZARD");
                 }
             }
             else if (spellTargetEnum == ETargetType.TargetGlobal && spell == (Spell)SPELL.RAISE_DEAD)
             {
-                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, this.battle, spell))
+                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battle, spell))
                 {
                     MHDataStorage.Set("Unit", null);
-                    List<BattleUnit> list = new List<BattleUnit>(sc.IsAttackerInBattle(this.battle) ? this.battle.attackerUnits : this.battle.defenderUnits);
+                    List<BattleUnit> list = new List<BattleUnit>(sc.IsAttackerInBattle(battle) ? battle.attackerUnits : battle.defenderUnits);
                     list = list.FindAll((BattleUnit o) => !o.IsAlive() && !o.dbSource.Get().unresurrectable && o.GetAttributes().DoesNotContains((Tag)TAG.FANTASTIC_CLASS));
-                    foreach (KeyValuePair<BattleUnit, Unit> item in this.battle.buToSource)
+                    foreach (KeyValuePair<BattleUnit, Unit> item in battle.buToSource)
                     {
                         for (int num = list.Count - 1; num >= 0; num--)
                         {
@@ -501,22 +505,22 @@ namespace MOM
                     Debug.Log(spell.battleScript);
                     BattleHUD.CombatLogSpell(sc, spell, null);
                     Battle.CastBattleSpell(spell, castData, battleUnit);
-                    this.CastEffect(battleUnit.GetPosition(), spell, sc);
+                    CastEffect(battleUnit.GetPosition(), spell, sc);
                     BattleHUD.CombatLogSpellAddEffect();
                     castingSuccesful = true;
                 }
                 else
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_RAISE_DEAD");
+                    InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_RAISE_DEAD");
                 }
             }
             else if (spellTargetEnum == ETargetType.TargetGlobal && spell == (Spell)SPELL.ANIMATE_DEAD)
             {
-                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, this.battle, spell))
+                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battle, spell))
                 {
                     MHDataStorage.Set("Unit", null);
                     List<BattleUnit> list2 = new List<BattleUnit>();
-                    foreach (BattleUnit item3 in ListUtils.MultiEnumerable(this.battle.attackerUnits, this.battle.defenderUnits))
+                    foreach (BattleUnit item3 in ListUtils.MultiEnumerable(battle.attackerUnits, battle.defenderUnits))
                     {
                         int num3 = item3.GetBaseFigure().maxHitPoints * item3.maxCount;
                         if (item3.IsAlive() || item3.dbSource.Get() is Hero || !(item3.race != (Race)RACE.REALM_DEATH) || item3.summon || item3.irreversibleDamages >= num3 / 2 || (sc.GetWizardOwner() != item3.GetWizardOwner() && item3.GetAttributes().Contains(TAG.MAGIC_IMMUNITY)))
@@ -524,7 +528,7 @@ namespace MOM
                             continue;
                         }
                         bool flag2 = false;
-                        foreach (KeyValuePair<BattleUnit, Unit> item4 in this.battle.buToSource)
+                        foreach (KeyValuePair<BattleUnit, Unit> item4 in battle.buToSource)
                         {
                             if (item4.Key.IsAlive() && item4.Key.GetPosition() == item3.GetPosition())
                             {
@@ -567,27 +571,27 @@ namespace MOM
                     Debug.Log(spell.battleScript);
                     BattleHUD.CombatLogSpell(sc, spell, null);
                     Battle.CastBattleSpell(spell, castData, battleUnit2);
-                    this.CastEffect(battleUnit2.GetPosition(), spell, sc);
+                    CastEffect(battleUnit2.GetPosition(), spell, sc);
                     BattleHUD.CombatLogSpellAddEffect();
                     castingSuccesful = true;
                 }
                 else
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_ANIMATE_DEAD");
+                    InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_ANIMATE_DEAD");
                 }
             }
             else if (spellTargetEnum == ETargetType.TargetGlobal && spell == (Spell)SPELL.RECONSTRUCT)
             {
-                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, this.battle, spell))
+                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battle, spell))
                 {
                     MHDataStorage.Set("Unit", null);
                     List<BattleUnit> list3 = new List<BattleUnit>();
                     PlayerWizard wizardOwner = sc.GetWizardOwner();
-                    List<BattleUnit> list4 = ((this.battle.attacker.GetID() != wizardOwner.ID) ? this.battle.defenderUnits : this.battle.attackerUnits);
+                    List<BattleUnit> list4 = ((battle.attacker.GetID() != wizardOwner.ID) ? battle.defenderUnits : battle.attackerUnits);
                     foreach (BattleUnit item6 in list4)
                     {
                         int num5 = item6.GetBaseFigure().maxHitPoints * item6.maxCount;
-                        if (!item6.IsAlive() && !(item6.dbSource.Get() is Hero) && item6.GetAttFinal(TAG.MECHANICAL_UNIT) > FInt.ZERO && this.battle.buToSource[item6].group != null && item6.irreversibleDamages < num5 / 2)
+                        if (!item6.IsAlive() && !(item6.dbSource.Get() is Hero) && item6.GetAttFinal(TAG.MECHANICAL_UNIT) > FInt.ZERO && battle.buToSource[item6].group != null && item6.irreversibleDamages < num5 / 2)
                         {
                             list3.Add(item6);
                         }
@@ -622,57 +626,57 @@ namespace MOM
                     Debug.Log(spell.battleScript);
                     BattleHUD.CombatLogSpell(sc, spell, null);
                     Battle.CastBattleSpell(spell, castData, battleUnit3);
-                    this.CastEffect(battleUnit3.GetPosition(), spell, sc);
+                    CastEffect(battleUnit3.GetPosition(), spell, sc);
                     BattleHUD.CombatLogSpellAddEffect();
                     castingSuccesful = true;
                 }
                 else
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_ANIMATE_DEAD");
+                    InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_ANIMATE_DEAD");
                 }
             }
             else if (spellTargetEnum == ETargetType.TargetGlobal)
             {
-                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, this.battle, spell))
+                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battle, spell))
                 {
                     Debug.Log(spell.battleScript);
                     BattleHUD.CombatLogSpell(sc, spell, null);
-                    Battle.CastBattleSpell(spell, castData, this.battle);
-                    this.CastEffect(Vector3i.invalid, spell, sc);
+                    Battle.CastBattleSpell(spell, castData, battle);
+                    CastEffect(Vector3i.invalid, spell, sc);
                     BattleHUD.CombatLogSpellAddEffect();
                     castingSuccesful = true;
                 }
                 else
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_GLOBAL");
+                    InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_GLOBAL");
                 }
             }
             else if (spellTargetEnum == ETargetType.WorldHexBattleGlobal)
             {
-                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, this.battle, spell))
+                if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, battle, spell))
                 {
                     Debug.Log(spell.battleScript);
                     BattleHUD.CombatLogSpell(sc, spell, null);
-                    Battle.CastBattleSpell(spell, castData, this.chosenTarget);
-                    this.CastEffect(Vector3i.invalid, spell, sc);
+                    Battle.CastBattleSpell(spell, castData, chosenTarget);
+                    CastEffect(Vector3i.invalid, spell, sc);
                     BattleHUD.CombatLogSpellAddEffect();
                     castingSuccesful = true;
                 }
                 else
                 {
-                    this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_HEX_OR_GLOBAL");
+                    InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_HEX_OR_GLOBAL");
                 }
             }
             else if (spellTargetEnum == ETargetType.TargetUnit || spellTargetEnum == ETargetType.TargetHex || spellTargetEnum == ETargetType.WorldHexBattleGlobal)
             {
-                this.HighlightTargets(spell, sc);
+                HighlightTargets(spell, sc);
                 while (true)
                 {
-                    if (this.chosenTarget != Vector3i.invalid)
+                    if (chosenTarget != Vector3i.invalid)
                     {
                         if (spellTargetEnum == ETargetType.TargetUnit)
                         {
-                            BattleUnit unitAt = this.battle.GetUnitAt(this.chosenTarget);
+                            BattleUnit unitAt = battle.GetUnitAt(chosenTarget);
                             if (unitAt != null)
                             {
                                 if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, unitAt, spell))
@@ -681,7 +685,7 @@ namespace MOM
                                     Debug.Log(spell.battleScript);
                                     BattleHUD.CombatLogSpell(sc, spell, unitAt);
                                     Battle.CastBattleSpell(spell, castData, unitAt);
-                                    this.CastEffect(this.chosenTarget, spell, sc);
+                                    CastEffect(chosenTarget, spell, sc);
                                     if (num7 != unitAt.FigureCount())
                                     {
                                         unitAt.GetOrCreateFormation()?.UpdateFigureCount();
@@ -691,29 +695,29 @@ namespace MOM
                                 }
                                 else
                                 {
-                                    this.InvalidBattleTarget(spell, "UI_NO_VALID_TARGET", "UI_INVALID_SPELL_TARGET", "UI_OK");
+                                    InvalidBattleTarget(spell, "UI_NO_VALID_TARGET", "UI_INVALID_SPELL_TARGET", "UI_OK");
                                 }
                                 break;
                             }
                         }
                         else if (spellTargetEnum == ETargetType.TargetHex)
                         {
-                            if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, this.chosenTarget, spell))
+                            if (string.IsNullOrEmpty(spell.targetingScript) || (bool)ScriptLibrary.Call(spell.targetingScript, castData, chosenTarget, spell))
                             {
                                 Debug.Log(spell.battleScript);
-                                BattleHUD.CombatLogSpell(sc, spell, this.chosenTarget);
-                                Battle.CastBattleSpell(spell, castData, this.chosenTarget);
-                                this.CastEffect(this.chosenTarget, spell, sc);
+                                BattleHUD.CombatLogSpell(sc, spell, chosenTarget);
+                                Battle.CastBattleSpell(spell, castData, chosenTarget);
+                                CastEffect(chosenTarget, spell, sc);
                                 BattleHUD.CombatLogSpellAddEffect();
                                 castingSuccesful = true;
                             }
                             else
                             {
-                                this.InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_HEX");
+                                InvalidBattleTarget(spell, "UI_SPELL_NO_VALID_TARGET_HEX");
                             }
                             break;
                         }
-                        this.chosenTarget = Vector3i.invalid;
+                        chosenTarget = Vector3i.invalid;
                     }
                     yield return null;
                 }
@@ -729,7 +733,7 @@ namespace MOM
             {
                 if (sc is PlayerWizard)
                 {
-                    ((this.battle.attacker.wizard == sc) ? this.battle.attacker : this.battle.defender).UseResourcesFor(spell);
+                    ((battle.attacker.wizard == sc) ? battle.attacker : battle.defender).UseResourcesFor(spell);
                 }
                 else if (sc is BattleUnit)
                 {
@@ -771,11 +775,11 @@ namespace MOM
             ETargetType enumType = spell.targetType.enumType;
             int num = ((sc.GetWizardOwner() != null) ? sc.GetWizardOwner().GetID() : 0);
             List<Vector3i> list = new List<Vector3i>();
-            SpellCastData spellCastData = new SpellCastData(sc, this.battle);
+            SpellCastData spellCastData = new SpellCastData(sc, battle);
             switch (enumType)
             {
             case ETargetType.TargetUnit:
-                foreach (KeyValuePair<BattleUnit, Unit> item in this.battle.buToSource)
+                foreach (KeyValuePair<BattleUnit, Unit> item in battle.buToSource)
                 {
                     if (item.Key.currentlyVisible || item.Key.ownerID == num)
                     {
@@ -788,15 +792,15 @@ namespace MOM
                 }
                 break;
             case ETargetType.TargetHex:
-                this.battle.UnitBlind();
-                foreach (KeyValuePair<Vector3i, Hex> hex in this.battle.plane.GetHexes())
+                battle.UnitBlind();
+                foreach (KeyValuePair<Vector3i, Hex> hex in battle.plane.GetHexes())
                 {
                     if (!string.IsNullOrEmpty(spell.targetingScript) && !(bool)ScriptLibrary.Call(spell.targetingScript, spellCastData, hex.Key, spell))
                     {
                         continue;
                     }
                     bool flag = false;
-                    foreach (KeyValuePair<BattleUnit, Unit> item2 in this.battle.buToSource)
+                    foreach (KeyValuePair<BattleUnit, Unit> item2 in battle.buToSource)
                     {
                         if (item2.Key.GetPosition() == hex.Key && (item2.Key.currentlyVisible || item2.Key.ownerID == num))
                         {
@@ -808,10 +812,10 @@ namespace MOM
                         list.Add(hex.Key);
                     }
                 }
-                this.battle.UnitNormal();
+                battle.UnitNormal();
                 break;
             }
-            this.battle.plane.GetMarkers_().HighlightHexes(list);
+            battle.plane.GetMarkers_().HighlightHexes(list);
         }
 
         public GameObject CastEffect(Vector3i pos, string effectName, string addAudioSFX = null)
@@ -855,7 +859,7 @@ namespace MOM
             {
                 if (spellCaster is PlayerWizard)
                 {
-                    ((this.battle.attacker.wizard == spellCaster) ? this.battle.attacker : this.battle.defender).spellCasted = true;
+                    ((battle.attacker.wizard == spellCaster) ? battle.attacker : battle.defender).spellCasted = true;
                 }
                 else if (spellCaster is BattleUnit battleUnit)
                 {
@@ -947,8 +951,8 @@ namespace MOM
             {
                 return;
             }
-            BattlePlayer player = this.battle.GetPlayer(this.isAttackerTurn);
-            if (!this.battle.debugMode && !player.playerOwner)
+            BattlePlayer player = battle.GetPlayer(isAttackerTurn);
+            if (!battle.debugMode && !player.playerOwner)
             {
                 return;
             }
@@ -957,28 +961,33 @@ namespace MOM
             case "Wait":
                 if (!player.autoPlayByAI)
                 {
-                    this.SelectedUnit().Mp = FInt.ZERO;
-                    this.SelectNextUnit();
+                    SelectedUnit().Mp = FInt.ZERO;
+                    SelectNextUnit();
                 }
                 break;
             case "Skip":
                 if (!player.autoPlayByAI)
                 {
-                    this.SelectNextUnit();
+                    SelectNextUnit();
                 }
                 break;
             case "Surrender":
                 if (!player.autoPlayByAI)
                 {
+                    Debug.Log("HUDEvent - Surrender");
                     player.surrendered = true;
-                    this.battle.ApplyFleeDamages(this.battle.playerIsAttacker);
-                    base.Fsm.Event("End Battle");
+                    battle.ApplyFleeDamages(battle.playerIsAttacker);
+
+                    FsmEventTarget fsmEventTarget = new FsmEventTarget();
+                    fsmEventTarget.target = FsmEventTarget.EventTarget.Self;
+                    base.Fsm.Event(fsmEventTarget, "End Battle");
                 }
                 break;
             case "EndTurn":
                 if (!player.autoPlayByAI)
                 {
-                    this.endTurn = true;
+                    Debug.Log("HUDEvent - EndTurn");
+                    endTurn = true;
                 }
                 break;
             }
@@ -987,22 +996,22 @@ namespace MOM
         private bool IsEndTurn()
         {
             int num = 0;
-            if (this.battle.attackerUnits != null)
+            if (battle.attackerUnits != null)
             {
-                foreach (BattleUnit attackerUnit in this.battle.attackerUnits)
+                foreach (BattleUnit attackerUnit in battle.attackerUnits)
                 {
-                    if (attackerUnit.IsAlive() && (!this.isAttackerTurn || attackerUnit.Mp > 0))
+                    if (attackerUnit.IsAlive() && (!isAttackerTurn || attackerUnit.Mp > 0))
                     {
                         num++;
                         break;
                     }
                 }
             }
-            if (this.battle.defenderUnits != null)
+            if (battle.defenderUnits != null)
             {
-                foreach (BattleUnit defenderUnit in this.battle.defenderUnits)
+                foreach (BattleUnit defenderUnit in battle.defenderUnits)
                 {
-                    if (defenderUnit.IsAlive() && (this.isAttackerTurn || defenderUnit.Mp > 0))
+                    if (defenderUnit.IsAlive() && (isAttackerTurn || defenderUnit.Mp > 0))
                     {
                         num++;
                         break;
@@ -1014,18 +1023,18 @@ namespace MOM
 
         private void SelectNextUnit()
         {
-            if (this.battle.IsFinished())
+            if (battle.IsFinished())
             {
                 return;
             }
-            List<BattleUnit> units = this.battle.GetUnits(this.isAttackerTurn);
-            int num = units.IndexOf(this.SelectedUnit());
+            List<BattleUnit> units = battle.GetUnits(isAttackerTurn);
+            int num = units.IndexOf(SelectedUnit());
             for (int i = 1; i < units.Count + 1; i++)
             {
                 BattleUnit battleUnit = units[(i + num) % units.Count];
                 if (battleUnit.figureCount > 0 && battleUnit.Mp > 0)
                 {
-                    BattleHUD.Get()?.SelectUnit(battleUnit, this.battle.playerIsAttacker, focus: true);
+                    BattleHUD.Get()?.SelectUnit(battleUnit, battle.playerIsAttacker, focus: true);
                     break;
                 }
             }
@@ -1061,23 +1070,23 @@ namespace MOM
 
         private void NewTurnHudMessage()
         {
-            if (this.isAttackerTurn)
+            if (isAttackerTurn)
             {
-                bool playerOwner = this.battle.attacker.playerOwner;
-                BattleHUD.CombatLogAdd(global::DBUtils.Localization.Get("UI_COMBAT_LOG_TURN", true, this.battle.attacker.GetName(), WizardColors.GetHex(this.battle.attacker.wizard)));
+                bool playerOwner = battle.attacker.playerOwner;
+                BattleHUD.CombatLogAdd(global::DBUtils.Localization.Get("UI_COMBAT_LOG_TURN", true, battle.attacker.GetName(), WizardColors.GetHex(battle.attacker.wizard)));
                 BattleHUD.SetMessageAnim(playerOwner);
             }
             else
             {
-                bool playerOwner2 = this.battle.defender.playerOwner;
-                BattleHUD.CombatLogAdd(global::DBUtils.Localization.Get("UI_COMBAT_LOG_TURN", true, this.battle.defender.GetName(), WizardColors.GetHex(this.battle.defender.wizard)));
+                bool playerOwner2 = battle.defender.playerOwner;
+                BattleHUD.CombatLogAdd(global::DBUtils.Localization.Get("UI_COMBAT_LOG_TURN", true, battle.defender.GetName(), WizardColors.GetHex(battle.defender.wizard)));
                 BattleHUD.SetMessageAnim(playerOwner2);
             }
         }
 
         private void MoveAttackAction(BattleUnit bu, BattleUnit targetUnit)
         {
-            this.attacking = base.StartCoroutine(this.MoveAttackCoroutine(bu, targetUnit));
+            attacking = base.StartCoroutine(MoveAttackCoroutine(bu, targetUnit));
         }
 
         private IEnumerator MoveAttackCoroutine(BattleUnit bu, BattleUnit targetUnit)
@@ -1106,8 +1115,8 @@ namespace MOM
                     {
                         yield break;
                     }
-                    bu.MoveAnimatedTo(path[path.Count - 2], this.battle);
-                    while (this.battle != null && !this.battle.IsAttentionAvaliable())
+                    bu.MoveAnimatedTo(path[path.Count - 2], battle);
+                    while (battle != null && !battle.IsAttentionAvaliable())
                     {
                         yield return null;
                     }
@@ -1119,13 +1128,13 @@ namespace MOM
             }
             if (Battle.AttackFormPossible(bu, targetUnit) != 0 && bu.Mp > 0)
             {
-                yield return this.AttackUnit(targetUnit);
+                yield return AttackUnit(targetUnit);
                 if (bu == null)
                 {
                     yield break;
                 }
             }
-            this.attacking = null;
+            attacking = null;
             MHEventSystem.TriggerEvent("BattleHUDInfoChange", this, targetUnit);
             MHEventSystem.TriggerEvent("BattleHUDInfoChange", this, bu);
             MHEventSystem.TriggerEvent<FSMBattleTurn>(bu, null);
@@ -1135,24 +1144,24 @@ namespace MOM
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (this.updateVortexes != null)
+            if (updateVortexes != null)
             {
                 return;
             }
-            if (this.endTurn)
+            if (endTurn)
             {
-                if (this.messageAnimation == null && this.attacking == null && this.battle.IsAttentionAvaliable())
+                if (messageAnimation == null && attacking == null && battle.IsAttentionAvaliable())
                 {
-                    this.EndState();
+                    EndState();
                 }
             }
-            else if ((this.isAttackerTurn && this.battle.attacker.autoPlayByAI) || (!this.isAttackerTurn && this.battle.defender.autoPlayByAI))
+            else if ((isAttackerTurn && battle.attacker.autoPlayByAI) || (!isAttackerTurn && battle.defender.autoPlayByAI))
             {
                 CursorsLibrary.SetMode(CursorsLibrary.Mode.Default);
             }
             else
             {
-                if (!this.AllowsForInteration() || this.battle == null || !this.battle.IsAttentionAvaliable())
+                if (!AllowsForInteration() || battle == null || !battle.IsAttentionAvaliable())
                 {
                     return;
                 }
@@ -1162,28 +1171,28 @@ namespace MOM
                     {
                         CursorsLibrary.SetMode(CursorsLibrary.Mode.CastSpell);
                     }
-                    if (this.castingStopLimiter)
+                    if (castingStopLimiter)
                     {
-                        this.castingStopLimiter = false;
+                        castingStopLimiter = false;
                         return;
                     }
                     Vector3i hexCoordAt = HexCoordinates.GetHexCoordAt(CameraController.GetClickWorldPosition());
-                    BattleUnit unitAt = this.battle.GetUnitAt(hexCoordAt);
-                    this.RollOverUnit(unitAt, hexCoordAt, FSMBattleTurn.casting == null);
+                    BattleUnit unitAt = battle.GetUnitAt(hexCoordAt);
+                    RollOverUnit(unitAt, hexCoordAt, FSMBattleTurn.casting == null);
                     if ((Input.GetMouseButtonUp(1) && !UIManager.AnyPopupScreen()) || (Input.GetMouseButtonUp(0) && UIManager.IsOverUI() && !UIManager.AnyPopupScreen()))
                     {
                         base.StopCoroutine(FSMBattleTurn.casting);
                         BattleHUD.Get().SetCasting(null);
                         CursorsLibrary.SetMode(CursorsLibrary.Mode.Default);
                         FSMBattleTurn.casting = null;
-                        VerticalMarkerManager.Get().UpdateSpelcasterIcon(this.isAttackerTurn ? this.battle.attackerUnits : this.battle.defenderUnits, active: false);
+                        VerticalMarkerManager.Get().UpdateSpelcasterIcon(isAttackerTurn ? battle.attackerUnits : battle.defenderUnits, active: false);
                         return;
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
-                        if (!UIManager.IsOverUI() && (unitAt == null || unitAt.attackingSide == this.isAttackerTurn || unitAt.currentlyVisible))
+                        if (!UIManager.IsOverUI() && (unitAt == null || unitAt.attackingSide == isAttackerTurn || unitAt.currentlyVisible))
                         {
-                            this.chosenTarget = hexCoordAt;
+                            chosenTarget = hexCoordAt;
                         }
                         return;
                     }
@@ -1196,21 +1205,21 @@ namespace MOM
                 {
                     Vector3 clickWorldPosition = CameraController.GetClickWorldPosition();
                     Vector3i pos3i = HexCoordinates.GetHexCoordAt(clickWorldPosition);
-                    BattleUnit unitAt2 = this.battle.GetUnitAt(pos3i);
-                    BattleUnit battleUnit = this.SelectedUnit();
-                    if (battleUnit != null && battleUnit.IsAlive() && battleUnit.Mp > 0 && battleUnit.attackingSide == this.isAttackerTurn)
+                    BattleUnit unitAt2 = battle.GetUnitAt(pos3i);
+                    BattleUnit battleUnit = SelectedUnit();
+                    if (battleUnit != null && battleUnit.IsAlive() && battleUnit.Mp > 0 && battleUnit.attackingSide == isAttackerTurn)
                     {
-                        if (unitAt2 != null && unitAt2.attackingSide != this.isAttackerTurn && unitAt2.currentlyVisible)
+                        if (unitAt2 != null && unitAt2.attackingSide != isAttackerTurn && unitAt2.currentlyVisible)
                         {
-                            this.MoveAttackAction(battleUnit, unitAt2);
+                            MoveAttackAction(battleUnit, unitAt2);
                             return;
                         }
                         if (unitAt2 == null)
                         {
                             bool flag = false;
-                            if (battleUnit != null && battleUnit.attackingSide && this.battle.battleWalls != null)
+                            if (battleUnit != null && battleUnit.attackingSide && battle.battleWalls != null)
                             {
-                                BattleWall battleWall = this.battle.battleWalls.Find((BattleWall o) => o.position == pos3i);
+                                BattleWall battleWall = battle.battleWalls.Find((BattleWall o) => o.position == pos3i);
                                 if (battleWall != null && battleWall.standing)
                                 {
                                     int num = HexCoordinates.HexDistance(pos3i, battleUnit.GetPosition());
@@ -1219,13 +1228,13 @@ namespace MOM
                                     flag = true;
                                     if (num2 || (num <= 1 && flag2) || (num <= 1 && battleWall.gate))
                                     {
-                                        this.attacking = base.StartCoroutine(this.AttackWall(battleWall));
+                                        attacking = base.StartCoroutine(AttackWall(battleWall));
                                     }
                                 }
                             }
                             if (!flag)
                             {
-                                this.MoveTo(pos3i);
+                                MoveTo(pos3i);
                             }
                         }
                         MHEventSystem.TriggerEvent("BattleHUDInfoChange", this, battleUnit);
@@ -1236,24 +1245,24 @@ namespace MOM
                 else if (FSMBattleTurn.casting == null && Input.GetMouseButtonUp(0))
                 {
                     Vector3i hexCoordAt2 = HexCoordinates.GetHexCoordAt(CameraController.GetClickWorldPosition(flat: true));
-                    BattleUnit unitAt3 = this.battle.GetUnitAt(hexCoordAt2);
+                    BattleUnit unitAt3 = battle.GetUnitAt(hexCoordAt2);
                     if (unitAt3 != null)
                     {
-                        this.LeftClickUnit(unitAt3);
+                        LeftClickUnit(unitAt3);
                     }
                 }
                 else if (FSMBattleTurn.casting == null)
                 {
                     Vector3i hexCoordAt3 = HexCoordinates.GetHexCoordAt(CameraController.GetClickWorldPosition());
-                    BattleUnit unitAt4 = this.battle.GetUnitAt(hexCoordAt3);
-                    BattleUnit battleUnit2 = this.SelectedUnit();
+                    BattleUnit unitAt4 = battle.GetUnitAt(hexCoordAt3);
+                    BattleUnit battleUnit2 = SelectedUnit();
                     if (battleUnit2 == null || battleUnit2.ownerID != PlayerWizard.HumanID() || battleUnit2.Mp <= 0)
                     {
                         CursorsLibrary.SetMode(CursorsLibrary.Mode.Default);
                     }
                     else
                     {
-                        this.RollOverUnit(unitAt4, hexCoordAt3, FSMBattleTurn.casting == null);
+                        RollOverUnit(unitAt4, hexCoordAt3, FSMBattleTurn.casting == null);
                         if (unitAt4 != null && battleUnit2.GetWizardOwnerID() != unitAt4.GetWizardOwnerID() && !unitAt4.IsInvisibleUnit())
                         {
                             if (Battle.AttackFormPossible(battleUnit2, unitAt4) == Battle.AttackForm.eRanged)
@@ -1262,7 +1271,7 @@ namespace MOM
                             }
                             else if (Battle.AttackFormPossible(battleUnit2, unitAt4, 1) == Battle.AttackForm.eMelee)
                             {
-                                RequestDataV2 requestDataV = RequestDataV2.CreateRequest(this.battle.plane, battleUnit2.GetPosition(), battleUnit2.Mp, battleUnit2);
+                                RequestDataV2 requestDataV = RequestDataV2.CreateRequest(battle.plane, battleUnit2.GetPosition(), battleUnit2.Mp, battleUnit2);
                                 PathfinderV2.FindArea(requestDataV);
                                 List<Vector3i> area = requestDataV.GetArea();
                                 if (area == null || !area.Contains(unitAt4.GetPosition()))
@@ -1281,11 +1290,11 @@ namespace MOM
                 {
                     if (SettingsBlock.IsKeyUp(Settings.KeyActions.UI_END_TURN2) && UIManager.IsTopForInput(BattleHUD.Get()))
                     {
-                        this.endTurn = true;
+                        endTurn = true;
                     }
-                    else if (this.battle.IsFinished() || (this.IsEndTurn() && Settings.GetData().GetAutoEndTurn()))
+                    else if (battle.IsFinished() || (IsEndTurn() && Settings.GetData().GetAutoEndTurn()))
                     {
-                        this.endTurn = true;
+                        endTurn = true;
                     }
                 }
             }
@@ -1294,7 +1303,7 @@ namespace MOM
         public BattleUnit RollOverUnit(BattleUnit rollOverUnit, Vector3i pos3i, bool cursorUpdate = true)
         {
             bool flag = false;
-            BattleUnit battleUnit = this.SelectedUnit();
+            BattleUnit battleUnit = SelectedUnit();
             if (rollOverUnit != null && rollOverUnit != battleUnit)
             {
                 if (pos3i == Vector3i.invalid)
@@ -1313,7 +1322,7 @@ namespace MOM
                 }
                 if (flag2)
                 {
-                    if (this.isAttackerTurn)
+                    if (isAttackerTurn)
                     {
                         BattleHUD.Get().defenderInfo.UpdateUnitInfoDisplay(rollOverUnit, showButtons: false);
                     }
@@ -1322,7 +1331,7 @@ namespace MOM
                         BattleHUD.Get().attackerInfo.UpdateUnitInfoDisplay(rollOverUnit, showButtons: false);
                     }
                 }
-                if (cursorUpdate && battleUnit != null && battleUnit != rollOverUnit && rollOverUnit.currentlyVisible && rollOverUnit.attackingSide != this.SelectedUnit().attackingSide)
+                if (cursorUpdate && battleUnit != null && battleUnit != rollOverUnit && rollOverUnit.currentlyVisible && rollOverUnit.attackingSide != SelectedUnit().attackingSide)
                 {
                     Battle.AttackForm attackForm = Battle.AttackFormPossible(battleUnit, rollOverUnit);
                     int num = HexCoordinates.HexDistance(battleUnit.GetPosition(), rollOverUnit.GetPosition());
@@ -1358,7 +1367,7 @@ namespace MOM
             }
             else
             {
-                if (this.isAttackerTurn)
+                if (isAttackerTurn)
                 {
                     BattleHUD.Get().defenderInfo.UpdateUnitInfoDisplay(null, showButtons: false);
                 }
@@ -1369,9 +1378,9 @@ namespace MOM
                 if (cursorUpdate)
                 {
                     bool flag3 = true;
-                    if (pos3i != Vector3i.invalid && battleUnit != null && battleUnit.attackingSide && this.battle.battleWalls != null)
+                    if (pos3i != Vector3i.invalid && battleUnit != null && battleUnit.attackingSide && battle.battleWalls != null)
                     {
-                        BattleWall battleWall = this.battle.battleWalls.Find((BattleWall o) => o.position == pos3i);
+                        BattleWall battleWall = battle.battleWalls.Find((BattleWall o) => o.position == pos3i);
                         if (battleWall != null && battleWall.standing)
                         {
                             int distanceTo = battleUnit.GetDistanceTo(pos3i);
@@ -1404,12 +1413,12 @@ namespace MOM
 
         public void LeftClickUnit(BattleUnit clickedUnit)
         {
-            if (clickedUnit.attackingSide == this.battle.playerIsAttacker)
+            if (clickedUnit.attackingSide == battle.playerIsAttacker)
             {
-                if (clickedUnit == this.SelectedUnit())
+                if (clickedUnit == SelectedUnit())
                 {
                     UnitInfo unitInfo = UIManager.Open<UnitInfo>(UIManager.Layer.Popup);
-                    List<BattleUnit> units = this.battle.GetUnits(clickedUnit.attackingSide);
+                    List<BattleUnit> units = battle.GetUnits(clickedUnit.attackingSide);
                     unitInfo.SetData(units, clickedUnit);
                 }
                 else
@@ -1420,46 +1429,54 @@ namespace MOM
             else
             {
                 UnitInfo unitInfo2 = UIManager.Open<UnitInfo>(UIManager.Layer.Popup);
-                List<BattleUnit> units2 = this.battle.GetUnits(clickedUnit.attackingSide);
+                List<BattleUnit> units2 = battle.GetUnits(clickedUnit.attackingSide);
                 unitInfo2.SetData(units2, clickedUnit);
             }
         }
 
         private void EndState()
         {
-            if (!this.battle.IsAttentionAvaliable())
+            Debug.LogFormat("FSMBattleTurn::EndState() AttentionAvailable:{0} IsFinished:{1} turn:{2} lastTurn:{3} ",
+                 battle.IsAttentionAvaliable(), battle.IsFinished(), battle.turn, battle.lastTurn);
+
+            if (!battle.IsAttentionAvaliable())
             {
                 return;
             }
             FsmEventTarget fsmEventTarget = new FsmEventTarget();
             fsmEventTarget.target = FsmEventTarget.EventTarget.Self;
-            if (this.battle.IsFinished() || this.battle.turn == this.battle.lastTurn)
+            if (battle.IsFinished() || battle.turn == battle.lastTurn)
             {
-                this.TriggerEvent(EEnchantmentType.BattleEndEffect, ESkillType.BattleEndEffect);
-                for (int num = this.battle.attackerUnits.Count - 1; num >= 0; num--)
+                TriggerEvent(EEnchantmentType.BattleEndEffect, ESkillType.BattleEndEffect);
+
+                for (int num = battle.attackerUnits.Count - 1; num >= 0; num--)
                 {
-                    BattleUnit battleUnit = this.battle.attackerUnits[num];
-                    Unit unit = this.battle.buToSource[battleUnit];
-                    if (!battleUnit.isHopingToJoin && unit.GetWizardOwner() != battleUnit.GetWizardOwner() && unit.group != null)
+                    BattleUnit battleUnit = battle.attackerUnits[num];
+                    Unit unit = battle.buToSource[battleUnit];
+                    if (!battleUnit.isHopingToJoin && 
+                        unit.GetWizardOwner() != battleUnit.GetWizardOwner() && 
+                        unit.group != null)
                     {
-                        this.battle.attackerUnits.Remove(battleUnit);
-                        this.battle.defenderUnits.Add(battleUnit);
-                        this.battle.UnitListsDirty();
-                        battleUnit.ownerID = this.battle.defender.GetID();
+                        battle.attackerUnits.Remove(battleUnit);
+                        battle.defenderUnits.Add(battleUnit);
+                        battle.UnitListsDirty();
+                        battleUnit.ownerID = battle.defender.GetID();
                         battleUnit.attackingSide = !battleUnit.attackingSide;
                         battleUnit.currentFigureHP = 0;
                         battleUnit.figureCount = 0;
                     }
                 }
-                for (int num2 = this.battle.defenderUnits.Count - 1; num2 >= 0; num2--)
+                for (int num2 = battle.defenderUnits.Count - 1; num2 >= 0; num2--)
                 {
-                    BattleUnit battleUnit2 = this.battle.defenderUnits[num2];
-                    Unit unit2 = this.battle.buToSource[battleUnit2];
-                    if (!battleUnit2.isHopingToJoin && unit2.GetWizardOwner() != battleUnit2.GetWizardOwner() && unit2.group != null)
+                    BattleUnit battleUnit2 = battle.defenderUnits[num2];
+                    Unit unit2 = battle.buToSource[battleUnit2];
+                    if (!battleUnit2.isHopingToJoin && 
+                        unit2.GetWizardOwner() != battleUnit2.GetWizardOwner() && 
+                        unit2.group != null)
                     {
-                        this.battle.defenderUnits.Remove(battleUnit2);
-                        this.battle.attackerUnits.Add(battleUnit2);
-                        battleUnit2.ownerID = this.battle.attacker.GetID();
+                        battle.defenderUnits.Remove(battleUnit2);
+                        battle.attackerUnits.Add(battleUnit2);
+                        battleUnit2.ownerID = battle.attacker.GetID();
                         battleUnit2.attackingSide = !battleUnit2.attackingSide;
                         battleUnit2.currentFigureHP = 0;
                         battleUnit2.figureCount = 0;
@@ -1469,26 +1486,26 @@ namespace MOM
             }
             else
             {
-                this.battle.BattleCountdownUpdate(this.isAttackerTurn);
-                this.battle.attacker.BattleCountdownUpdate(this.isAttackerTurn);
-                this.battle.defender.BattleCountdownUpdate(this.isAttackerTurn);
-                for (int num3 = this.battle.attackerUnits.Count - 1; num3 >= 0; num3--)
+                battle.BattleCountdownUpdate(isAttackerTurn);
+                battle.attacker.BattleCountdownUpdate(isAttackerTurn);
+                battle.defender.BattleCountdownUpdate(isAttackerTurn);
+                for (int num3 = battle.attackerUnits.Count - 1; num3 >= 0; num3--)
                 {
-                    this.battle.attackerUnits[num3].BattleCountdownUpdate(this.isAttackerTurn);
+                    battle.attackerUnits[num3].BattleCountdownUpdate(isAttackerTurn);
                 }
-                for (int num4 = this.battle.defenderUnits.Count - 1; num4 >= 0; num4--)
+                for (int num4 = battle.defenderUnits.Count - 1; num4 >= 0; num4--)
                 {
-                    this.battle.defenderUnits[num4].BattleCountdownUpdate(this.isAttackerTurn);
+                    battle.defenderUnits[num4].BattleCountdownUpdate(isAttackerTurn);
                 }
-                if (this.isAttackerTurn)
+                if (isAttackerTurn)
                 {
-                    this.TriggerEventForSide(attacker: true, includeBattle: true, EEnchantmentType.BattleTurnEndEffect, ESkillType.BattleTurnEndEffect);
-                    this.NewTurn(this.battle.attackerUnits);
+                    TriggerEventForSide(attacker: true, includeBattle: true, EEnchantmentType.BattleTurnEndEffect, ESkillType.BattleTurnEndEffect);
+                    NewTurn(battle.attackerUnits);
                 }
                 else
                 {
-                    this.TriggerEventForSide(attacker: false, includeBattle: false, EEnchantmentType.BattleTurnEndEffect, ESkillType.BattleTurnEndEffect);
-                    this.NewTurn(this.battle.defenderUnits);
+                    TriggerEventForSide(attacker: false, includeBattle: false, EEnchantmentType.BattleTurnEndEffect, ESkillType.BattleTurnEndEffect);
+                    NewTurn(battle.defenderUnits);
                 }
                 base.Fsm.Event(fsmEventTarget, "NextTurn");
             }
@@ -1496,38 +1513,38 @@ namespace MOM
 
         public IEnumerator AttackUnit(BattleUnit bu)
         {
-            this.battle.GainAttention(this.SelectedUnit().GetOrCreateFormation());
-            yield return this.battle.AttackUnit(this.SelectedUnit(), bu);
-            yield return this.battle.WaitForAttention();
-            if (this.SelectedUnit() == null || this.SelectedUnit().Mp == 0 || !this.SelectedUnit().IsAlive())
+            battle.GainAttention(SelectedUnit().GetOrCreateFormation());
+            yield return battle.AttackUnit(SelectedUnit(), bu);
+            yield return battle.WaitForAttention();
+            if (SelectedUnit() == null || SelectedUnit().Mp == 0 || !SelectedUnit().IsAlive())
             {
-                this.SelectNextUnit();
+                SelectNextUnit();
             }
-            this.attacking = null;
+            attacking = null;
         }
 
         public IEnumerator AttackWall(BattleWall bw)
         {
-            yield return this.battle.AttackWall(this.SelectedUnit(), bw);
-            yield return this.battle.WaitForAttention();
-            if (this.SelectedUnit() == null || this.SelectedUnit().Mp == 0)
+            yield return battle.AttackWall(SelectedUnit(), bw);
+            yield return battle.WaitForAttention();
+            if (SelectedUnit() == null || SelectedUnit().Mp == 0)
             {
-                this.SelectNextUnit();
+                SelectNextUnit();
             }
             BattleHUD.RefreshSelection();
-            this.attacking = null;
+            attacking = null;
         }
 
         private void MoveTo(Vector3i pos)
         {
-            this.SelectedUnit().MoveAnimatedTo(pos, this.battle);
-            if (this.SelectedUnit().Mp == 0)
+            SelectedUnit().MoveAnimatedTo(pos, battle);
+            if (SelectedUnit().Mp == 0)
             {
-                this.HUDEvent(null, "Skip");
+                HUDEvent(null, "Skip");
             }
             else
             {
-                BattleHUD.Get().SetUnitDirty(this.SelectedUnit());
+                BattleHUD.Get().SetUnitDirty(SelectedUnit());
             }
         }
 
@@ -1536,27 +1553,36 @@ namespace MOM
             return BattleHUD.GetSelectedUnit();
         }
 
-        private void TriggerEvent(EEnchantmentType eType, ESkillType sType)
+        private void TriggerEvent(EEnchantmentType eEnchType, ESkillType eSkillType)
         {
-            if (this.battle.buToSource == null)
+            /*
+             * consider TriggerEvent(EEnchantmentType.BattleEndEffect, ESkillType.BattleEndEffect);
+             */
+
+            if (eEnchType == EEnchantmentType.BattleEndEffect)
+            {
+                Debug.Log("TriggerEvent-BattleEndEffect");
+            }
+
+            if (battle.buToSource == null)
             {
                 return;
             }
-            List<BattleUnit> list = new List<BattleUnit>(this.battle.buToSource.Keys);
+            List<BattleUnit> list = new List<BattleUnit>(battle.buToSource.Keys);
             List<BattleUnit> list2 = Serializer.DeepClone(list);
-            this.battle.TriggerScripts(eType);
-            this.battle.GetPlayer(attacker: true).TriggerScripts(eType);
-            this.battle.GetPlayer(attacker: false).TriggerScripts(eType);
-            if (this.battle.buToSource != null)
+            battle.TriggerScripts(eEnchType);
+            battle.GetPlayer(attacker: true).TriggerScripts(eEnchType);
+            battle.GetPlayer(attacker: false).TriggerScripts(eEnchType);
+            if (battle.buToSource != null)
             {
-                foreach (BattleUnit item in list)
+                foreach (BattleUnit bu in list)
                 {
-                    if (item.IsAlive())
+                    if (bu.IsAlive())
                     {
-                        item.TriggerScripts(eType);
-                        if (item.IsAlive())
+                        bu.TriggerScripts(eEnchType);
+                        if (bu.IsAlive())
                         {
-                            item.TriggerSkillScripts(sType);
+                            bu.TriggerSkillScripts(eSkillType);
                         }
                     }
                 }
@@ -1589,25 +1615,25 @@ namespace MOM
             }
         }
 
-        private void TriggerEventForSide(bool attacker, bool includeBattle, EEnchantmentType eType, ESkillType sType)
+        private void TriggerEventForSide(bool attacker, bool includeBattle, EEnchantmentType eEnchType, ESkillType eSkillType)
         {
-            if (this.battle.buToSource == null)
+            if (battle.buToSource == null)
             {
                 return;
             }
-            List<BattleUnit> list = new List<BattleUnit>(this.battle.buToSource.Keys);
+            List<BattleUnit> list = new List<BattleUnit>(battle.buToSource.Keys);
             List<BattleUnit> list2 = Serializer.DeepClone(list);
             if (includeBattle)
             {
-                this.battle.TriggerScripts(eType);
+                battle.TriggerScripts(eEnchType);
             }
-            this.battle.GetPlayer(attacker).TriggerScripts(eType);
-            if (this.battle.buToSource != null)
+            battle.GetPlayer(attacker).TriggerScripts(eEnchType);
+            if (battle.buToSource != null)
             {
-                foreach (BattleUnit item in new List<BattleUnit>(attacker ? this.battle.attackerUnits : this.battle.defenderUnits))
+                foreach (BattleUnit item in new List<BattleUnit>(attacker ? battle.attackerUnits : battle.defenderUnits))
                 {
-                    item.TriggerScripts(eType);
-                    item.TriggerSkillScripts(sType);
+                    item.TriggerScripts(eEnchType);
+                    item.TriggerSkillScripts(eSkillType);
                 }
             }
             bool flag = false;
@@ -1667,7 +1693,7 @@ namespace MOM
 
         public bool AllowsForInteration()
         {
-            return !this.busy;
+            return !busy;
         }
     }
 }

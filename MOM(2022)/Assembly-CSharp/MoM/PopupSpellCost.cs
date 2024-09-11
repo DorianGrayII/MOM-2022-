@@ -80,25 +80,25 @@ namespace MOM
             PopupSpellCost.instance.btCloseSpellBook = btCloseSpellBook;
             PopupSpellCost.instance.spellIcon.texture = descriptionInfo.GetTexture();
             PopupSpellCost.instance.labelSpellName.text = descriptionInfo.GetLocalizedName();
-            int num = 0;
-            int num2 = 0;
-            float num3 = 1f;
-            int num4 = 0;
-            int num5 = 0;
-            float num6 = 1f;
+            int iMinSpellCost = 0;
+            int iMaxSpellCost = 0;
+            int iMinSpellSkillCost = 0;
+            int iMaxSpellSkillCost = 0;
+            float fSpellStepCost = 1f;
+            float fSpellStepSCost = 1f;
             int num7 = 0;
-            int num8 = 0;
+            int iSpellCost = 0;
             int num9 = 0;
             bool active = false;
             if (selectedSpell.worldScript != null && Battle.Get() == null)
             {
-                num8 = selectedSpell.worldCost;
-                num9 = (num8 * selectedSpell.changeableCost.maxMultipier - num8) / selectedSpell.changeableCost.costPerPoint;
-                num = selectedSpell.GetWorldCastingCost(PopupSpellCost.instance.caster);
-                float num10 = (float)num / (float)num8;
-                num3 = (float)selectedSpell.changeableCost.costPerPoint * num10;
+                iSpellCost = selectedSpell.worldCost;
+                num9 = (iSpellCost * selectedSpell.changeableCost.maxMultipier - iSpellCost) / selectedSpell.changeableCost.costPerPoint;
+                iMinSpellCost = selectedSpell.GetWorldCastingCost(PopupSpellCost.instance.caster);
+                float num10 = (float)iMinSpellCost / (float)iSpellCost;
+                fSpellStepCost = (float)selectedSpell.changeableCost.costPerPoint * num10;
                 num7 = num9;
-                num2 = num + Mathf.CeilToInt(num3 * (float)num7);
+                iMaxSpellCost = iMinSpellCost + Mathf.CeilToInt(fSpellStepCost * (float)num7);
             }
             else if (selectedSpell.battleScript != null && Battle.Get() != null)
             {
@@ -107,60 +107,60 @@ namespace MOM
                     BattlePlayer obj = ((battle.attacker.GetID() == caster.GetWizardOwner().GetID()) ? battle.attacker : battle.defender);
                     int mana = obj.mana;
                     int castingSkill = obj.castingSkill;
-                    num8 = selectedSpell.battleCost;
-                    num9 = (num8 * selectedSpell.changeableCost.maxMultipier - num8) / selectedSpell.changeableCost.costPerPoint;
-                    num4 = selectedSpell.GetBattleCastingCost(PopupSpellCost.instance.caster);
-                    float num11 = (float)num4 / (float)num8;
-                    num6 = (float)selectedSpell.changeableCost.costPerPoint * num11;
-                    num = selectedSpell.GetBattleCastingCostByDistance(PopupSpellCost.instance.caster);
-                    float num12 = (float)num / (float)num8;
-                    num3 = (float)selectedSpell.changeableCost.costPerPoint * num12;
-                    num7 = Mathf.Min(num9, (int)((float)(mana - num) / num3), (int)((float)(castingSkill - num4) / num6));
-                    num5 = num4 + Mathf.CeilToInt(num6 * (float)num7);
-                    num2 = num + Mathf.CeilToInt(num3 * (float)num7);
+                    iSpellCost = selectedSpell.battleCost;
+                    num9 = (iSpellCost * selectedSpell.changeableCost.maxMultipier - iSpellCost) / selectedSpell.changeableCost.costPerPoint;
+                    iMinSpellSkillCost = selectedSpell.GetBattleCastingCost(PopupSpellCost.instance.caster);
+                    float num11 = (float)iMinSpellSkillCost / (float)iSpellCost;
+                    fSpellStepSCost = (float)selectedSpell.changeableCost.costPerPoint * num11;
+                    iMinSpellCost = selectedSpell.GetBattleCastingCostByDistance(PopupSpellCost.instance.caster);
+                    float num12 = (float)iMinSpellCost / (float)iSpellCost;
+                    fSpellStepCost = (float)selectedSpell.changeableCost.costPerPoint * num12;
+                    num7 = Mathf.Min(num9, (int)((float)(mana - iMinSpellCost) / fSpellStepCost), (int)((float)(castingSkill - iMinSpellSkillCost) / fSpellStepSCost));
+                    iMaxSpellSkillCost = iMinSpellSkillCost + Mathf.CeilToInt(fSpellStepSCost * (float)num7);
+                    iMaxSpellCost = iMinSpellCost + Mathf.CeilToInt(fSpellStepCost * (float)num7);
                     active = true;
                 }
                 else
                 {
                     int mana2 = caster.GetMana();
-                    num8 = selectedSpell.GetBattleCastingCost(caster);
-                    num9 = (num8 * selectedSpell.changeableCost.maxMultipier - num8) / selectedSpell.changeableCost.costPerPoint;
-                    num = selectedSpell.GetBattleCastingCostByDistance(PopupSpellCost.instance.caster);
-                    float num13 = (float)num / (float)num8;
-                    num3 = (float)selectedSpell.changeableCost.costPerPoint * num13;
-                    num7 = Mathf.Min(num9, (int)((float)(mana2 - num) / num3));
-                    num2 = num + Mathf.CeilToInt(num3 * (float)num7);
+                    iSpellCost = selectedSpell.GetBattleCastingCost(caster);
+                    num9 = (iSpellCost * selectedSpell.changeableCost.maxMultipier - iSpellCost) / selectedSpell.changeableCost.costPerPoint;
+                    iMinSpellCost = selectedSpell.GetBattleCastingCostByDistance(PopupSpellCost.instance.caster);
+                    float num13 = (float)iMinSpellCost / (float)iSpellCost;
+                    fSpellStepCost = (float)selectedSpell.changeableCost.costPerPoint * num13;
+                    num7 = Mathf.Min(num9, (int)((float)(mana2 - iMinSpellCost) / fSpellStepCost));
+                    iMaxSpellCost = iMinSpellCost + Mathf.CeilToInt(fSpellStepCost * (float)num7);
                 }
             }
             else
             {
                 Debug.LogError("PopupSpellCost have error because attempt of use spell " + selectedSpell.dbName.ToString());
             }
-            PopupSpellCost.instance.minCost = num;
-            PopupSpellCost.instance.maxCost = num2;
-            PopupSpellCost.instance.stepCost = num3;
-            PopupSpellCost.instance.minSCost = num4;
-            PopupSpellCost.instance.maxSCost = num5;
-            PopupSpellCost.instance.sStepCost = num6;
-            int num14 = Mathf.Min(num7, num2 - num);
-            if (num14 == 0)
+            PopupSpellCost.instance.minCost = iMinSpellCost;
+            PopupSpellCost.instance.maxCost = iMaxSpellCost;
+            PopupSpellCost.instance.stepCost = fSpellStepCost;
+            PopupSpellCost.instance.minSCost = iMinSpellSkillCost;
+            PopupSpellCost.instance.maxSCost = iMaxSpellSkillCost;
+            PopupSpellCost.instance.sStepCost = fSpellStepSCost;
+            int iMaxSliderValue = Mathf.Min(num7, iMaxSpellCost - iMinSpellCost);
+            if (iMaxSliderValue == 0)
             {
                 PopupSpellCost.instance.stepCapScalar = 0f;
             }
             else
             {
-                PopupSpellCost.instance.stepCapScalar = (float)(num2 - num) / ((float)num14 * num3);
+                PopupSpellCost.instance.stepCapScalar = (float)(iMaxSpellCost - iMinSpellCost) / ((float)iMaxSliderValue * fSpellStepCost);
             }
             PopupSpellCost.instance.sliderMana.minValue = 0f;
             PopupSpellCost.instance.sliderMana.value = 0f;
-            PopupSpellCost.instance.sliderMana.maxValue = num14;
+            PopupSpellCost.instance.sliderMana.maxValue = iMaxSliderValue;
             PopupSpellCost.instance.sliderMana.wholeNumbers = true;
-            PopupSpellCost.instance.labelMinSkillCost.text = num4.ToString();
-            PopupSpellCost.instance.labelMaxSkillCost.text = num5.ToString();
-            PopupSpellCost.instance.labelCurrentCastingSkillCost.text = num4.ToString();
-            PopupSpellCost.instance.labelMinManaCost.text = num.ToString();
-            PopupSpellCost.instance.labelMaxManaCost.text = num2.ToString();
-            PopupSpellCost.instance.labelCurrentManaCost.text = num.ToString();
+            PopupSpellCost.instance.labelMinSkillCost.text = iMinSpellSkillCost.ToString();
+            PopupSpellCost.instance.labelMaxSkillCost.text = iMaxSpellSkillCost.ToString();
+            PopupSpellCost.instance.labelCurrentCastingSkillCost.text = iMinSpellSkillCost.ToString();
+            PopupSpellCost.instance.labelMinManaCost.text = iMinSpellCost.ToString();
+            PopupSpellCost.instance.labelMaxManaCost.text = iMaxSpellCost.ToString();
+            PopupSpellCost.instance.labelCurrentManaCost.text = iMinSpellCost.ToString();
             PopupSpellCost.instance.labelEffect.text = PopupSpellCost.instance.UpdateEffectText();
             PopupSpellCost.instance.minSkill.SetActive(active);
             PopupSpellCost.instance.maxSkill.SetActive(active);

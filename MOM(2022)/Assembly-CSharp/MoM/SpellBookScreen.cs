@@ -278,7 +278,7 @@ namespace MOM
                         int battleCastingCostByDistance = spell.GetBattleCastingCostByDistance(spellCaster);
                         component.spellCastingCost.SetActive(active);
                         component.labelCastingCost.text = battleCastingCostByDistance.ToString();
-                        bool flag = true;
+                        // bool flag = true;
                         if ((battlePlayer == null) ? (battleCastingCostByDistance > spellCaster.GetMana()) : (battleCastingCostByDistance > battlePlayer.mana))
                         {
                             component.labelCastingCost.color = SpellBookScreen.RED;

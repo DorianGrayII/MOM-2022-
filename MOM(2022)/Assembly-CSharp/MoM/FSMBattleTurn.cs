@@ -49,7 +49,7 @@ namespace MOM
 
         public override void OnEnter()
         {
-            // Debug.Log("OnEnter()");
+            Debug.Log("FSMBattleTurn::OnEnter()");
 
             FSMBattleTurn.instance = this;
             busy = true;
@@ -79,7 +79,7 @@ namespace MOM
 
         public override void OnExit()
         {
-            // Debug.Log("OnExit()");
+            Debug.Log("FSMBattleTurn::OnExit()");
 
             if (FSMBattleTurn.casting != null)
             {

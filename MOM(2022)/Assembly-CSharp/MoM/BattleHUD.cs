@@ -70,7 +70,7 @@ namespace MOM
                 damage = 0;
                 int num = this.figures - u.FigureCount();
                 int num2 = 0;
-                string text = null;
+                string strDeltaResult = null;
                 if (num == 0)
                 {
                     num2 = this.hp - u.currentFigureHP;
@@ -78,24 +78,24 @@ namespace MOM
                     {
                         return null;
                     }
-                    text = global::DBUtils.Localization.Get("UI_COMBAT_LOG_NO_FIGURES", true, BattleHUD.GetHPGainedOrLost(num2));
+                    strDeltaResult = global::DBUtils.Localization.Get("UI_COMBAT_LOG_NO_FIGURES", true, BattleHUD.GetHPGainedOrLost(num2));
                 }
                 else if (num > 0)
                 {
                     num2 = this.hp + (this.maxhp - u.currentFigureHP) + (num - 1) * this.maxhp;
-                    text = ((num != 1) ? global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURES", true, BattleHUD.GetHPGainedOrLost(num2), num) : global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURE", true, BattleHUD.GetHPGainedOrLost(num2)));
+                    strDeltaResult = ((num != 1) ? global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURES", true, BattleHUD.GetHPGainedOrLost(num2), num) : global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURE", true, BattleHUD.GetHPGainedOrLost(num2)));
                 }
                 else
                 {
                     num2 = -(this.maxhp - this.hp + u.currentFigureHP + (-num - 1) * this.maxhp);
-                    text = ((num != -1) ? global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURES_RESURRECTED", true, BattleHUD.GetHPGainedOrLost(num2), -num, this.bu.GetName()) : global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURE_RESURRECTED", true, BattleHUD.GetHPGainedOrLost(num2), this.bu.GetName()));
+                    strDeltaResult = ((num != -1) ? global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURES_RESURRECTED", true, BattleHUD.GetHPGainedOrLost(num2), -num, this.bu.GetName()) : global::DBUtils.Localization.Get("UI_COMBAT_LOG_FIGURE_RESURRECTED", true, BattleHUD.GetHPGainedOrLost(num2), this.bu.GetName()));
                 }
                 damage = -num2;
                 if (num2 != 0)
                 {
                     new CombatEffect(u, num2, num);
                 }
-                return text;
+                return strDeltaResult;
             }
         }
 
@@ -191,9 +191,9 @@ namespace MOM
 
         private GameObject selectedHuman;
 
-        private bool m_moving;
+        private bool bMoving;
 
-        private bool dirty;
+        private bool bDirty;
 
         private static List<CombatSummary> combatLog;
 
@@ -385,13 +385,13 @@ namespace MOM
 
         private void EnchantmentItem(GameObject itemSource, object source, object data, int index)
         {
-            EnchantmentInstance enchantmentInstance = source as EnchantmentInstance;
+            EnchantmentInstance ei = source as EnchantmentInstance;
             RawImage rawImage = GameObjectUtils.FindByNameGetComponentInChildren<RawImage>(itemSource, "E1Image");
             Image image = GameObjectUtils.FindByNameGetComponentInChildren<Image>(itemSource, "Frame");
-            rawImage.texture = enchantmentInstance.source.Get().GetDescriptionInfo().GetTexture();
-            Color color = WizardColors.GetColor((enchantmentInstance.owner?.GetEntity() is PlayerWizard playerWizard) ? playerWizard.color : PlayerWizard.Color.None);
+            rawImage.texture = ei.source.Get().GetDescriptionInfo().GetTexture();
+            Color color = WizardColors.GetColor((ei.owner?.GetEntity() is PlayerWizard playerWizard) ? playerWizard.color : PlayerWizard.Color.None);
             image.color = color;
-            itemSource.GetOrAddComponent<RolloverSimpleTooltip>().sourceAsDbName = enchantmentInstance.source.Get().dbName;
+            itemSource.GetOrAddComponent<RolloverSimpleTooltip>().sourceAsDbName = ei.source.Get().dbName;
         }
 
         protected override void ButtonClick(Selectable s)
@@ -546,7 +546,7 @@ namespace MOM
 
         public void Dirty()
         {
-            this.dirty = true;
+            this.bDirty = true;
         }
 
         public void BaseUpdate()
@@ -564,10 +564,10 @@ namespace MOM
         public override void UpdateState()
         {
             base.UpdateState();
-            if (this.dirty)
+            if (this.bDirty)
             {
                 this.BaseUpdate();
-                this.dirty = false;
+                this.bDirty = false;
             }
         }
 
@@ -607,12 +607,12 @@ namespace MOM
         {
             if ((string)data == "Start")
             {
-                this.m_moving = true;
+                this.bMoving = true;
                 this.selectedHuman.gameObject.SetActive(value: false);
             }
             else if ((string)data == "End")
             {
-                this.m_moving = false;
+                this.bMoving = false;
                 this.UpdateSelectedHuman();
             }
         }
@@ -1060,9 +1060,9 @@ namespace MOM
 
         public static string GetSpellTitle(bool causedDamage, int totalDamage = 0)
         {
-            string result = "";
-            string localizedName = ((BattleHUD.logSpell != null) ? BattleHUD.logSpell.GetDescriptionInfo() : BattleHUD.logSkill.GetDescriptionInfo()).GetLocalizedName();
-            string text = BattleHUD.logCaster.GetName();
+            string strSpellTitle = "";
+            string strSpellDesc = ((BattleHUD.logSpell != null) ? BattleHUD.logSpell.GetDescriptionInfo() : BattleHUD.logSkill.GetDescriptionInfo()).GetLocalizedName();
+            string strCasterName = BattleHUD.logCaster.GetName();
             string text2 = (causedDamage ? "2" : "");
             if (BattleHUD.logTarget != null)
             {
@@ -1072,7 +1072,7 @@ namespace MOM
                     {
                         text2 = ((battleUnit.GetWizardOwner() == BattleHUD.logCaster.GetWizardOwner()) ? "2_FRIENDLY" : "2_VS");
                     }
-                    result = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_UNIT" + text2, true, text, localizedName, battleUnit.GetName(), WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()), WizardColors.GetHex(battleUnit.GetWizardOwner()), BattleHUD.GetHPGainedOrLost(-totalDamage));
+                    strSpellTitle = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_UNIT" + text2, true, strCasterName, strSpellDesc, battleUnit.GetName(), WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()), WizardColors.GetHex(battleUnit.GetWizardOwner()), BattleHUD.GetHPGainedOrLost(-totalDamage));
                 }
                 else
                 {
@@ -1080,23 +1080,23 @@ namespace MOM
                     if (obj is Vector3i)
                     {
                         _ = (Vector3i)obj;
-                        result = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_BATTLEFIELD" + text2, true, text, localizedName, WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()));
+                        strSpellTitle = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_BATTLEFIELD" + text2, true, strCasterName, strSpellDesc, WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()));
                     }
                     else if (BattleHUD.logTarget is Battle)
                     {
-                        result = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_BATTLEFIELD" + text2, true, text, localizedName, WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()));
+                        strSpellTitle = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_BATTLEFIELD" + text2, true, strCasterName, strSpellDesc, WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()));
                     }
                     else if (BattleHUD.logTarget is BattlePlayer battlePlayer && battlePlayer.wizard != null)
                     {
-                        result = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_UNIT" + text2, true, text, localizedName, battlePlayer.wizard.GetName(), WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()), WizardColors.GetHex(battlePlayer.wizard.GetWizardOwner()), BattleHUD.GetHPGainedOrLost(-totalDamage));
+                        strSpellTitle = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST_UNIT" + text2, true, strCasterName, strSpellDesc, battlePlayer.wizard.GetName(), WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()), WizardColors.GetHex(battlePlayer.wizard.GetWizardOwner()), BattleHUD.GetHPGainedOrLost(-totalDamage));
                     }
                 }
             }
             else
             {
-                result = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST" + text2, true, text, localizedName, WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()));
+                strSpellTitle = global::DBUtils.Localization.Get("UI_COMBAT_LOG_SPELL_CAST" + text2, true, strCasterName, strSpellDesc, WizardColors.GetHex(BattleHUD.logCaster.GetWizardOwner()));
             }
-            return result;
+            return strSpellTitle;
         }
 
         public static void CombatLogSpellAddEffect()
@@ -1261,27 +1261,27 @@ namespace MOM
             List<BattleUnit> allUnits = battle.GetAllUnits();
             bool flag = false;
             bool flag2 = true;
-            int num = 0;
+            int iDamage = 0;
             if (flag2)
             {
                 BattleHUD.summary = new CombatSummary();
             }
-            string text = ((BattleHUD.logSpell != null) ? BattleHUD.logSpell.GetDescriptionInfo().GetLocalizedName() : BattleHUD.logSkill.GetDescriptionInfo().GetLocalizedName());
+            string strSpellDesc = ((BattleHUD.logSpell != null) ? BattleHUD.logSpell.GetDescriptionInfo().GetLocalizedName() : BattleHUD.logSkill.GetDescriptionInfo().GetLocalizedName());
             foreach (BattleUnit item in allUnits)
             {
                 if (!BattleHUD.logStoredUnitInfo.ContainsKey(item.GetID()))
                 {
                     continue;
                 }
-                int damage;
-                string delta = BattleHUD.logStoredUnitInfo[item.GetID()].GetDelta(item, out damage);
+                int iDelta;
+                string delta = BattleHUD.logStoredUnitInfo[item.GetID()].GetDelta(item, out iDelta);
                 if (delta == null)
                 {
                     continue;
                 }
                 if (item == BattleHUD.logTarget)
                 {
-                    num += damage;
+                    iDamage += iDelta;
                 }
                 int num2 = ((item.GetWizardOwner() != battle.defender.wizard) ? 1 : 0);
                 if (!flag)
@@ -1313,11 +1313,11 @@ namespace MOM
                     }
                     flag = true;
                 }
-                BattleHUD.logSpellDamage.TryGetValue(item.GetID(), out var value);
-                string text2 = text;
-                if (value != 0)
+                BattleHUD.logSpellDamage.TryGetValue(item.GetID(), out int iSpellDamage);
+                string text2 = strSpellDesc;
+                if (iSpellDamage != 0)
                 {
-                    text2 = text2 + " (" + value + ")";
+                    text2 = text2 + " (" + iSpellDamage + ")";
                 }
                 CombatLogDetail combatLogDetail = new CombatLogDetail
                 {
@@ -1355,9 +1355,9 @@ namespace MOM
             }
             if (flag2)
             {
-                if (BattleHUD.logSkill == null || num != 0)
+                if (BattleHUD.logSkill == null || iDamage != 0)
                 {
-                    BattleHUD.summary.summary = BattleHUD.GetSpellTitle(causedDamage: false, num);
+                    BattleHUD.summary.summary = BattleHUD.GetSpellTitle(causedDamage: false, iDamage);
                     BattleHUD.instance.AddSummaryToLog(BattleHUD.summary);
                 }
             }

@@ -181,8 +181,10 @@ namespace MOM
         private static void SaveMeta(string path, SaveMeta m)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(SaveMeta));
-            using (MemoryStream memoryStream = new MemoryStream())
+            MemoryStream memoryStream = null;
+            try
             {
+                memoryStream = new MemoryStream();
                 XmlWriter xmlWriter = new XmlTextWriter(memoryStream, Encoding.Unicode)
                 {
                     Formatting = Formatting.Indented
@@ -202,7 +204,11 @@ namespace MOM
                         return;
                     }
                 }
-                memoryStream.Close();
+            }
+            finally
+            {
+                if (memoryStream != null)
+                    memoryStream.Close();
             }
         }
 

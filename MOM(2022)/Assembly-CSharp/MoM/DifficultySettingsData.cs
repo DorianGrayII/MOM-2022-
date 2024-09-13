@@ -43,28 +43,28 @@ namespace MOM
             DifficultySettingsData.current = null;
         }
 
-        public static NetDictionary<string, int> GetDefaults(int diffLevel, bool quickStart = false)
+        public static NetDictionary<string, int> GetDefaults(int iDifficultyLevel, bool quickStart = false)
         {
-            List<global::DBDef.Difficulty> type = DataBase.GetType<global::DBDef.Difficulty>();
-            if (type == null || type.Count <= 0)
+            List<global::DBDef.Difficulty> lstDifficulty = DataBase.GetType<global::DBDef.Difficulty>();
+            if (lstDifficulty == null || lstDifficulty.Count <= 0)
             {
                 Debug.LogError("DIFFICULTY not found in database");
             }
             NetDictionary<string, int> netDictionary = new NetDictionary<string, int>();
-            foreach (global::DBDef.Difficulty item in type)
+            foreach (global::DBDef.Difficulty diff in lstDifficulty)
             {
                 int num = 0;
                 int num2 = -1;
                 num = 0;
-                if (item.fullValue > 0f)
+                if (diff.fullValue > 0f)
                 {
-                    for (int i = 0; i < item.setting.Length; i++)
+                    for (int i = 0; i < diff.setting.Length; i++)
                     {
-                        if (quickStart && item.setting[i].quickStart)
+                        if (quickStart && diff.setting[i].quickStart)
                         {
                             num2 = i;
                         }
-                        if (item.setting[i].collection <= diffLevel)
+                        if (diff.setting[i].collection <= iDifficultyLevel)
                         {
                             num = i;
                         }
@@ -74,7 +74,7 @@ namespace MOM
                 {
                     num = num2;
                 }
-                netDictionary[item.name] = num;
+                netDictionary[diff.name] = num;
             }
             return netDictionary;
         }
@@ -93,20 +93,20 @@ namespace MOM
             PlayerPrefs.Save();
         }
 
-        public static void SetDefaults(int diffLevel, bool quickStart = false)
+        public static void SetDefaults(int iDifficultyLevel, bool quickStart = false)
         {
-            NetDictionary<string, int> defaults = DifficultySettingsData.GetDefaults(diffLevel, quickStart);
-            List<global::DBDef.Difficulty> type = DataBase.GetType<global::DBDef.Difficulty>();
+            NetDictionary<string, int> defaults = DifficultySettingsData.GetDefaults(iDifficultyLevel, quickStart);
+            List<global::DBDef.Difficulty> lstDifficulty = DataBase.GetType<global::DBDef.Difficulty>();
             DifficultySettingsData.current.dSettings = null;
             DifficultySettingsData difficultySettingsData = DifficultySettingsData.current;
             if (difficultySettingsData.settingsNamed == null)
             {
                 difficultySettingsData.settingsNamed = new NetDictionary<string, int>();
             }
-            for (int i = 0; i < type.Count; i++)
+            for (int i = 0; i < lstDifficulty.Count; i++)
             {
-                DifficultySettingsData.current.settingsNamed[type[i].name] = defaults[type[i].name];
-                PlayerPrefs.SetInt("DIFF:" + type[i].name, defaults[type[i].name]);
+                DifficultySettingsData.current.settingsNamed[lstDifficulty[i].name] = defaults[lstDifficulty[i].name];
+                PlayerPrefs.SetInt("DIFF:" + lstDifficulty[i].name, defaults[lstDifficulty[i].name]);
             }
             PlayerPrefs.Save();
         }
@@ -118,8 +118,8 @@ namespace MOM
                 return;
             }
             DifficultySettingsData difficultySettingsData = new DifficultySettingsData();
-            List<global::DBDef.Difficulty> type = DataBase.GetType<global::DBDef.Difficulty>();
-            if (type == null || type.Count <= 0)
+            List<global::DBDef.Difficulty> lstDifficulty = DataBase.GetType<global::DBDef.Difficulty>();
+            if (lstDifficulty == null || lstDifficulty.Count <= 0)
             {
                 Debug.LogError("DIFFICULTY not found in database");
             }
@@ -130,9 +130,9 @@ namespace MOM
             {
                 difficultySettingsData2.settingsNamed = new NetDictionary<string, int>();
             }
-            for (int i = 0; i < type.Count; i++)
+            for (int i = 0; i < lstDifficulty.Count; i++)
             {
-                global::DBDef.Difficulty difficulty = type[i];
+                global::DBDef.Difficulty difficulty = lstDifficulty[i];
                 string key = "DIFF:" + difficulty.name;
                 int num = 0;
                 if (PlayerPrefs.HasKey(key))
@@ -149,36 +149,41 @@ namespace MOM
             DifficultySettingsData.current = difficultySettingsData;
         }
 
-        public static DifficultySettingsData Create(int diffLevel = 0)
+        const int dfEasy = 1;
+        const int dfMedium = 2;
+        const int dfHard = 3;
+        const int dfExtreme = 4;
+
+        public static DifficultySettingsData Create(int iDifficultyLevel = 0)
         {
             DifficultySettingsData difficultySettingsData = new DifficultySettingsData();
-            List<global::DBDef.Difficulty> type = DataBase.GetType<global::DBDef.Difficulty>();
-            if (type == null || type.Count <= 0)
+            List<global::DBDef.Difficulty> lstDifficulty = DataBase.GetType<global::DBDef.Difficulty>();
+            if (lstDifficulty == null || lstDifficulty.Count <= 0)
             {
                 Debug.LogError("DIFFICULTY not found in database");
             }
-            NetDictionary<string, int> defaults = DifficultySettingsData.GetDefaults(diffLevel);
+            NetDictionary<string, int> defaults = DifficultySettingsData.GetDefaults(iDifficultyLevel);
             difficultySettingsData.interruptDelay = 35;
             DifficultySettingsData difficultySettingsData2 = difficultySettingsData;
             if (difficultySettingsData2.settingsNamed == null)
             {
                 difficultySettingsData2.settingsNamed = new NetDictionary<string, int>();
             }
-            for (int i = 0; i < type.Count; i++)
+            for (int i = 0; i < lstDifficulty.Count; i++)
             {
-                global::DBDef.Difficulty difficulty = type[i];
-                string key = "DIFF:" + difficulty.name;
-                int num = 0;
-                if (PlayerPrefs.HasKey(key))
+                global::DBDef.Difficulty diff = lstDifficulty[i];
+                string strKey = "DIFF:" + diff.name;
+
+                if (PlayerPrefs.HasKey(strKey))
                 {
-                    num = PlayerPrefs.GetInt(key);
-                    if (difficulty.setting.Length > num)
+                    int num = PlayerPrefs.GetInt(strKey);
+                    if (diff.setting.Length > num)
                     {
-                        difficultySettingsData.settingsNamed[difficulty.name] = num;
+                        difficultySettingsData.settingsNamed[diff.name] = num;
                         continue;
                     }
                 }
-                difficultySettingsData.settingsNamed[difficulty.name] = defaults[difficulty.name];
+                difficultySettingsData.settingsNamed[diff.name] = defaults[diff.name];
             }
             DifficultySettingsData.current = difficultySettingsData;
             return difficultySettingsData;
@@ -186,12 +191,13 @@ namespace MOM
 
         public static int GetCurentDifficultyRank()
         {
-            for (int i = 1; i <= 3; i++)
+            for (int iRank = dfEasy; iRank <= dfExtreme; iRank++)
             {
                 bool flag = true;
-                foreach (KeyValuePair<string, int> @default in DifficultySettingsData.GetDefaults(i))
+                foreach (KeyValuePair<string, int> @default in DifficultySettingsData.GetDefaults(iRank))
                 {
-                    if (DifficultySettingsData.current.settingsNamed.ContainsKey(@default.Key) && DifficultySettingsData.current.settingsNamed[@default.Key] != @default.Value)
+                    if (DifficultySettingsData.current.settingsNamed.ContainsKey(@default.Key) && 
+                        DifficultySettingsData.current.settingsNamed[@default.Key] != @default.Value)
                     {
                         flag = false;
                         break;
@@ -199,7 +205,7 @@ namespace MOM
                 }
                 if (flag)
                 {
-                    return i;
+                    return iRank;
                 }
             }
             return -1;
@@ -207,41 +213,59 @@ namespace MOM
 
         public static int GetCurentScoreMultiplier()
         {
-            List<global::DBDef.Difficulty> type = DataBase.GetType<global::DBDef.Difficulty>();
-            if (type == null || type.Count <= 0)
+            List<global::DBDef.Difficulty> lstDifficulty = DataBase.GetType<global::DBDef.Difficulty>();
+            if (lstDifficulty == null || lstDifficulty.Count <= 0)
             {
                 Debug.LogError("DIFFICULTY not found in database");
             }
-            float num = 0f;
-            float[] array = new float[3];
-            int[] array2 = new int[3] { 100, 150, 200 };
-            foreach (global::DBDef.Difficulty v in type)
+            float fDifficulty = 0f;
+            float[] array = new float[4];
+            int[] array2 = new int[4] { 100, 150, 200, 250 };
+            foreach (global::DBDef.Difficulty diff in lstDifficulty)
             {
-                int a = v.setting.Length - 1;
-                int num2 = Array.FindIndex(v.setting, (DifficultyOption o) => o.difficulty == v.fullValue);
-                for (int i = 0; i < 3; i++)
+                int a = diff.setting.Length - 1;
+                int iIndexFound = Array.FindIndex(diff.setting, (DifficultyOption o) => o.difficulty == diff.fullValue);
+                if (iIndexFound >= 0)
                 {
-                    DifficultyOption difficultyOption = v.setting[Mathf.Min(a, i + num2)];
-                    array[i] += difficultyOption.difficulty;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        DifficultyOption diffOption = diff.setting[Mathf.Min(a, i + iIndexFound)];
+                        array[i] += diffOption.difficulty;
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Unknown difficulty rank : " + diff.name + " full value : " + diff.fullValue);
+                    for (int i = 0; i < diff.setting.Length; i++)
+                    {
+                        DifficultyOption diffOption = diff.setting[i];
+                        Debug.LogWarning("   difficulty : " + diffOption.difficulty + " value : " + diffOption.value);
+                    }
                 }
             }
-            foreach (global::DBDef.Difficulty item in type)
+            foreach (global::DBDef.Difficulty diff in lstDifficulty)
             {
-                if (DifficultySettingsData.current.settingsNamed.ContainsKey(item.name))
+                if (DifficultySettingsData.current.settingsNamed.ContainsKey(diff.name))
                 {
-                    int num3 = DifficultySettingsData.current.settingsNamed[item.name];
-                    num += item.setting[num3].difficulty;
+                    int num3 = DifficultySettingsData.current.settingsNamed[diff.name];
+                    fDifficulty += diff.setting[num3].difficulty;
                 }
             }
-            if (num > array[1])
+            if (fDifficulty > array[2])
             {
-                float num4 = array[2] - array[1];
-                float num5 = (num - array[1]) / num4;
-                return Mathf.RoundToInt((float)array2[1] + (float)(array2[2] - array2[1]) * num5);
+                float fFactor = (fDifficulty - array[2]) / (array[3] - array[2]);
+                return Mathf.RoundToInt((float)array2[2] + (float)(array2[3] - array2[2]) * fFactor);
             }
-            float num6 = array[1] - array[0];
-            float num7 = (num - array[0]) / num6;
-            return Mathf.RoundToInt((float)array2[0] + (float)(array2[1] - array2[0]) * num7);
+            else if (fDifficulty > array[1])
+            {
+                float fFactor = (fDifficulty - array[1]) / (array[2] - array[1]);
+                return Mathf.RoundToInt((float)array2[1] + (float)(array2[2] - array2[1]) * fFactor);
+            }
+            else
+            {
+                float fFactor = (fDifficulty - array[0]) / (array[1] - array[0]);
+                return Mathf.RoundToInt((float)array2[0] + (float)(array2[1] - array2[0]) * fFactor);
+            }
         }
 
         public static int GetCurentScoreMultiplierCached()
@@ -307,7 +331,7 @@ namespace MOM
             {
                 if (withWarnings)
                 {
-                    Debug.LogWarning("Unknown difficulty rank");
+                    Debug.LogWarning("Unknown difficulty rank : " + name);
                 }
                 return -1;
             }
@@ -317,7 +341,7 @@ namespace MOM
             }
             if (withWarnings)
             {
-                Debug.LogWarning("Unknown difficulty setting");
+                Debug.LogWarning("Unknown difficulty setting : " + name);
             }
             return -1;
         }
@@ -329,7 +353,7 @@ namespace MOM
             {
                 if (withWarnings)
                 {
-                    Debug.LogWarning("Unknown difficulty rank");
+                    Debug.LogWarning("Unknown difficulty rank : " + name);
                 }
                 return null;
             }
@@ -340,7 +364,7 @@ namespace MOM
             }
             if (withWarnings)
             {
-                Debug.LogWarning("Unknown difficulty setting");
+                Debug.LogWarning("Unknown difficulty setting : " + name);
             }
             return null;
         }

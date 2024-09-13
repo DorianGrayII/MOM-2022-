@@ -59,8 +59,12 @@ public class SettingsBlock
             followAIMovement = true,
             onlyManualBattleCamera = false,
             autoEndTurn = false,
-            animationSpeed = 1,
-            battleSpeed = 1,
+            // changing the defalut to 4
+            // animationSpeed = 1,
+            animationSpeed = 4,
+            // changing the default to 4
+            // battleSpeed = 1,
+            battleSpeed = 4,
             edgescrolling = true,
             autoNextUnit = false,
             experimentalLoading = 2,

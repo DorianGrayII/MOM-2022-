@@ -154,12 +154,12 @@ namespace MOM
                     UpdateScoreMultiplier();
                 }
             };
-            RolloverSimpleTooltip orAddComponent = component.label.gameObject.GetOrAddComponent<RolloverSimpleTooltip>();
-            orAddComponent.title = global::DBUtils.Localization.Get(difficulty.t0.tooltipName, true);
-            orAddComponent.description = global::DBUtils.Localization.Get(difficulty.t0.tooltipDescription, true);
-            orAddComponent.useMouseLocation = false;
-            orAddComponent.anchor = new Vector2(1.05f, 1f);
-            orAddComponent.offset = new Vector2(0f, 50f);
+            RolloverSimpleTooltip toolTip = component.label.gameObject.GetOrAddComponent<RolloverSimpleTooltip>();
+            toolTip.title = global::DBUtils.Localization.Get(difficulty.t0.tooltipName, true);
+            toolTip.description = global::DBUtils.Localization.Get(difficulty.t0.tooltipDescription, true);
+            toolTip.useMouseLocation = false;
+            toolTip.anchor = new Vector2(1.05f, 1f);
+            toolTip.offset = new Vector2(0f, 50f);
         }
 
         private void UpdateItems()

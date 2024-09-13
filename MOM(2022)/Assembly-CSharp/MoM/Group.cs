@@ -1270,7 +1270,11 @@ namespace MOM
 
         public int GetSightRange()
         {
-            return 1 + this.GetSightRangeBonus();
+            int iSightRange = DifficultySettingsData.GetSettingAsInt("UI_BASE_SIGHT_RANGE");
+            if (iSightRange < 1)
+                iSightRange = 1;
+
+            return iSightRange + this.GetSightRangeBonus();
         }
 
         public int GetSightRangeBonus()

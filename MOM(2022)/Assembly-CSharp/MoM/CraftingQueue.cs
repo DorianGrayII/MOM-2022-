@@ -481,7 +481,7 @@ namespace MOM
         {
             if (this.craftingItems == null)
             {
-                Debug.LogError("Queue is nullified!");
+                Debug.LogError("craftingItems == null!");
             }
             else
             {
